@@ -3,7 +3,7 @@
 **Operational checkpoint.** Authoritative for **status only** — never for design. Update at
 the end of every working session and at every phase gate.
 
-**Last updated:** 2026-09-12 12:10 EDT · **Phase:** P0–P2 VERIFIED, P3 IMPLEMENTED · **Mode:** sole driver
+**Last updated:** 2026-09-12 12:55 EDT · **Phase:** P0–P2 VERIFIED, P3 IMPLEMENTED (teammate tap measurement pending), P4–P6 blocked on hardware · **Mode:** sole driver
 
 ---
 
@@ -13,16 +13,18 @@ in `docs/architecture/`. Twelve ADRs accepted (`docs/decisions/`). No architectu
 is currently open that blocks P0.
 
 ## 2. What has been implemented
-Git on `main`, remote `origin = https://github.com/RohanPejaver/hackathon.git`. Harness and
-contracts exist and are gate-verified: `pyproject.toml` (39 §2 deps, pydantic pinned 2.13.5,
-8 import-linter contracts), `.gitignore`, `requirements.lock`; `src/domain` (types incl. Q1
-`ticket_lifecycle`, three epistemic values, headline validators), `src/events` (33-type catalog,
-`EventLog` with private reorder buffer, `EventSink`, `GradedEvent` projection); `src/runtime`
-(`config.py` loader/validation/checksums/`to_domain`, `clock.py`, `controller.py`, `app.py`
-composition root coded against the P1 APIs); `src/ui` (FastAPI + WebSocket server, wire shape,
-static HMI shell with vendored Open Props / Phosphor / Archivo / IBM Plex); `config/` (defaults,
-profiles, demo station, demo knowledge bundle). P1 packages (`state`, `risk`, `policy`,
-`knowledge`, `orders`, `replay`, `scenarios/`) are being written by four concurrent streams.
+Everything on the P0→P3 cut line (`39` §9), in one process, with no camera:
+`src/domain` + `src/events` (contracts, 33-type catalog, log with private reorder buffer,
+confidence-free `GradedEvent`); `src/state` (full `13` transition table); `src/knowledge`
+(closure, provider); `src/risk` (recipe-scoped preconditions, backward pathway search with
+reset-breaks-path); `src/policy` (tiers per `15` + ADR-0005, `alert_key` dedup, escalation at
+COMPLETE, cooldown, copy templates); `src/orders` (deterministic normalizer with mandatory
+AMBIGUOUS, intake, lifecycle, manual/fixture sources); `src/replay` (loader, runner, assertion
+vocabulary) with `scenarios/` A–M + `demo.yaml`; `src/runtime` (config loader/validation/
+checksums, clocks, `RuntimeController`, composition root with REPLAY feed); `src/ui` (FastAPI +
+WebSocket at 5Hz, worker display with the three `26` surfaces, carrier grid, evidence trace,
+read-only inspector, vendored assets, HMI styling with no green). `config/` holds the demo
+station and knowledge bundle. `src/perception/` is empty by decision (no hardware).
 
 ## 3. What has been verified
 | Phase | Status | Evidence |
@@ -39,11 +41,9 @@ profiles, demo station, demo knowledge bundle). P1 packages (`state`, `risk`, `p
 All of P0-P6 (`engineering/38-workflow.md`).
 
 ## 5. Currently being worked on
-P1 as four concurrent streams on disjoint paths (integration contract in `data/build/openq_B.md`
-§CHANNEL and §Sole-driver decisions): S1 reducer (`src/state`), S2 risk + policy + knowledge,
-S3 scenarios A–M + `demo.yaml` + replay runner + `scripts/determinism_check.py`, S4 orders.
-Then the P1 gate (13 fixtures, determinism, SMR = 0 → `data/eval/<date>/p1_replay_report.json`),
-then P3 (`uvicorn src.runtime.app:app` in `PROTOCOL_ONLY`, no camera).
+Convergence: read-only audit of the worker interface against `26`/`02`/`37`/`39` §6 (findings
+become fixes or scenario fixtures), then the teammate tap-count measurement (the only P3 gate
+clause a single driver cannot close).
 
 ## 6. Recent decisions
 ADR-0001 through ADR-0012, all accepted 2026-09-12. The load-bearing three: **0001**
@@ -59,17 +59,17 @@ the tier, never the bar), **0008** (carriers hold taint, not dishes).
 6. `docs/engineering/38-workflow.md` — gates and the doc-maintenance protocol
 
 ## 8. Single most appropriate next action
-Land the four P1 streams, run `pytest -q` + `python scripts/determinism_check.py`, fix only
-B-owned failures via repair passes, write `data/eval/2026-09-12/p1_replay_report.json`, then
-run the P3 gate from `data/build/runbook_B.md`.
+**Measure taps on a teammate** (Tier 0, 1, 2 from `data/build/runbook_B.md`) and record the
+numbers in `data/build/status_B.md`; that closes P3 → `VERIFIED`. Then, if a camera and the 12
+annotated clips appear, start P4 in `src/perception/` against `21` — nothing else is blocked.
 
 ## 9. Evidence that the previous phase is complete
-Planning phase: `docs/` contains 29 documents; every architecture layer in `10` has an owner
-document; every interface in `22` has a named owner module; every failure mode in `23` maps
-to a planned fixture or metric; the architectural audit found and fixed 9
-defects (duplicated threshold defaults; unscoped pessimistic closure; missing
-`recent_allergen_exposure` state; three undefined interfaces; unmeasured top risk; two
-implementation leaks; one premature optimization).
+`data/eval/2026-09-12/`: `p0_gate_report.json` (four planted violations rejected),
+`p1_replay_report.json` (14/14 fixtures, byte-identical twice, IR 1.0, SMR 0.0),
+`p3_protocol_only_rehearsal.json` (full demo path live with no camera),
+`p3_fallback_ladder.json` (levels 2 and 3 identical on the display). Suite: 528 passed;
+`mypy --strict` on 38 core files; `lint-imports` 8 contracts kept; ruff clean.
+Ledger: `data/build/ledger_B.md` (62/65 SATISFIED with file:line), `ledger_A.md` summary.
 
 ## 10. Unresolved assumptions
 Tracked, not hidden. Each is config or an experiment, never a silent code choice.

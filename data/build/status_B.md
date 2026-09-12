@@ -54,3 +54,25 @@ Status vocabulary per `docs/engineering/38-workflow.md`. A folds this into `PROJ
 
 ## Status drift for A to fold in
 - `PROJECT_STATE.md` §2: "no git repository" is stale — repo exists with remote `origin`.
+
+## P3 gate statement (12:55 EDT)
+
+`38` §P3 has three clauses. **Two are green, one needs a person:**
+1. every alert type resolvable in ≤ 2 taps, measured on a teammate — mechanically ≤ 2 (Tier 0: 1, Tier 1: 1, Tier 2: 2 or 1); **teammate measurement not done** (`runbook_B.md` §Tap-count table is ready to fill);
+2. alert-copy lint green — **green** (`tests/property::test_alert_copy_guard`, `tests/integration/ui/test_copy_lint.py`);
+3. a complete demo runs in `PROTOCOL_ONLY` with no camera attached — **green** (`p3_protocol_only_rehearsal.json`, `test_app.py`).
+
+So: **P3 IMPLEMENTED, one human measurement from VERIFIED.** There is a shippable, demoable
+product with no perception at all; the run book drives it.
+
+## Numbers handed over (convergence §8.2)
+
+| item | value |
+|---|---|
+| P0 plants rejected | 4 of 4 (+1 UI copy plant) |
+| P1 fixtures | 14/14 pass, 14/14 deterministic, IR 1.0, SMR 0.0, hazards 6 |
+| Suite | 528 passed; mypy --strict 38 core files; lint-imports 8 kept; ruff clean |
+| Tap counts (mechanical) | Tier 0 = 1, Tier 1 = 1, Tier 2 = 2 (or 1 remake); teammate: pending |
+| Fallback ladder | level 3 (fixture) and level 2 (recorded log) identical on the display; level 1 N/A |
+| `[DEFER]` rows | B63, B64, B65 confirmed absent by grep (`ledger_B.md`) |
+| P4 metrics | none — no hardware |

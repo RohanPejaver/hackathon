@@ -242,6 +242,7 @@ class Runtime:
                 t=now,
                 station_id=self.station_cfg.station_id,
                 event_id_prefix=self._event_id(),
+                threshold=self.cfg.normalizer_threshold,
             ):
                 self.sink.emit(draft)
             self.manual.ack(raw.external_id)

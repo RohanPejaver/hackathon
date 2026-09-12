@@ -5,6 +5,8 @@
 (() => {
   const page = document.body.dataset.page;
   const $ = (id) => document.getElementById(id);
+  const num = (v) => `<span class="num">${esc(v)}</span>`;
+  const bodyText = (b) => esc(b).replace(/\+\d+:\d\d(\.\d)?/g, (m) => `<span class="num">${m}</span>`);
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const icon = (n) => `<svg class="ph"><use href="/static/vendor/icons/phosphor-sprite.svg#ph-${n}"/></svg>`;
   const KIND_ICON = { GLOVES: 'hand', TOOL: 'knife', SURFACE: 'square', CONTAINER: 'jar', FOOD: 'bread' };
@@ -72,6 +74,27 @@
     if (t.lifecycle === 'BLOCKED') return '<span class="micro">restriction unresolved — ask front of house</span>';
     return '';
   }
+  let menuKey = '';
+  function renderForm(s) {
+    const form = $('new-ticket');
+    if (!form) return;
+    if (page !== 'worker') { form.hidden = true; return; }
+    const key = s.runtime.menu.map((m) => m.item_id).join('|');
+    if (key !== menuKey) {
+      menuKey = key;
+      $('nt-item').innerHTML = s.runtime.menu.map((m) => `<option value="${esc(m.item_id)}">${esc(m.display_name)}</option>`).join('');
+    }
+    if (!form.dataset.wired) {
+      form.dataset.wired = '1';
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = $('nt-id').value.trim(); if (!id) return;
+        const raw = $('nt-restr').value.trim();
+        act({ kind: 'NEW_TICKET', ticket_id: id, items: [$('nt-item').value], restrictions: raw ? [{ raw_text: raw }] : [] });
+        $('nt-id').value = ''; $('nt-restr').value = '';
+      });
+    }
+  }
   function renderTickets(s) {
     const live = s.state_summary.tickets.filter((t) => LIVE_TICKET.has(t.lifecycle));
     $('tickets-count').textContent = live.length;
@@ -82,27 +105,7 @@
         ${t.restrictions.map(restrLine).join('')}
         <div class="row" style="margin-top:6px">${ticketButtons(t)}</div>
       </div>`);
-    const form = page === 'worker' ? `
-      <div class="ticket" data-lifecycle="RECEIVED">
-        <div class="micro" style="margin-bottom:6px">New ticket</div>
-        <div class="row"><input id="nt-id" class="mono" placeholder="id" size="5"> <select id="nt-item">${s.runtime.menu.map((m) => `<option value="${esc(m.item_id)}">${esc(m.display_name)}</option>`).join('')}</select></div>
-        <div class="row" style="margin-top:6px"><input id="nt-restr" placeholder="restriction note (optional)" style="flex:1"> <button class="btn small" id="nt-go">Enter</button></div>
-      </div>` : '';
-    const keep = { id: $('nt-id') && $('nt-id').value, restr: $('nt-restr') && $('nt-restr').value, item: $('nt-item') && $('nt-item').value, focus: document.activeElement && document.activeElement.id };
-    $('tickets').innerHTML = (cards.join('') || '<div class="empty">No tickets</div>') + form;
-    const go = $('nt-go');
-    if (go) {
-      if (keep.id) $('nt-id').value = keep.id;
-      if (keep.restr) $('nt-restr').value = keep.restr;
-      if (keep.item) $('nt-item').value = keep.item;
-      if (keep.focus && $(keep.focus)) $(keep.focus).focus();
-      go.onclick = () => {
-        const id = $('nt-id').value.trim(); if (!id) return;
-        const raw = $('nt-restr').value.trim();
-        act({ kind: 'NEW_TICKET', ticket_id: id, items: [$('nt-item').value], restrictions: raw ? [{ raw_text: raw }] : [] });
-        $('nt-id').value = ''; $('nt-restr').value = '';
-      };
-    }
+    $('tickets').innerHTML = cards.join('') || '<div class="empty">No tickets</div>';
   }
 
   function eventLine(e) {
@@ -138,10 +141,20 @@
     $('grid').innerHTML = cs.map(tile).join('');
   }
 
+  function deltaText(sd) {
+    if (!sd) return '';
+    const after = sd.after;
+    if (sd.field === 'taints' && after && typeof after === 'object') {
+      return Object.entries(after).map(([al, v]) => `+${al}${v && v.hop != null ? ` h${v.hop}` : ''}${sd.carrier_id ? ` on ${sd.carrier_id}` : ''}`).join(', ');
+    }
+    if (sd.field === 'reset') return sd.carrier_id ? `no reset on ${sd.carrier_id}` : 'no reset';
+    if (after == null) return sd.field;
+    return `${sd.field}=${typeof after === 'object' ? JSON.stringify(after) : after}`;
+  }
   function traceLines(d) {
     return d.map((st) => st.rule_id === 'absence'
       ? `<div class="trace-line absent"><span class="t">—</span><span>-- ${esc(st.narrative)} --</span></div>`
-      : `<div class="trace-line ${st.rule_id === 'alert' || st.rule_id.startsWith('pathway') || st.rule_id.startsWith('precondition') ? 'rule' : 'event'}"><span class="t">${fmtT(st.t_occurred)}</span><span class="type">${esc(st.rule_id)}</span><span class="delta">${esc(st.narrative)}</span><span class="grade">${esc(st.grade || '')}</span></div>`).join('');
+      : `<div class="trace-line ${st.rule_id === 'alert' || st.rule_id.startsWith('pathway') || st.rule_id.startsWith('precondition') ? 'rule' : 'event'}"><span class="t">${fmtT(st.t_occurred)}</span><span class="type">${esc(st.rule_id)}</span><span class="narr">${esc(st.narrative)}</span><span class="delta">${esc(deltaText(st.state_delta))}</span><span class="grade">${esc(st.grade || '')}</span></div>`).join('');
   }
   function renderRisk(s) {
     const open = s.interventions.filter((a) => OPEN.has(a.state)).sort((a, b) => b.tier - a.tier || a.raised_at - b.raised_at);
@@ -149,7 +162,7 @@
     const all = page === 'inspector' ? [...s.interventions].sort((a, b) => b.updated_at - a.updated_at) : open;
     $('risk').innerHTML = all.map((a) => `
       <div class="alert" data-tier="${a.tier}">
-        <div class="row"><span class="micro">Tier ${a.tier} · #${esc(a.ticket_id)} · ${esc(a.allergen_id)}</span><span class="state micro">${esc(a.state)}</span></div>
+        <div class="row"><span class="micro">Tier ${a.tier} · #${num(a.ticket_id)} · ${esc(a.allergen_id)}</span><span class="state micro">${esc(a.state)}</span></div>
         <div class="head">${esc(a.headline)}</div>
         <div class="trace">${traceLines(a.derivation)}</div>
       </div>`).join('') || '<div class="empty">Quiet</div>';
@@ -158,23 +171,27 @@
   function surfaceFor(s) {
     const open = s.interventions.filter((a) => OPEN.has(a.state) && !(a.dismissed_until != null && a.dismissed_until > now()));
     open.sort((a, b) => b.tier - a.tier || a.raised_at - b.raised_at);
-    if (open.length) return { alert: open[0] };
     const held = s.state_summary.tickets.find((t) => t.lifecycle === 'HELD');
-    return held ? { held } : {};
+    if (held && !open.some((a) => a.tier === 2)) return { held };  // the release is the next tap
+    if (open.length) return { alert: open[0] };
+    const resolved = s.interventions.filter((a) => !OPEN.has(a.state)).sort((a, b) => b.updated_at - a.updated_at || b.tier - a.tier);
+    return resolved.length ? { resolved: resolved[0] } : {};
   }
+  const REASON_TEXT = { RESOLVED_BY_RESET: 'reset observed', RESOLVED_BY_ASSERTION: 'confirmed by the cook', RESOLVED_BY_REMAKE: 'remade', EXPIRED: 'ticket closed' };
   function renderSurface(s) {
     const el = $('surface');
-    const { alert: a, held } = surfaceFor(s);
+    const { alert: a, held, resolved } = surfaceFor(s);
     if (!a && !held) {
       el.dataset.tier = 'none';
       const multi = s.state_summary.conditions.includes('MULTI_RESTRICTION');
-      el.innerHTML = `<div class="label micro">${multi ? 'Two active restrictions — sequence them' : 'Station quiet'}</div><h1 class="headline">Nothing to do</h1>`;
+      const line = resolved ? `<div class="resolved-line">${icon('check')} Resolved — ${esc(resolved.headline)} — ${REASON_TEXT[resolved.state] || esc(resolved.state)} <span class="num">${fmtT(resolved.updated_at)}</span></div>` : '';
+      el.innerHTML = `<div class="label micro">${multi ? 'Two active restrictions — sequence them' : 'Station quiet'}</div><h1 class="headline">Nothing to do</h1>${line}`;
       return;
     }
     if (held) {
       el.dataset.tier = '2';
-      el.innerHTML = `<div class="label micro">Tier 2 · Hold · Ticket ${esc(held.ticket_id)} · awaiting release</div>
-        <h1 class="headline">HELD — TICKET ${esc(held.ticket_id)}</h1>
+      el.innerHTML = `<div class="label micro">Tier 2 · Hold · Ticket ${num(held.ticket_id)} · awaiting release</div>
+        <h1 class="headline">HELD — TICKET ${num(held.ticket_id)}</h1>
         <div class="actions"><button class="btn" data-kind="primary" data-act='${esc(JSON.stringify({ kind: 'RESOLVE_HOLD', ticket_id: held.ticket_id }))}'>${icon('check')} Release ticket</button>
         <button class="btn" data-kind="hold" data-act='${esc(JSON.stringify({ kind: 'REMAKE', ticket_id: held.ticket_id }))}'>${icon('arrow-counter-clockwise')} Remake</button></div>
         <div class="disclaimer">Only a person releases a hold. The system never does.</div>`;
@@ -196,20 +213,20 @@
           ${!done && r.carrier_id && ASSERT_LABEL[r.kind] ? `<button class="btn small" data-kind="quiet" data-act='${esc(JSON.stringify({ kind: 'ASSERT_REPLACED', alert_id: a.alert_id, carrier_ids: [r.carrier_id] }))}'>${ASSERT_LABEL[r.kind]}</button>` : ''}
         </li>`;
       }).join('');
-      el.innerHTML = `<div class="label micro">Tier 0 · Reset prompt · Ticket ${esc(a.ticket_id)} · before you start</div>
+      el.innerHTML = `<div class="label micro">Tier 0 · Reset prompt · Ticket ${num(a.ticket_id)} · before you start</div>
         <div><h1 class="headline">${esc(a.headline)}</h1><ul class="checklist">${items}</ul></div>
         <div class="actions">${assertAll('ASSERT_REPLACED', 'All done — station reset', 'primary')}${dismiss}</div>`;
     } else if (a.tier === 1) {
       const first = a.required_actions[0];
-      el.innerHTML = `<div class="label micro">Tier 1 · Interrupt · Ticket ${esc(a.ticket_id)}</div>
-        <div><h1 class="headline">${esc(a.headline)}</h1>${a.body ? `<div class="body">${esc(a.body)}</div>` : ''}</div>
+      el.innerHTML = `<div class="label micro">Tier 1 · Interrupt · Ticket ${num(a.ticket_id)}</div>
+        <div><h1 class="headline">${esc(a.headline)}</h1>${a.body ? `<div class="body">${bodyText(a.body)}</div>` : ''}</div>
         <div class="actions">
-          <button class="btn" data-kind="primary" data-act='${esc(JSON.stringify({ kind: 'ACKNOWLEDGE', alert_id: a.alert_id }))}'>${icon('arrows-clockwise')} ${esc(first ? first.label : 'On it')}</button>
+          <button class="btn" data-kind="primary" data-act='${esc(JSON.stringify(first && first.kind === 'REMAKE' ? { kind: 'REMAKE', ticket_id: a.ticket_id, alert_id: a.alert_id } : { kind: 'ACKNOWLEDGE', alert_id: a.alert_id }))}'>${icon(first && first.kind === 'REMAKE' ? 'arrow-counter-clockwise' : 'arrows-clockwise')} ${esc(first ? first.label : 'On it')}</button>
           ${assertAll('ASSERT_REPLACED', 'Already swapped', 'quiet')}${dismiss}</div>`;
     } else {
       const implicated = [...new Set(a.required_actions.filter((r) => r.carrier_id).map((r) => r.carrier_id))];
-      el.innerHTML = `<div class="label micro">Tier 2 · Hold at the pass · Ticket ${esc(a.ticket_id)}</div>
-        <div><h1 class="headline">${esc(a.headline)}</h1>${a.body ? `<div class="body">${esc(a.body)}</div>` : ''}<div class="trace">${traceLines(a.derivation)}</div></div>
+      el.innerHTML = `<div class="label micro">Tier 2 · Hold at the pass · Ticket ${num(a.ticket_id)}</div>
+        <div><h1 class="headline">${esc(a.headline)}</h1>${a.body ? `<div class="body">${bodyText(a.body)}</div>` : ''}<div class="trace">${traceLines(a.derivation)}</div></div>
         <div class="actions">
           ${implicated.length ? `<button class="btn" data-kind="primary" data-act='${esc(JSON.stringify({ kind: 'ASSERT_CLEAN', alert_id: a.alert_id, carrier_ids: implicated }))}'>${icon('check')} Cook confirms ${esc(implicated.join(', '))} was clean</button>` : ''}
           <button class="btn" data-kind="hold" data-act='${esc(JSON.stringify({ kind: 'REMAKE', ticket_id: a.ticket_id, alert_id: a.alert_id }))}'>${icon('arrow-counter-clockwise')} Remake</button></div>
@@ -236,7 +253,7 @@
 
   function render(s) {
     snap = s;
-    renderTop(s); renderTickets(s); renderRisk(s);
+    renderTop(s); renderForm(s); renderTickets(s); renderRisk(s);
     if (page === 'worker') { renderLog(s); renderGrid(s); renderSurface(s); }
     else renderInspector(s);
   }

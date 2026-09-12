@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 from src.domain import (
     GRADE_RANK,
+    Action,
     Alert,
     AlertCommand,
     AlertLifecycle,
@@ -70,13 +71,22 @@ def _wants(a: RiskAssessment, state: WorldState | None, cfg: Config) -> list[_Wa
 
 
 def _fingerprint(alert: Alert) -> tuple[object, ...]:
+    # required_actions is deliberately absent: the checklist is stable for the life of a
+    # Tier 0 alert (26: items tick themselves off); blocking_carriers is what changes.
     return (
         alert.headline,
         alert.body,
         tuple(alert.blocking_carriers),
-        tuple((x.kind, x.carrier_id, x.label) for x in alert.required_actions),
         tuple((s.rule_id, s.event_id, s.narrative) for s in alert.derivation),
     )
+
+
+def _merged_actions(existing: Alert, new: Alert) -> list[Action]:
+    """The checklist never loses a line: items already shown stay (and tick off via
+    blocking_carriers); newly blocking carriers append (26 §Tier 0, 37 req 4)."""
+    seen = {(x.kind, x.carrier_id) for x in existing.required_actions}
+    extra = [x for x in new.required_actions if (x.kind, x.carrier_id) not in seen]
+    return [*existing.required_actions, *extra]
 
 
 def _carry(existing: Alert, new: Alert, state: AlertLifecycle, tier: Tier) -> Alert:
@@ -88,6 +98,12 @@ def _carry(existing: Alert, new: Alert, state: AlertLifecycle, tier: Tier) -> Al
             "tier": tier,
             "acknowledged_by_slot": existing.acknowledged_by_slot,
             "dismissed_until": existing.dismissed_until,
+            # Only a Tier 0 checklist keeps its lines; an escalation carries its own actions.
+            "required_actions": (
+                _merged_actions(existing, new)
+                if existing.tier == tier == Tier.RESET
+                else new.required_actions
+            ),
         }
     )
 

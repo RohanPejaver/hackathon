@@ -1,0 +1,19 @@
+{
+  "phase": "P3 audit loop (BUILD_B §6)",
+  "date": "2026-09-12",
+  "auditor": "read-only subagent checking src/ui, src/policy/copy.py, src/runtime against 26, 02, 37, 39 §6, 25, 16, 22, 10, 24",
+  "findings": [
+    {"n": 1, "severity": "BLOCKER", "finding": "hold release unreachable in 2 taps while a lower alert holds the surface", "fix": "app.js surfaceFor: a HELD ticket with no open Tier 2 alert takes the surface (Release is the next tap)", "verified": "live: Cook confirms -> HELD surface -> Release = 2 taps (this file)"},
+    {"n": 2, "severity": "MAJOR", "finding": "Tier 0 checklist items disappeared instead of ticking", "fix": "policy evaluate._carry merges required_actions for same-tier Tier 0 updates; fingerprint ignores required_actions", "verified": "tests/unit/policy::test_checklist_lines_persist_and_tick_via_blocking_carriers; live sample shows done=1 lines"},
+    {"n": 3, "severity": "MAJOR", "finding": "Tier 0/1 alert outlived a released ticket", "fix": "AlertState.observe(TICKET_RELEASED): hold -> RESOLVED_BY_ASSERTION, others -> EXPIRED", "verified": "tests/unit/policy::test_ticket_released_expires_lower_tier_alerts_too; test_app hold test"},
+    {"n": 4, "severity": "MAJOR", "finding": "Tier 1 resolution cleared silently", "fix": "runtime snapshot keeps resolved alerts on the wire for 6 s; UI renders a 'Resolved — … — reason' line in the quiet state", "verified": "live: 'Resolved — PINE NUT — station not clean — ticket closed'"},
+    {"n": 5, "severity": "MAJOR", "finding": "new-ticket form rebuilt at 5Hz (select unusable)", "fix": "static <form id=new-ticket> outside the re-rendered list; options refreshed only when the menu changes", "verified": "live: 8 options, form persists"},
+    {"n": 6, "severity": "MAJOR", "finding": "CALIBRATION config error unreachable end to end", "fix": "make_app catches ConfigError and serves a CALIBRATION stub with health.message", "verified": "test_app::test_bad_config_serves_a_calibration_stub_with_the_error"},
+    {"n": 7, "severity": "MAJOR", "finding": "trace lines omitted the state delta", "fix": "fifth trace column from state_delta (+ALLERGEN hN on carrier / no reset / field=after)", "verified": "live: '+PINE_NUT on spreader_2'"},
+    {"n": 8, "severity": "MINOR", "finding": "Tier 1 primary button always acknowledged even when labelled Remake", "fix": "REMAKE action when the first required action is REMAKE", "verified": "code"},
+    {"n": 9, "severity": "MINOR", "finding": "some numbers outside monospace", "fix": "ticket ids and body times wrapped in .num; .ago and .body tabular-nums", "verified": "code"},
+    {"n": 10, "severity": "MINOR", "finding": "Open Props linked but unused", "fix": "style.css uses --size-2 and --ease-3 from Open Props", "verified": "code"},
+    {"n": 11, "severity": "MINOR", "finding": "ledger evidence names drifted", "fix": "ledger_B B33/B34/B36/B40 corrected; data/build/snapshot.{example,schema}.json synced to src/ui/static/mock", "verified": "files"}
+  ],
+  "reasoning_defects_needing_a_fixture": "none — findings 2 and 3 are policy (alert lifecycle) rules; both are covered by new unit tests and the replay suite still passes 14/14 deterministically"
+}

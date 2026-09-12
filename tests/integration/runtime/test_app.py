@@ -43,6 +43,12 @@ def _types(r: Runtime) -> list[str]:
     return [e.type for e in r.recent]
 
 
+def _open(snap: dict) -> list[dict]:
+    return [
+        a for a in snap["interventions"] if a["state"] in ("RAISED", "ACKNOWLEDGED", "ESCALATED")
+    ]
+
+
 def _new_ticket(r: Runtime, ticket_id: str, item: str, note: str | None = None) -> None:
     restrictions = [{"raw_text": note}] if note else []
     r.on_action(
@@ -73,7 +79,7 @@ def test_unrestricted_ticket_is_silent(rt: Runtime):
     _settle(rt)
     snap = rt.snapshot()
     assert [t["lifecycle"] for t in snap["state_summary"]["tickets"]] == ["BOUND"]
-    assert snap["interventions"] == []
+    assert _open(snap) == []
 
 
 def test_restricted_bind_fires_tier0_before_any_motion_and_resolves_in_one_tap(rt: Runtime):
@@ -101,7 +107,9 @@ def test_restricted_bind_fires_tier0_before_any_motion_and_resolves_in_one_tap(r
     assert r["accepted"] and len(r["event_ids"]) == len(blocking)
     _settle(rt)
     snap = rt.snapshot()
-    assert snap["interventions"] == [], snap["interventions"]
+    assert _open(snap) == [], snap["interventions"]
+    # 16: the resolution is shown, not silently cleared — the resolved alert lingers briefly
+    assert [a["state"] for a in snap["interventions"]] == ["RESOLVED_BY_ASSERTION"]
     types = _types(rt)
     assert types.count("OPERATOR_ASSERTION") == len(blocking)
     assert "ALERT_RESOLVED" in types
@@ -137,7 +145,26 @@ def test_hold_is_only_released_by_a_person(rt: Runtime):
     assert not rt.on_action({"kind": "DISMISS", "alert_id": "nope"})["accepted"]
     assert rt.on_action({"kind": "RESOLVE_HOLD", "ticket_id": "T51"})["accepted"]
     _settle(rt)
-    assert rt.snapshot()["state_summary"]["tickets"][0]["lifecycle"] == "RELEASED"
+    snap = rt.snapshot()
+    assert snap["state_summary"]["tickets"][0]["lifecycle"] == "RELEASED"
+    assert _open(snap) == [], "a released ticket leaves no intervention behind (26 §4)"
+
+
+def test_bad_config_serves_a_calibration_stub_with_the_error(tmp_path, monkeypatch):
+    import shutil
+
+    from fastapi.testclient import TestClient
+
+    from src.runtime.app import make_app
+
+    shutil.copytree("config", tmp_path / "config")
+    (tmp_path / "config" / "defaults.yaml").write_text("temporal: [unclosed\n")
+    monkeypatch.setenv("STATION_CONFIG_ROOT", str(tmp_path / "config"))
+    client = TestClient(make_app())
+    snap = client.get("/snapshot").json()
+    assert snap["state_summary"]["mode"] == "CALIBRATION"
+    assert "YAML" in snap["runtime"]["health"]["message"]
+    assert client.post("/action", json={"kind": "BIND_TICKET", "ticket_id": "x"}).status_code == 400
 
 
 def test_malformed_action_never_crashes(rt: Runtime):

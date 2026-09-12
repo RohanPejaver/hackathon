@@ -22,6 +22,11 @@
   <section class="pane" data-pane="tickets">
     <div class="pane-head"><span class="micro">Tickets</span><span class="count mono" id="tickets-count">0</span></div>
     <div class="pane-body" id="tickets"><div class="empty">No tickets bound</div></div>
+    <form class="new-ticket" id="new-ticket" autocomplete="off">
+      <div class="micro">New ticket</div>
+      <div class="row"><input id="nt-id" class="mono" placeholder="id" size="5"> <select id="nt-item"></select></div>
+      <div class="row"><input id="nt-restr" placeholder="restriction note (optional)"> <button class="btn small" id="nt-go" type="submit">Enter</button></div>
+    </form>
   </section>
   <section class="pane" data-pane="log">
     <div class="pane-head"><span class="micro">Observations</span><span class="count mono" id="log-count">seq —</span></div>

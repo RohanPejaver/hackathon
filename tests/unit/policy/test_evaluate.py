@@ -102,7 +102,8 @@ def test_checklist_shrinks_as_an_update_not_a_new_alert() -> None:
     stored = alerts.apply(cmd)
     assert stored.alert_id == "al-1"
     assert stored.blocking_carriers == ["spreader"] and stored.updated_at == 2000
-    assert [x.label for x in stored.required_actions] == ["Clean spreader"]
+    # 26 §Tier 0: the line ticks off, it does not disappear (done = not in blocking_carriers)
+    assert [x.label for x in stored.required_actions] == ["New gloves", "Clean spreader"]
     assert len(alerts.open()) == 1
 
 

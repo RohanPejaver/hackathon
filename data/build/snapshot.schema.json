@@ -114,6 +114,30 @@
         "updated_at": {
           "title": "Updated At",
           "type": "integer"
+        },
+        "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Body"
+        },
+        "dismissed_until": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dismissed Until"
         }
       },
       "required": [
@@ -263,6 +287,74 @@
       "title": "EpistemicStatus",
       "type": "string"
     },
+    "EventLine": {
+      "additionalProperties": false,
+      "properties": {
+        "seq": {
+          "title": "Seq",
+          "type": "integer"
+        },
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "t_occurred": {
+          "title": "T Occurred",
+          "type": "integer"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "grade": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvidenceGrade"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "participants": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Participants",
+          "type": "array"
+        },
+        "mutates_state": {
+          "title": "Mutates State",
+          "type": "boolean"
+        },
+        "late": {
+          "title": "Late",
+          "type": "boolean"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "seq",
+        "event_id",
+        "t_occurred",
+        "type",
+        "source",
+        "grade",
+        "participants",
+        "mutates_state",
+        "late",
+        "summary"
+      ],
+      "title": "EventLine",
+      "type": "object"
+    },
     "EvidenceGrade": {
       "enum": [
         "OBSERVED",
@@ -273,7 +365,88 @@
       "title": "EvidenceGrade",
       "type": "string"
     },
+    "Health": {
+      "additionalProperties": false,
+      "properties": {
+        "vision": {
+          "enum": [
+            "OK",
+            "DEGRADED",
+            "UNAVAILABLE"
+          ],
+          "title": "Vision",
+          "type": "string"
+        },
+        "reasoning": {
+          "enum": [
+            "OK",
+            "DOWN"
+          ],
+          "title": "Reasoning",
+          "type": "string"
+        },
+        "late_rate": {
+          "default": 0.0,
+          "title": "Late Rate",
+          "type": "number"
+        },
+        "rejected_events": {
+          "default": 0,
+          "title": "Rejected Events",
+          "type": "integer"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "last_incident_event_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Incident Event Id"
+        }
+      },
+      "required": [
+        "vision",
+        "reasoning"
+      ],
+      "title": "Health",
+      "type": "object"
+    },
     "JsonValue": {},
+    "MenuItem": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "title": "Item Id",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "item_id",
+        "display_name"
+      ],
+      "title": "MenuItem",
+      "type": "object"
+    },
     "Mode": {
       "enum": [
         "FULL",
@@ -349,6 +522,70 @@
         "raw_text"
       ],
       "title": "Restriction",
+      "type": "object"
+    },
+    "RuntimeInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "time": {
+          "$ref": "#/$defs/TimeRef"
+        },
+        "seq": {
+          "title": "Seq",
+          "type": "integer"
+        },
+        "health": {
+          "$ref": "#/$defs/Health"
+        },
+        "recent_events": {
+          "items": {
+            "$ref": "#/$defs/EventLine"
+          },
+          "title": "Recent Events",
+          "type": "array"
+        },
+        "zones": {
+          "items": {
+            "$ref": "#/$defs/ZoneInfo"
+          },
+          "title": "Zones",
+          "type": "array"
+        },
+        "menu": {
+          "items": {
+            "$ref": "#/$defs/MenuItem"
+          },
+          "title": "Menu",
+          "type": "array"
+        },
+        "config_checksum": {
+          "title": "Config Checksum",
+          "type": "string"
+        },
+        "knowledge_checksum": {
+          "title": "Knowledge Checksum",
+          "type": "string"
+        },
+        "rejected": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Rejected",
+          "type": "array"
+        }
+      },
+      "required": [
+        "time",
+        "seq",
+        "health",
+        "recent_events",
+        "zones",
+        "menu",
+        "config_checksum",
+        "knowledge_checksum"
+      ],
+      "title": "RuntimeInfo",
       "type": "object"
     },
     "StateDelta": {
@@ -612,6 +849,29 @@
       "title": "Tier",
       "type": "integer"
     },
+    "TimeRef": {
+      "additionalProperties": false,
+      "properties": {
+        "t": {
+          "title": "T",
+          "type": "integer"
+        },
+        "kind": {
+          "enum": [
+            "WALL",
+            "LOG"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "t",
+        "kind"
+      ],
+      "title": "TimeRef",
+      "type": "object"
+    },
     "TraceStep": {
       "additionalProperties": false,
       "properties": {
@@ -648,10 +908,104 @@
       ],
       "title": "TraceStep",
       "type": "object"
+    },
+    "ZoneInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "zone_id": {
+          "title": "Zone Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ZoneKind"
+        },
+        "contents": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Contents",
+          "type": "array"
+        },
+        "bound_carrier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bound Carrier"
+        },
+        "allergens": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allergens",
+          "type": "array"
+        },
+        "polygon": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Polygon",
+          "type": "array"
+        },
+        "last_contact_at": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Contact At"
+        }
+      },
+      "required": [
+        "zone_id",
+        "kind",
+        "contents",
+        "bound_carrier",
+        "allergens",
+        "polygon",
+        "last_contact_at"
+      ],
+      "title": "ZoneInfo",
+      "type": "object"
+    },
+    "ZoneKind": {
+      "enum": [
+        "INGREDIENT",
+        "TOOL_RACK",
+        "WORK",
+        "LANDING",
+        "GLOVE_DISPENSER",
+        "WASH",
+        "CLEAN_STOCK"
+      ],
+      "title": "ZoneKind",
+      "type": "string"
     }
   },
   "additionalProperties": false,
   "properties": {
+    "schema_version": {
+      "const": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
     "state_summary": {
       "$ref": "#/$defs/StationSummary"
     },
@@ -661,12 +1015,17 @@
       },
       "title": "Interventions",
       "type": "array"
+    },
+    "runtime": {
+      "$ref": "#/$defs/RuntimeInfo"
     }
   },
   "required": [
+    "schema_version",
     "state_summary",
-    "interventions"
+    "interventions",
+    "runtime"
   ],
-  "title": "DisplayPayload",
+  "title": "Snapshot",
   "type": "object"
 }

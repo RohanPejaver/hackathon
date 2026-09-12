@@ -32,7 +32,7 @@ from src.policy import AlertState, evaluate
 from src.replay import seed_state
 from src.risk import assess
 from src.runtime.clock import Clock, LogClock, SystemClock
-from src.runtime.config import LoadedConfig, load, to_domain
+from src.runtime.config import ConfigError, LoadedConfig, load, to_domain
 from src.runtime.controller import RuntimeController
 from src.runtime.feed import FeedItem, jsonl_feed, scenario_feed
 from src.state import initial, reduce
@@ -46,6 +46,7 @@ LIVE = (
     dom.TicketLifecycle.HELD,
 )
 TICK_S = 0.1
+RESOLUTION_LINGER_MS = 6_000  # 16: the UI shows a resolution rather than silently clearing it
 DERIVED = {
     "ALERT_RAISED",
     "ALERT_UPDATED",
@@ -431,10 +432,16 @@ class Runtime:
         menu_names = {
             m.item_id: m.display_name for m in self.loaded.knowledge.menu_items.menu_items
         }
+        open_ids = {a.alert_id for a in self.alerts.open()}
+        recent = [
+            a
+            for a in self.alerts.all()
+            if a.alert_id not in open_ids and now - a.updated_at <= RESOLUTION_LINGER_MS
+        ]
         snap = wire.Snapshot(
             schema_version=1,
             state_summary=summary,
-            interventions=self.alerts.open(),
+            interventions=[*self.alerts.open(), *sorted(recent, key=lambda a: a.updated_at)],
             runtime=wire.RuntimeInfo(
                 time=wire.TimeRef(t=now, kind=self.clock.kind),
                 seq=self.recent[-1].seq if self.recent else 0,
@@ -470,14 +477,53 @@ def build(
     return rt
 
 
+def calibration_app(error: str, station_id: str) -> FastAPI:
+    """23 P12 / 10 §Runtime modes: a bundle that fails validation leaves the station in
+    CALIBRATION showing the specific error; nothing binds, nothing is assessed."""
+    summary = dom.StationSummary(
+        station_id=station_id,
+        mode=dom.Mode.CALIBRATION,
+        config_version="0",
+        knowledge_version="0",
+        carriers=[],
+        tickets=[],
+        conditions=[],
+        t_occurred=0,
+    )
+
+    def snapshot() -> dict[str, Any]:
+        return wire.Snapshot(
+            schema_version=1,
+            state_summary=summary,
+            interventions=[],
+            runtime=wire.RuntimeInfo(
+                time=wire.TimeRef(t=SystemClock().now(), kind="WALL"),
+                seq=0,
+                health=wire.Health(vision="UNAVAILABLE", reasoning="OK", message=error),
+                recent_events=[],
+                zones=[],
+                menu=[],
+                config_checksum="",
+                knowledge_checksum="",
+            ),
+        ).model_dump(mode="json")
+
+    return create_fastapi(snapshot, lambda body: {"accepted": False, "reason": error}, 5.0)
+
+
 def make_app() -> FastAPI:
     replay_src = os.environ.get("STATION_REPLAY")
-    rt = build(
-        profile=os.environ.get("STATION_PROFILE", "demo"),
-        station_id=os.environ.get("STATION_ID", "demo"),
-        knowledge_id=os.environ.get("KNOWLEDGE_ID", "demo"),
-        replay=replay_src,
-    )
+    station_id = os.environ.get("STATION_ID", "demo")
+    try:
+        rt = build(
+            profile=os.environ.get("STATION_PROFILE", "demo"),
+            station_id=station_id,
+            knowledge_id=os.environ.get("KNOWLEDGE_ID", "demo"),
+            config_root=os.environ.get("STATION_CONFIG_ROOT", "config"),
+            replay=replay_src,
+        )
+    except ConfigError as err:
+        return calibration_app(str(err), station_id)
     push_hz = rt.loaded.values.runtime.ui_push_hz
 
     @contextlib.asynccontextmanager

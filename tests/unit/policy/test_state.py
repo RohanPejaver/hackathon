@@ -78,7 +78,7 @@ def test_ticket_released_resolves_tier2_by_assertion_with_cooldown() -> None:
     alerts.observe(released("T48", 30_000))
     by_tier = {int(a.tier): a for a in alerts.all()}
     assert by_tier[2].state == AlertLifecycle.RESOLVED_BY_ASSERTION
-    assert by_tier[0].state == AlertLifecycle.RAISED
+    assert by_tier[0].state == AlertLifecycle.EXPIRED  # 26 §4: nothing outlives the ticket
     assert alerts.cooldowns() == {by_tier[2].alert_key: 150_000}
 
 
@@ -114,3 +114,30 @@ def test_apply_resolve_for_unknown_alert_stores_nothing() -> None:
     )
     assert alerts.apply(resolve) == resolve.alert
     assert alerts.all() == []
+
+
+def test_ticket_released_expires_lower_tier_alerts_too() -> None:
+    """26 §constraint 4: a released ticket leaves nothing on the worker surface."""
+    alerts = AlertState(cfg())
+    [t0] = _raised(alerts, assessment())  # a Tier 0 checklist for the default ticket
+    assert t0.tier == Tier.RESET
+    alerts.observe(released(t0.ticket_id, 5000))
+    (stored,) = [a for a in alerts.all() if a.alert_id == t0.alert_id]
+    assert stored.state == AlertLifecycle.EXPIRED and stored.updated_at == 5000
+    assert alerts.open() == []
+
+
+def test_checklist_lines_persist_and_tick_via_blocking_carriers() -> None:
+    """26 §Tier 0: items tick themselves off — the UPDATE that shrinks blocking_carriers keeps
+    every required_action line (the UI marks done = carrier not in blocking_carriers)."""
+    alerts = AlertState(cfg())
+    first = assessment(blocking=["gloves", "spreader", "bin:mayo"])
+    [t0] = _raised(alerts, first)
+    assert [x.carrier_id for x in t0.required_actions] == ["gloves", "spreader", "bin:mayo"]
+    second = assessment(blocking=["spreader", "bin:mayo"], t=2000)
+    cmds = evaluate([second], alerts, cfg())
+    assert [c.kind for c in cmds] == ["UPDATE"]
+    updated = alerts.apply(cmds[0])
+    assert updated.blocking_carriers == ["spreader", "bin:mayo"]
+    assert [x.carrier_id for x in updated.required_actions] == ["gloves", "spreader", "bin:mayo"]
+    assert evaluate([second], alerts, cfg()) == [], "no churn: same assessment twice emits nothing"

@@ -159,15 +159,15 @@ class AlertState:
                 )
                 self._store(alert.model_copy(update={"state": state, "updated_at": e.t_occurred}))
         elif isinstance(e, GradedTicketReleased):
+            # A released ticket has no interventions left (26 §constraint 4: silence is the
+            # default): the hold is resolved by the explicit human release; any lower-tier
+            # alert still open for that ticket expires.
             for alert in self.open():
-                if alert.ticket_id != e.ticket or alert.tier != Tier.HOLD:
+                if alert.ticket_id != e.ticket:
                     continue
-                self._cooldowns[alert.alert_key] = e.t_occurred + self._cfg.t_cooldown
-                self._store(
-                    alert.model_copy(
-                        update={
-                            "state": AlertLifecycle.RESOLVED_BY_ASSERTION,
-                            "updated_at": e.t_occurred,
-                        }
-                    )
-                )
+                if alert.tier == Tier.HOLD:
+                    self._cooldowns[alert.alert_key] = e.t_occurred + self._cfg.t_cooldown
+                    state = AlertLifecycle.RESOLVED_BY_ASSERTION
+                else:
+                    state = AlertLifecycle.EXPIRED
+                self._store(alert.model_copy(update={"state": state, "updated_at": e.t_occurred}))

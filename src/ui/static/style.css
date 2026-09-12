@@ -73,7 +73,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
   padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--bg-1);
 }
 .pane-head .count { color: var(--fg-1); }
-.pane-body { overflow: auto; padding: 8px; min-height: 0; }
+.pane-body { overflow: auto; padding: var(--size-2); min-height: 0; }
+.new-ticket { border-top: 1px solid var(--line); padding: var(--size-2); display: flex; flex-direction: column; gap: var(--size-2); background: var(--bg-1); }
+.new-ticket .row { display: flex; gap: var(--size-2); align-items: center; }
+.new-ticket input, .new-ticket select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--r); padding: 6px 8px; min-width: 0; }
+.new-ticket input#nt-restr { flex: 1; }
 .empty { color: var(--fg-2); padding: 12px 6px; font-style: italic; }
 
 /* tickets */
@@ -104,7 +108,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .tile {
   position: relative; border: 1px solid var(--line-2); border-left: var(--band) solid var(--line-2); border-radius: var(--r);
   background: var(--bg-1); padding: 8px 10px 8px 10px; min-height: 92px; display: flex; flex-direction: column; gap: 6px;
-  transition: background .25s, border-color .25s;
+  transition: background .25s var(--ease-3), border-color .25s var(--ease-3);
 }
 .tile[data-tainted="1"] { border-left-color: var(--amber); border-color: var(--amber-2); background: var(--amber-fill); }
 .tile[data-epi="STALE"] { border-style: dashed; border-left-style: solid; }
@@ -123,7 +127,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .tile[data-epi="TRACKED"] .epi { color: var(--fg-1); }
 .tile[data-epi="STALE"] .epi { color: var(--amber); }
 .tile[data-epi="UNKNOWN"] .epi { color: var(--fg); }
-.tile .ago { color: var(--fg-2); font-size: 12px; }
+.tile .ago { color: var(--fg-2); font-size: 12px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .tile .shared { font-size: 12px; color: var(--amber); }
 
 /* risk / alerts */
@@ -135,10 +139,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .alert .head { font: 600 14px var(--font-head); margin-top: 2px; }
 .alert .state { color: var(--fg-2); }
 .trace { margin-top: 6px; border-top: 1px solid var(--line); padding-top: 6px; }
-.trace-line { display: grid; grid-template-columns: 5.5em 12em 1fr 7em; gap: 8px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 12px; padding: 2px 0; white-space: nowrap; }
+.trace-line { display: grid; grid-template-columns: 5.5em 11em 1fr 12em 7em; gap: 8px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 12px; padding: 2px 0; white-space: nowrap; }
+.trace-line .narr { color: var(--fg); overflow: hidden; text-overflow: ellipsis; }
 .trace-line .delta { color: var(--amber); overflow: hidden; text-overflow: ellipsis; }
 .trace-line .grade { color: var(--fg-2); text-align: right; }
 .trace-line.absent { color: var(--fg-1); font-style: italic; grid-template-columns: 5.5em 1fr; }
+.trace-line.resolved { color: var(--fg-1); }
 .trace-line.rule .type { color: var(--blue); }
 
 /* ---- worker surface (bottom) ---------------------------------------------------------- */
@@ -154,7 +160,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .surface[data-tier="2"] .label { color: var(--red); }
 .headline { margin: 0; font: 700 clamp(26px, 3.6vw, 44px)/1.05 var(--font-head); letter-spacing: -.01em; }
 .surface[data-tier="none"] .headline { color: var(--fg-2); font-weight: 600; font-size: clamp(18px, 2vw, 24px); }
-.body { font-size: 17px; color: var(--fg); max-width: 70ch; }
+.body { font-size: 17px; color: var(--fg); max-width: 70ch; font-variant-numeric: tabular-nums; }
+.resolved-line { font-size: 17px; color: var(--fg-1); margin-top: var(--size-2); }
+.resolved-line .num { color: var(--fg); }
 .body .num { font-weight: 600; }
 .checklist { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .checklist li { display: flex; align-items: center; gap: 12px; font: 600 22px var(--font-head); }

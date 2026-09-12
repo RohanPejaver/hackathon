@@ -18,13 +18,20 @@ Dev: `npm run dev` (http://localhost:5173) with `npm run stage` running for the 
 
 ## Hosted copy (Vercel)
 
-The deck is a static Vite build. Deploy from the `deck/` directory (Vercel project root =
-`deck`, framework Vite, output `dist`; `vercel.json` sets this). A hosted copy has no product
-server, so scene 4 plays the recording of the real display (`V`) by default; `S` steps the
-stills. `R`, `L` and `P` only work on the laptop that runs `npm run stage`.
+Live: https://sequence-hackcmu.vercel.app (project `sequence-hackcmu`). A hosted copy has no
+product server, so scene 4 plays the recording of the real display (`V`) by default; `S` steps
+the stills. `R`, `L` and `P` only work on the laptop that runs `npm run stage`.
+
+Deploying from git is blocked by Vercel because the local commit author email
+(`vikramk@Vikrams-MacBook-Pro-2.local`) is not on the Vercel account. Either set
+`git config user.email <your Vercel email>` once, or deploy the prebuilt output from a folder
+with no git history, which is what works today:
 
 ```bash
-cd deck && npx vercel login && npx vercel --prod
+cd deck && npx vercel build --prod --yes
+rm -rf /tmp/vdeploy && mkdir -p /tmp/vdeploy/.vercel && cp -R .vercel/output /tmp/vdeploy/.vercel/ && cp .vercel/project.json /tmp/vdeploy/.vercel/
+cd /tmp/vdeploy && npx vercel deploy --prebuilt --prod --yes
+npx vercel alias set <deployment url printed above> sequence-hackcmu.vercel.app
 ```
 
 ## Keys

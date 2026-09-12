@@ -14,7 +14,7 @@ Two devices work from this file: the demo laptop (station, rehearsal) and the de
 ## 1. Shopping / gather list (one bag)
 
 - Printed from `data/markers/` at **100% scale, matte paper**: mat sheets (`mat_letter_A.png`,
-  `mat_letter_B.png` or the A4 pair), `tool_10_spreader.png`, `tool_11_spreader_2.png`,
+  `mat_letter_B.png` or the A4 pair; corner markers are printed ON the mat), `tool_10_spreader.png`, `tool_11_spreader_2.png`,
   `surface_20_board.png`, `surface_21_board_2.png`, spare `corner_00..03.png`.
 - Clear tape, scissors.
 - 4 paper cups or bottle caps (bins: pesto, mayo, turkey, bread), 2 plastic knives (spreaders),
@@ -30,7 +30,7 @@ Two devices work from this file: the demo laptop (station, rehearsal) and the de
 | 11:00–11:30 | tape mat, place props, phone framing check in Photo Booth (then close it) | fallback screen recording |
 | 11:30–12:15 | calibrate → tune HSV → **go/no-go 5/5 test** (§4) | threshold fixes from your outputs |
 | 12:15–13:00 | lunch | run book final, evidence files |
-| 13:00–14:30 | **five clean rehearsals** + failure drill; tap counts on paper | fixes only if a run fails |
+| 13:00–14:30 | **five clean rehearsals** + failure drill; tap counts on paper; **screen-record run #3 with Cmd+Shift+5 (whole screen, mic on) → save as `data/build/demo_fallback.mov`** | fixes only if a run fails |
 | 14:30–15:15 | deck numbers merged, script timed twice | — |
 | 15:15–15:45 | pack (§8), pre-flight | — |
 | 15:45 | walk; in the room: mat, props, phone, banner FULL check (2 min max) | — |
@@ -40,15 +40,15 @@ Two devices work from this file: the demo laptop (station, rehearsal) and the de
 ```bash
 cd ~/Documents/hackathon/hackathon && source .venv/bin/activate && git pull
 python -c "import cv2; print([i for i in range(4) if cv2.VideoCapture(i).isOpened()])"   # camera index
-python scripts/calibrate.py --source 0 --frames 30        # error must be < 3 mm, then:
-python scripts/calibrate.py --source 0 --frames 30 --write
+python scripts/calibrate.py --station mat --source 0 --frames 30        # error must be < 3 mm, then:
+python scripts/calibrate.py --station mat --source 0 --frames 30 --write
 python scripts/tune_hsv.py --source 0                     # sliders until only the glove is white; w = save, q = quit
 ```
 
 ## 4. Go/no-go test (11:45)
 
 ```bash
-STATION_CAMERA=0 uvicorn src.runtime.app:app
+STATION_ID=mat STATION_CAMERA=0 uvicorn src.runtime.app:app
 ```
 Open `http://127.0.0.1:8000/` and `http://127.0.0.1:8000/inspector`. Banner must read FULL.
 Glove into the pesto cup (hold 1 s), out, wait 2 s, into mayo. Five tries.
@@ -60,7 +60,7 @@ Glove into the pesto cup (hold 1 s), out, wait 2 s, into mayo. Five tries.
 Servers (start in this order, leave running all day):
 ```bash
 STATION_REPLAY=scenarios/demo.yaml uvicorn src.runtime.app:app --port 8001   # main show
-STATION_CAMERA=0 uvicorn src.runtime.app:app --port 8000                     # live mat (if go)
+STATION_ID=mat STATION_CAMERA=0 uvicorn src.runtime.app:app --port 8000      # live mat (if go)
 ```
 Browser tabs in order: `http://127.0.0.1:8001/` · `http://127.0.0.1:8000/` ·
 `http://127.0.0.1:8001/inspector` · `data/build/demo_fallback.mp4` (paused at 0:00).
@@ -114,4 +114,5 @@ charger, adapter, spare markers. Both servers running; four tabs open; video pau
 - Run book with all beats and the field procedure: `data/build/runbook_B.md`
 - Status and evidence: `data/build/status_B.md`, `data/eval/2026-09-12/`
 - Marker and mat images: `data/markers/` (regenerate with `python scripts/print_markers.py`)
-- Station config for the mat: `config/station/demo.yaml` (scaled by Claude; do not edit)
+- Station config for the mat: `config/station/mat.yaml` (380 x 230 mm frame; run servers with `STATION_ID=mat`)
+- Mat sheets: `data/markers/mat_letter_A.png` + `_B.png` (or `mat_a4_*`); `python scripts/print_mat.py --paper a4` to regenerate

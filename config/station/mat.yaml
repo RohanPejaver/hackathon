@@ -1,0 +1,51 @@
+# The "station on a mat": the demo station scaled to a printed sheet pair (380 x 230 mm
+# between the corner-marker centres) for an in-room demo with a phone camera. Same
+# station_id and carriers as demo.yaml so the demo knowledge bundle and fixtures apply;
+# only the geometry differs. Print with scripts/print_mat.py. Bins are paper cups (~75 mm)
+# on 80 mm squares: INGREDIENT zones stay generous, CLEAN_STOCK conservative (31, 20).
+station_id: demo-bagel
+config_version: 1
+schema_version: 1
+worker_slots: 1
+
+calibration:
+  units: mm
+  origin: front-left corner ArUco marker (id 0) centre
+  width_mm: 380
+  height_mm: 230
+  homography: null
+
+zones:
+  - { zone_id: "bin:pesto",  kind: INGREDIENT, contents: [pesto],  bound_carrier: "bin:pesto",  polygon: [[20, 140], [105, 140], [105, 220], [20, 220]] }
+  - { zone_id: "bin:mayo",   kind: INGREDIENT, contents: [mayo],   bound_carrier: "bin:mayo",   polygon: [[110, 140], [195, 140], [195, 220], [110, 220]] }
+  - { zone_id: "bin:turkey", kind: INGREDIENT, contents: [turkey], bound_carrier: "bin:turkey", polygon: [[200, 140], [285, 140], [285, 220], [200, 220]] }
+  - { zone_id: "bin:bread",  kind: INGREDIENT, contents: [bread],  bound_carrier: "bin:bread",  polygon: [[290, 140], [375, 140], [375, 220], [290, 220]] }
+  - { zone_id: work,    kind: WORK,    contents: [], bound_carrier: board,   polygon: [[105, 15], [230, 15], [230, 125], [105, 125]] }
+  - { zone_id: landing, kind: LANDING, contents: [], bound_carrier: landing, polygon: [[240, 15], [335, 15], [335, 125], [240, 125]] }
+  - { zone_id: tool_rack,       kind: TOOL_RACK,       contents: [], bound_carrier: null, polygon: [[10, 75], [95, 75], [95, 125], [10, 125]] }
+  - { zone_id: clean_stock,     kind: CLEAN_STOCK,     contents: [], bound_carrier: null, polygon: [[15, 20], [90, 20], [90, 65], [15, 65]] }
+  - { zone_id: glove_dispenser, kind: GLOVE_DISPENSER, contents: [], bound_carrier: null, polygon: [[345, 150], [375, 150], [375, 220], [345, 220]] }
+  - { zone_id: wash,            kind: WASH,            contents: [], bound_carrier: null, polygon: [[345, 15], [375, 15], [375, 125], [345, 125]] }
+
+carriers:
+  - { carrier_id: gloves,   kind: GLOVES,  home_zone: null,    resettable_by: [GLOVE_CHANGE] }
+  - { carrier_id: spreader, kind: TOOL,    home_zone: tool_rack, resettable_by: [TOOL_SWAP, WASH_CYCLE, OPERATOR_ASSERTION] }
+  - { carrier_id: board,    kind: SURFACE, home_zone: work,    resettable_by: [SURFACE_SWAP, OPERATOR_ASSERTION] }
+  - { carrier_id: landing,  kind: SURFACE, home_zone: landing, resettable_by: [SURFACE_SWAP, OPERATOR_ASSERTION] }
+  - { carrier_id: "bin:pesto",  kind: CONTAINER, home_zone: "bin:pesto",  resettable_by: [OPERATOR_ASSERTION] }
+  - { carrier_id: "bin:mayo",   kind: CONTAINER, home_zone: "bin:mayo",   resettable_by: [OPERATOR_ASSERTION] }
+  - { carrier_id: "bin:turkey", kind: CONTAINER, home_zone: "bin:turkey", resettable_by: [OPERATOR_ASSERTION] }
+  - { carrier_id: "bin:bread",  kind: CONTAINER, home_zone: "bin:bread",  resettable_by: [OPERATOR_ASSERTION] }
+
+clean_stock:
+  - { carrier_id: spreader_2, kind: TOOL,    resettable_by: [TOOL_SWAP, WASH_CYCLE, OPERATOR_ASSERTION] }
+  - { carrier_id: spreader_3, kind: TOOL,    resettable_by: [TOOL_SWAP, WASH_CYCLE, OPERATOR_ASSERTION] }
+  - { carrier_id: board_2,    kind: SURFACE, resettable_by: [SURFACE_SWAP, OPERATOR_ASSERTION] }
+
+markers:
+  tools: { 10: spreader, 11: spreader_2, 12: spreader_3 }
+  surfaces: { 20: board, 21: board_2 }
+
+thresholds:
+  temporal:
+    t_dwell_ms: 250

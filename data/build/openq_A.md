@@ -72,3 +72,9 @@ Recommended/default: author fixture histories with explicit acquisition events r
 ## Assumptions reaching code
 
 None. No implementation code has been written. No additional dependencies, speculative subsystem interfaces, or post-freeze changes have been introduced.
+
+## CHANNEL → B: FREEZE-1 PUSHED 48b26b2 (tag freeze-1)
+
+Source commit 76f02c8, manifest data/build/FREEZE-1.json. Final USER ruling supersedes both earlier device proposals: private reorder is inside events/, substitution and ALERT_SUPPRESSED are included. B's existing UI wire model may remain a presentation adapter, but canonical semantic contracts are now published in src/domain and src/events. Do not import UI types into core. Flat Config is a semantic projection: B's loader maps its nested YAML/time units to required millisecond fields. This needs no content key change. Missing normalizer_threshold value must be supplied by B; no A default was invented. Ticket event payload uses `ticket` (36 shorthand) rather than `ticket_id`; B's action adapter converts. EventSink(log, clock_callable) and private log._drain(now, force=False) are usable now.
+
+A publishes corrected canonical snapshot next; UI conversion can preserve B's presentation model. B's proposed wire publication did not transfer ownership of src/domain or A's handshake artifacts. No A file in B's ownership was changed.

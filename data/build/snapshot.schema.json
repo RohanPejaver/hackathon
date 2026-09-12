@@ -1,0 +1,672 @@
+{
+  "$defs": {
+    "Action": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "NEW_GLOVES",
+            "SWAP_TOOL",
+            "SWAP_SURFACE",
+            "USE_SEALED_BACKUP",
+            "VERIFY",
+            "SEQUENCE_TICKETS",
+            "HOLD",
+            "REMAKE"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "carrier_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Carrier Id"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "label"
+      ],
+      "title": "Action",
+      "type": "object"
+    },
+    "Alert": {
+      "additionalProperties": false,
+      "properties": {
+        "alert_id": {
+          "title": "Alert Id",
+          "type": "string"
+        },
+        "alert_key": {
+          "title": "Alert Key",
+          "type": "string"
+        },
+        "pathway_signature": {
+          "title": "Pathway Signature",
+          "type": "string"
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "ticket_id": {
+          "title": "Ticket Id",
+          "type": "string"
+        },
+        "allergen_id": {
+          "title": "Allergen Id",
+          "type": "string"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        },
+        "required_actions": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "title": "Required Actions",
+          "type": "array"
+        },
+        "derivation": {
+          "items": {
+            "$ref": "#/$defs/TraceStep"
+          },
+          "title": "Derivation",
+          "type": "array"
+        },
+        "raised_at": {
+          "title": "Raised At",
+          "type": "integer"
+        },
+        "state": {
+          "$ref": "#/$defs/AlertLifecycle"
+        },
+        "acknowledged_by_slot": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Acknowledged By Slot"
+        },
+        "blocking_carriers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blocking Carriers",
+          "type": "array"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "alert_id",
+        "alert_key",
+        "pathway_signature",
+        "tier",
+        "ticket_id",
+        "allergen_id",
+        "headline",
+        "required_actions",
+        "derivation",
+        "raised_at",
+        "state",
+        "updated_at"
+      ],
+      "title": "Alert",
+      "type": "object"
+    },
+    "AlertLifecycle": {
+      "enum": [
+        "RAISED",
+        "ACKNOWLEDGED",
+        "ESCALATED",
+        "RESOLVED_BY_RESET",
+        "RESOLVED_BY_ASSERTION",
+        "RESOLVED_BY_REMAKE",
+        "EXPIRED"
+      ],
+      "title": "AlertLifecycle",
+      "type": "string"
+    },
+    "Carrier": {
+      "additionalProperties": false,
+      "properties": {
+        "carrier_id": {
+          "title": "Carrier Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/CarrierKind"
+        },
+        "taints": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TaintRecord"
+          },
+          "title": "Taints",
+          "type": "object"
+        },
+        "epistemic": {
+          "$ref": "#/$defs/EpistemicStatus",
+          "default": "UNKNOWN"
+        },
+        "last_observed_at": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Observed At"
+        },
+        "home_zone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Home Zone"
+        },
+        "resettable_by": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ResetKind"
+          },
+          "title": "Resettable By",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "asserted_at": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Asserted At"
+        },
+        "clean_grade": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvidenceGrade"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "worker_slot": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Worker Slot"
+        }
+      },
+      "required": [
+        "carrier_id",
+        "kind"
+      ],
+      "title": "Carrier",
+      "type": "object"
+    },
+    "CarrierKind": {
+      "enum": [
+        "GLOVES",
+        "TOOL",
+        "SURFACE",
+        "CONTAINER",
+        "FOOD"
+      ],
+      "title": "CarrierKind",
+      "type": "string"
+    },
+    "EpistemicStatus": {
+      "enum": [
+        "TRACKED",
+        "STALE",
+        "UNKNOWN"
+      ],
+      "title": "EpistemicStatus",
+      "type": "string"
+    },
+    "EvidenceGrade": {
+      "enum": [
+        "OBSERVED",
+        "INFERRED",
+        "ASSERTED",
+        "PESSIMISTIC"
+      ],
+      "title": "EvidenceGrade",
+      "type": "string"
+    },
+    "JsonValue": {},
+    "Mode": {
+      "enum": [
+        "FULL",
+        "PROTOCOL_ONLY",
+        "REPLAY",
+        "CALIBRATION"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "ResetKind": {
+      "enum": [
+        "GLOVE_CHANGE",
+        "TOOL_SWAP",
+        "SURFACE_SWAP",
+        "WASH_CYCLE",
+        "OPERATOR_ASSERTION"
+      ],
+      "title": "ResetKind",
+      "type": "string"
+    },
+    "Resolution": {
+      "enum": [
+        "RESOLVED",
+        "AMBIGUOUS",
+        "UNRESOLVABLE"
+      ],
+      "title": "Resolution",
+      "type": "string"
+    },
+    "Restriction": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "default": "AVOID_ALLERGEN",
+          "enum": [
+            "AVOID_ALLERGEN",
+            "AVOID_INGREDIENT",
+            "DIETARY"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "allergen_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allergen Ids",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "raw_text": {
+          "title": "Raw Text",
+          "type": "string"
+        },
+        "resolution": {
+          "$ref": "#/$defs/Resolution",
+          "default": "AMBIGUOUS"
+        },
+        "severity_declared": {
+          "default": "UNSPECIFIED",
+          "enum": [
+            "STATED_ALLERGY",
+            "STATED_PREFERENCE",
+            "UNSPECIFIED"
+          ],
+          "title": "Severity Declared",
+          "type": "string"
+        }
+      },
+      "required": [
+        "raw_text"
+      ],
+      "title": "Restriction",
+      "type": "object"
+    },
+    "StateDelta": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "carrier_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Carrier Id"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "before": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        },
+        "after": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        }
+      },
+      "required": [
+        "event_id",
+        "rule_id",
+        "field"
+      ],
+      "title": "StateDelta",
+      "type": "object"
+    },
+    "StationSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "station_id": {
+          "title": "Station Id",
+          "type": "string"
+        },
+        "mode": {
+          "$ref": "#/$defs/Mode"
+        },
+        "config_version": {
+          "title": "Config Version",
+          "type": "string"
+        },
+        "knowledge_version": {
+          "title": "Knowledge Version",
+          "type": "string"
+        },
+        "carriers": {
+          "items": {
+            "$ref": "#/$defs/Carrier"
+          },
+          "title": "Carriers",
+          "type": "array"
+        },
+        "tickets": {
+          "items": {
+            "$ref": "#/$defs/Ticket"
+          },
+          "title": "Tickets",
+          "type": "array"
+        },
+        "conditions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "t_occurred": {
+          "title": "T Occurred",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "station_id",
+        "mode",
+        "config_version",
+        "knowledge_version",
+        "carriers",
+        "tickets",
+        "conditions",
+        "t_occurred"
+      ],
+      "title": "StationSummary",
+      "type": "object"
+    },
+    "Strength": {
+      "enum": [
+        "PRESENT",
+        "POSSIBLE"
+      ],
+      "title": "Strength",
+      "type": "string"
+    },
+    "TaintRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "allergen_id": {
+          "title": "Allergen Id",
+          "type": "string"
+        },
+        "acquired_at": {
+          "title": "Acquired At",
+          "type": "integer"
+        },
+        "source_event_id": {
+          "title": "Source Event Id",
+          "type": "string"
+        },
+        "source_carrier_id": {
+          "title": "Source Carrier Id",
+          "type": "string"
+        },
+        "grade": {
+          "$ref": "#/$defs/EvidenceGrade"
+        },
+        "hops": {
+          "minimum": 0,
+          "title": "Hops",
+          "type": "integer"
+        },
+        "strength": {
+          "$ref": "#/$defs/Strength",
+          "default": "PRESENT"
+        }
+      },
+      "required": [
+        "allergen_id",
+        "acquired_at",
+        "source_event_id",
+        "source_carrier_id",
+        "grade",
+        "hops"
+      ],
+      "title": "TaintRecord",
+      "type": "object"
+    },
+    "Ticket": {
+      "additionalProperties": false,
+      "properties": {
+        "ticket_id": {
+          "title": "Ticket Id",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "restrictions": {
+          "items": {
+            "$ref": "#/$defs/Restriction"
+          },
+          "title": "Restrictions",
+          "type": "array"
+        },
+        "source": {
+          "default": "fixture",
+          "title": "Source",
+          "type": "string"
+        },
+        "lifecycle": {
+          "$ref": "#/$defs/TicketLifecycle",
+          "default": "RECEIVED"
+        },
+        "bound_station": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bound Station"
+        },
+        "bound_at": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bound At"
+        },
+        "rework_of": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rework Of"
+        },
+        "landing_zone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Landing Zone"
+        }
+      },
+      "required": [
+        "ticket_id",
+        "items"
+      ],
+      "title": "Ticket",
+      "type": "object"
+    },
+    "TicketLifecycle": {
+      "enum": [
+        "RECEIVED",
+        "BLOCKED",
+        "BOUND",
+        "IN_PREP",
+        "COMPLETE",
+        "HELD",
+        "RELEASED",
+        "VOIDED"
+      ],
+      "title": "TicketLifecycle",
+      "type": "string"
+    },
+    "Tier": {
+      "enum": [
+        0,
+        1,
+        2
+      ],
+      "title": "Tier",
+      "type": "integer"
+    },
+    "TraceStep": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "t_occurred": {
+          "title": "T Occurred",
+          "type": "integer"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "state_delta": {
+          "$ref": "#/$defs/StateDelta"
+        },
+        "grade": {
+          "$ref": "#/$defs/EvidenceGrade"
+        },
+        "narrative": {
+          "title": "Narrative",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "t_occurred",
+        "rule_id",
+        "state_delta",
+        "grade",
+        "narrative"
+      ],
+      "title": "TraceStep",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "state_summary": {
+      "$ref": "#/$defs/StationSummary"
+    },
+    "interventions": {
+      "items": {
+        "$ref": "#/$defs/Alert"
+      },
+      "title": "Interventions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "state_summary",
+    "interventions"
+  ],
+  "title": "DisplayPayload",
+  "type": "object"
+}

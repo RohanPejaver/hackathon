@@ -1,0 +1,455 @@
+{
+  "state_summary": {
+    "station_id": "station",
+    "mode": "REPLAY",
+    "config_version": "1",
+    "knowledge_version": "1",
+    "carriers": [
+      {
+        "carrier_id": "gloves",
+        "kind": "GLOVES",
+        "taints": {
+          "PINE_NUT": {
+            "allergen_id": "PINE_NUT",
+            "acquired_at": 1000,
+            "source_event_id": "seed:1",
+            "source_carrier_id": "pesto",
+            "grade": "OBSERVED",
+            "hops": 0,
+            "strength": "PRESENT"
+          }
+        },
+        "epistemic": "TRACKED",
+        "last_observed_at": 3000,
+        "home_zone": null,
+        "resettable_by": [],
+        "asserted_at": null,
+        "clean_grade": null,
+        "worker_slot": null
+      },
+      {
+        "carrier_id": "tool:left",
+        "kind": "TOOL",
+        "taints": {
+          "PINE_NUT": {
+            "allergen_id": "PINE_NUT",
+            "acquired_at": 2000,
+            "source_event_id": "contact:1",
+            "source_carrier_id": "gloves",
+            "grade": "OBSERVED",
+            "hops": 1,
+            "strength": "PRESENT"
+          },
+          "MILK": {
+            "allergen_id": "MILK",
+            "acquired_at": 2000,
+            "source_event_id": "contact:2",
+            "source_carrier_id": "board",
+            "grade": "OBSERVED",
+            "hops": 1,
+            "strength": "PRESENT"
+          }
+        },
+        "epistemic": "STALE",
+        "last_observed_at": null,
+        "home_zone": null,
+        "resettable_by": [],
+        "asserted_at": null,
+        "clean_grade": null,
+        "worker_slot": null
+      },
+      {
+        "carrier_id": "tool:right",
+        "kind": "TOOL",
+        "taints": {
+          "PINE_NUT": {
+            "allergen_id": "PINE_NUT",
+            "acquired_at": 2000,
+            "source_event_id": "contact:1",
+            "source_carrier_id": "gloves",
+            "grade": "OBSERVED",
+            "hops": 1,
+            "strength": "PRESENT"
+          },
+          "MILK": {
+            "allergen_id": "MILK",
+            "acquired_at": 2000,
+            "source_event_id": "contact:2",
+            "source_carrier_id": "board",
+            "grade": "OBSERVED",
+            "hops": 1,
+            "strength": "PRESENT"
+          }
+        },
+        "epistemic": "STALE",
+        "last_observed_at": null,
+        "home_zone": null,
+        "resettable_by": [],
+        "asserted_at": null,
+        "clean_grade": null,
+        "worker_slot": null
+      },
+      {
+        "carrier_id": "landing",
+        "kind": "SURFACE",
+        "taints": {},
+        "epistemic": "UNKNOWN",
+        "last_observed_at": null,
+        "home_zone": null,
+        "resettable_by": [],
+        "asserted_at": null,
+        "clean_grade": null,
+        "worker_slot": null
+      }
+    ],
+    "tickets": [],
+    "conditions": [],
+    "t_occurred": 3000
+  },
+  "interventions": [
+    {
+      "alert_id": "alert:0",
+      "alert_key": "station:signature:0",
+      "pathway_signature": "signature:0",
+      "tier": 0,
+      "ticket_id": "T0",
+      "allergen_id": "PINE_NUT",
+      "headline": "Verify before starting",
+      "required_actions": [
+        {
+          "kind": "VERIFY",
+          "carrier_id": "tool:left",
+          "label": "Verify tool replacement"
+        }
+      ],
+      "derivation": [
+        {
+          "event_id": "path:0",
+          "t_occurred": 0,
+          "rule_id": "zone_acquire",
+          "state_delta": {
+            "event_id": "path:0",
+            "rule_id": "zone_acquire",
+            "carrier_id": "gloves",
+            "field": "taints",
+            "before": null,
+            "after": {
+              "PINE_NUT": {
+                "source": "pesto"
+              }
+            }
+          },
+          "grade": "OBSERVED",
+          "narrative": "gloves contact recorded with pesto"
+        },
+        {
+          "event_id": "path:1",
+          "t_occurred": 1000,
+          "rule_id": "contact_transfer",
+          "state_delta": {
+            "event_id": "path:1",
+            "rule_id": "contact_transfer",
+            "carrier_id": "board",
+            "field": "taints",
+            "before": null,
+            "after": {
+              "PINE_NUT": {
+                "source": "gloves"
+              }
+            }
+          },
+          "grade": "OBSERVED",
+          "narrative": "board contact recorded with gloves"
+        },
+        {
+          "event_id": "path:2",
+          "t_occurred": 2000,
+          "rule_id": "contact_transfer",
+          "state_delta": {
+            "event_id": "path:2",
+            "rule_id": "contact_transfer",
+            "carrier_id": "food:T2",
+            "field": "taints",
+            "before": null,
+            "after": {
+              "PINE_NUT": {
+                "source": "board"
+              }
+            }
+          },
+          "grade": "OBSERVED",
+          "narrative": "food:T2 contact recorded with board"
+        },
+        {
+          "event_id": "identity:1",
+          "t_occurred": 3000,
+          "rule_id": "identity_suspect_merge",
+          "state_delta": {
+            "event_id": "identity:1",
+            "rule_id": "identity_suspect_merge",
+            "carrier_id": "tool:left",
+            "field": "taints",
+            "before": null,
+            "after": {
+              "PINE_NUT": {
+                "allergen_id": "PINE_NUT",
+                "acquired_at": 2000,
+                "source_event_id": "contact:1",
+                "source_carrier_id": "gloves",
+                "grade": "OBSERVED",
+                "hops": 1,
+                "strength": "PRESENT"
+              },
+              "MILK": {
+                "allergen_id": "MILK",
+                "acquired_at": 2000,
+                "source_event_id": "contact:2",
+                "source_carrier_id": "board",
+                "grade": "OBSERVED",
+                "hops": 1,
+                "strength": "PRESENT"
+              }
+            }
+          },
+          "grade": "PESSIMISTIC",
+          "narrative": "Tool identities uncertain; both taint sets merged"
+        }
+      ],
+      "raised_at": 3000,
+      "state": "RAISED",
+      "acknowledged_by_slot": null,
+      "blocking_carriers": [
+        "tool:left"
+      ],
+      "updated_at": 3000
+    },
+    {
+      "alert_id": "alert:1",
+      "alert_key": "station:signature:1",
+      "pathway_signature": "signature:1",
+      "tier": 1,
+      "ticket_id": "T1",
+      "allergen_id": "PINE_NUT",
+      "headline": "Spreader contact recorded",
+      "required_actions": [
+        {
+          "kind": "SWAP_TOOL",
+          "carrier_id": "tool:left",
+          "label": "Replace spreader"
+        }
+      ],
+      "derivation": [
+        {
+          "event_id": "path:0",
+          "t_occurred": 0,
+          "rule_id": "zone_acquire",
+          "state_delta": {
+            "event_id": "path:0",
+            "rule_id": "zone_acquire",
+            "carrier_id": "gloves",
+            "field": "taints",
+            "before": null,
+            "after": {
+              "PINE_NUT": {
+                "source": "pesto"
+              }
+            }
+          },
+          "grade": "OBSERVED",
+          "narrative": "gloves contact recorded with pesto"
+        },
+        {
+          "event_id": "path:1",
+          "t_occurred": 1000,
+          "rule_id": "contact_transfer",
+          "state_delta": {
+            "event_id": "path:1",
+            "rule_id": "contact_transfer",
+            "carrier_id": "board",
+            "field": "taints",
+            "before": null,
+            "after": {
+              "PINE_NUT": {
+                "source": "gloves"
+              }
+            }
+          },
+          "grade": "OBSERVED",
+          "narrative": "board contact recorded with gloves"
+        },
+        {
+          "event_id": "path:2",
+          "t_occurred": 2000,
+          "rule_id": "contact_transfer",
+          "state_delta": {
+            "event_id": "path:2",
+            "rule_id": "contact_transfer",
+            "carrier_id": "food:T2",
+            "field": "taints",
+            "before": null,
+            "after": {
+              "PINE_NUT": {
+                "source": "board"
+              }
+            }
+          },
+          "grade": "OBSERVED",
+          "narrative": "food:T2 contact recorded with board"
+        },
+        {
+          "event_id": "identity:1",
+          "t_occurred": 3000,
+          "rule_id": "identity_suspect_merge",
+          "state_delta": {
+            "event_id": "identity:1",
+            "rule_id": "identity_suspect_merge",
+            "carrier_id": "tool:left",
+            "field": "taints",
+            "before": null,
+            "after": {
+              "PINE_NUT": {
+                "allergen_id": "PINE_NUT",
+                "acquired_at": 2000,
+                "source_event_id": "contact:1",
+                "source_carrier_id": "gloves",
+                "grade": "OBSERVED",
+                "hops": 1,
+                "strength": "PRESENT"
+              },
+              "MILK": {
+                "allergen_id": "MILK",
+                "acquired_at": 2000,
+                "source_event_id": "contact:2",
+                "source_carrier_id": "board",
+                "grade": "OBSERVED",
+                "hops": 1,
+                "strength": "PRESENT"
+              }
+            }
+          },
+          "grade": "PESSIMISTIC",
+          "narrative": "Tool identities uncertain; both taint sets merged"
+        }
+      ],
+      "raised_at": 3000,
+      "state": "RAISED",
+      "acknowledged_by_slot": null,
+      "blocking_carriers": [],
+      "updated_at": 3000
+    },
+    {
+      "alert_id": "alert:2",
+      "alert_key": "station:signature:2",
+      "pathway_signature": "signature:2",
+      "tier": 2,
+      "ticket_id": "T2",
+      "allergen_id": "PINE_NUT",
+      "headline": "Hold item for review",
+      "required_actions": [
+        {
+          "kind": "HOLD",
+          "carrier_id": "tool:left",
+          "label": "Confirm with cook"
+        }
+      ],
+      "derivation": [
+        {
+          "event_id": "path:0",
+          "t_occurred": 0,
+          "rule_id": "zone_acquire",
+          "state_delta": {
+            "event_id": "path:0",
+            "rule_id": "zone_acquire",
+            "carrier_id": "gloves",
+            "field": "taints",
+            "before": null,
+            "after": {
+              "PINE_NUT": {
+                "source": "pesto"
+              }
+            }
+          },
+          "grade": "OBSERVED",
+          "narrative": "gloves contact recorded with pesto"
+        },
+        {
+          "event_id": "path:1",
+          "t_occurred": 1000,
+          "rule_id": "contact_transfer",
+          "state_delta": {
+            "event_id": "path:1",
+            "rule_id": "contact_transfer",
+            "carrier_id": "board",
+            "field": "taints",
+            "before": null,
+            "after": {
+              "PINE_NUT": {
+                "source": "gloves"
+              }
+            }
+          },
+          "grade": "OBSERVED",
+          "narrative": "board contact recorded with gloves"
+        },
+        {
+          "event_id": "path:2",
+          "t_occurred": 2000,
+          "rule_id": "contact_transfer",
+          "state_delta": {
+            "event_id": "path:2",
+            "rule_id": "contact_transfer",
+            "carrier_id": "food:T2",
+            "field": "taints",
+            "before": null,
+            "after": {
+              "PINE_NUT": {
+                "source": "board"
+              }
+            }
+          },
+          "grade": "OBSERVED",
+          "narrative": "food:T2 contact recorded with board"
+        },
+        {
+          "event_id": "identity:1",
+          "t_occurred": 3000,
+          "rule_id": "identity_suspect_merge",
+          "state_delta": {
+            "event_id": "identity:1",
+            "rule_id": "identity_suspect_merge",
+            "carrier_id": "tool:left",
+            "field": "taints",
+            "before": null,
+            "after": {
+              "PINE_NUT": {
+                "allergen_id": "PINE_NUT",
+                "acquired_at": 2000,
+                "source_event_id": "contact:1",
+                "source_carrier_id": "gloves",
+                "grade": "OBSERVED",
+                "hops": 1,
+                "strength": "PRESENT"
+              },
+              "MILK": {
+                "allergen_id": "MILK",
+                "acquired_at": 2000,
+                "source_event_id": "contact:2",
+                "source_carrier_id": "board",
+                "grade": "OBSERVED",
+                "hops": 1,
+                "strength": "PRESENT"
+              }
+            }
+          },
+          "grade": "PESSIMISTIC",
+          "narrative": "Tool identities uncertain; both taint sets merged"
+        }
+      ],
+      "raised_at": 3000,
+      "state": "RAISED",
+      "acknowledged_by_slot": null,
+      "blocking_carriers": [],
+      "updated_at": 3000
+    }
+  ]
+}

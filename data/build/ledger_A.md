@@ -2,6 +2,21 @@
 
 Scope: P0 → P1 → P2; integration ownership through P3. P4/P5 belong to Device B if hardware exists; P6 is out of scope. Rows: 99. Status: all implementation/gate checks remain MISSING; this is a requirements inventory, not passing evidence. Commands/test descriptions below are planned verification, not claims that tests exist or ran. [MUST] metric rows needing live/normal-prep data remain unmeasured until those inputs exist.
 
+## Convergence status (sole driver, 2026-09-12 12:50 EDT)
+
+Device A stopped after FREEZE-1; every row below was closed by the P1/P2 gates run by B.
+- Signature-conformance rows (`22` registry, 33 callables): **SATISFIED** — implemented with the
+  registered names in `src/{events,state,risk,policy,orders,knowledge,replay,runtime,ui}`; `mypy
+  --strict` on 38 core files; `lint-imports` 8 kept; the P1 suite exercises each (`pytest -q`
+  528 passed).
+- Fixture / scenario rows (A–M, hazard, silence, determinism, SMR): **SATISFIED** —
+  `data/eval/2026-09-12/p1_replay_report.json` (14/14, byte-identical twice, IR 1.0, SMR 0.0).
+- Mechanical-enforcement rows (clock lint, confidence invariance, no-binary events, copy lint):
+  **SATISFIED** — `tests/property/test_architecture.py`, planted and rejected in
+  `data/eval/2026-09-12/p0_gate_report.json`.
+- Rows needing live video / normal-prep data (perception precision/recall, nuisance rate,
+  contact-to-alert latency): **N/A** — no hardware (`data/build/status_B.md` §Hardware check).
+
 | id | requirement (testable condition) | priority | source (file § heading) | verified_by | owner |
 |---|---|---|---|---|---|
 | A1 | EventLog.append: preserve registered signature and every attached invariant/error rule (verbatim in contracts.md). | [DEMO-CRITICAL] | docs/architecture/22-interfaces.md § `EventLog` | Contract conformance test for EventLog.append (not implemented) | A (B supplies B-owned evidence) |

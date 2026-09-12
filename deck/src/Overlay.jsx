@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { SCENE_TEXT, BACKUP_TEXT, STEPS, Brand } from './content.jsx'
+import { SCENE_TEXT, BACKUP_TEXT, STEPS, STEP_DT, Brand } from './content.jsx'
 
 const API = `http://127.0.0.1:5174`
 export const DEMO_URL = 'http://127.0.0.1:8001/?stage=1'
@@ -8,9 +8,9 @@ export const LIVE_URL = 'http://127.0.0.1:8000/?stage=1'
 // Slide 3: one sequence of five actions; step 1 introduces pine nut and it spreads step by step.
 // Deterministic from scene entry: a step lights every 1.1 s, holds 3 s, then replays.
 function Sequence({ t }) {
-  const period = STEPS.length * 1.1 + 3.2
+  const period = STEPS.length * STEP_DT + 3.6
   const local = ((t - 0.8) % period + period) % period
-  const lit = t < 0.8 ? -1 : Math.min(STEPS.length - 1, Math.floor(local / 1.1))
+  const lit = t < 0.8 ? -1 : Math.min(STEPS.length - 1, Math.floor(local / STEP_DT))
   return (
     <>
       <div className="corner-tl"><Brand /></div>
@@ -36,10 +36,10 @@ function Sequence({ t }) {
 }
 
 function How({ t }) {
-  const on = Math.floor(Math.max(0, t - 0.2) / 1.4)
+  const on = Math.floor(Math.max(0, t - 0.2) / 1.3)
   useEffect(() => {
     document.querySelectorAll('.arch-row').forEach((el) => el.classList.toggle('on', Number(el.dataset.i) <= on))
-    document.querySelectorAll('.arch-boundary, .arch-foot').forEach((el) => el.classList.toggle('on', on >= 1))
+    document.querySelectorAll('.arch-boundary').forEach((el) => el.classList.toggle('on', on >= 1))
   }, [on])
   return SCENE_TEXT.how
 }

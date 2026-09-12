@@ -87,10 +87,15 @@ export function stationAt(sceneId, t) {
       return out
     }
     case 'insight': {
+      // objects light up in step with the cards (Overlay.Sequence): 5 steps of STEP_DT, hold, repeat
+      const DT = 1.6, period = 5 * DT + 3.6
+      const local = t < 0.8 ? -1 : ((t - 0.8) % period + period) % period
+      const lit = local < 0 ? -1 : Math.min(4, Math.floor(local / DT))
+      const on = (i) => (lit >= i ? 1 : 0)
       out.hand = null
-      out.taint = { gloves: 1, 'bin:mayo': 1, spreader: 1, board: 1 }
+      out.taint = { gloves: on(0), spreader: on(1), board: on(2), 'bin:mayo': on(3), landing: on(4) }
       out.labels = 'none'
-      out.dim = 0.6
+      out.dim = 0.5
       return out
     }
     case 'reveal': {
@@ -116,7 +121,7 @@ export function stationAt(sceneId, t) {
       out.hand = null
       out.unknown = t > 0.8
       out.labels = 'none'
-      out.dim = 0.45
+      out.dim = 1
       return out
     }
     case 'implication': {

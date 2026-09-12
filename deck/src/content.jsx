@@ -10,12 +10,13 @@ export const Brand = ({ big = false }) => (
 
 // Slide 3: the sequence of actions. Step 1 introduces pine nut; it spreads forward.
 export const STEPS = [
-  { t: 'Gloves into the pesto', c: 'pine nut on gloves', src: true },
-  { t: 'Gloves pick up the spreader', c: 'pine nut on spreader' },
-  { t: 'Spreader on the board', c: 'pine nut on board' },
-  { t: 'Same gloves into the mayo', c: 'pine nut in the shared mayo' },
-  { t: 'Ticket 48: turkey, pine-nut allergy', c: 'pathway open', target: true },
+  { t: 'Gloves into the pesto', c: 'pine nut on the gloves', src: true },
+  { t: 'Gloves pick up the spreader', c: 'pine nut on the spreader' },
+  { t: 'Spreader spreads on the board', c: 'pine nut on the board' },
+  { t: 'Same gloves into the shared mayo', c: 'pine nut in the mayo' },
+  { t: 'That mayo goes on ticket 48', c: 'pine-nut allergy: pathway open', target: true },
 ]
+export const STEP_DT = 1.6   // seconds per step (0.5 s slower than before)
 
 export const SCENE_TEXT = {
   intrigue: (
@@ -73,55 +74,80 @@ export const SCENE_TEXT = {
     <div className="arch">
       <div className="arch-head">
         <div className="micro petal">Why it was hard</div>
-        <h1 className="h2" style={{ maxWidth: 'none' }}>Our architecture: one boundary, one pure fold.</h1>
+        <h1 className="h2" style={{ maxWidth: 'none' }}>One boundary. One pure fold. AI only after the fact.</h1>
       </div>
       <div className="arch-row" data-i="0">
-        <div className="arch-lbl">Perception<span>probabilistic, ephemeral, never persisted</span></div>
-        <div className="arch-box"><b>Overhead frames</b><span>1280×720 @ 15 fps</span></div><i>→</i>
-        <div className="arch-box"><b>Station frame</b><span>4 ArUco fiducials → homography, pixel ↔ mm</span></div><i>→</i>
-        <div className="arch-box"><b>Segmentation</b><span>HSV glove blobs · ArUco tool identity · pointPolygonTest zones</span></div><i>→</i>
-        <div className="arch-box"><b>Tracker</b><span>occlusion honesty → OBSERVABILITY_CHANGED · identity-suspect merges</span></div><i>→</i>
-        <div className="arch-box"><b>Assembler</b><span>dwell + hysteresis episodes → typed events · confidence thresholded to a grade</span></div>
+        <div className="arch-lbl">Perception<span>probabilistic, ephemeral, never stored</span></div>
+        <div className="arch-box"><b>Station frame</b><span>4 ArUco fiducials, homography, pixel to mm</span></div><i>→</i>
+        <div className="arch-box"><b>Segmentation</b><span>HSV glove blobs, ArUco tool ids, polygon zones</span></div><i>→</i>
+        <div className="arch-box"><b>Tracker</b><span>occlusion reported as an event, identity-suspect merges</span></div><i>→</i>
+        <div className="arch-box"><b>Assembler</b><span>dwell + hysteresis episodes, confidence thresholded to a grade</span></div>
       </div>
-      <div className="arch-boundary"><i>↓</i> committed events only: 33 event types, pydantic discriminated unions, import-linter forbids anything else crossing <i>↓</i></div>
+      <div className="arch-boundary"><i>↓</i> committed events only: 33 typed events, discriminated unions, the import graph is linted <i>↓</i></div>
       <div className="arch-row" data-i="1">
-        <div className="arch-lbl">Reasoning<span>deterministic, pure, no clock, no I/O, no floats</span></div>
-        <div className="arch-box hard"><b>Append-only log</b><span>reorder buffer · JSONL · replay byte-for-byte</span></div><i>→</i>
-        <div className="arch-box hard"><b>Reducer fold</b><span>taint × epistemic lattice per carrier · pessimistic closure · wipe ≠ reset</span></div><i>→</i>
-        <div className="arch-box hard"><b>Risk engine</b><span>bounded backward BFS over the temporal contact graph · allergen taxonomy closure · reset-breaks-path</span></div><i>→</i>
-        <div className="arch-box hard"><b>Policy</b><span>tier selection by evidence grade · alert dedup by pathway signature · escalation at COMPLETE</span></div><i>→</i>
-        <div className="arch-box"><b>Worker display</b><span>WebSocket 5 Hz · ≤ 2 taps · every tap re-enters the log as OPERATOR_ASSERTION</span></div>
+        <div className="arch-lbl">Reasoning<span>deterministic, pure, no clock, no I/O</span></div>
+        <div className="arch-box hard"><b>Append-only log</b><span>reorder buffer, JSONL, byte-identical replay</span></div><i>→</i>
+        <div className="arch-box hard"><b>Reducer fold</b><span>taint × epistemic state per carrier, pessimistic closure, wipe ≠ reset</span></div><i>→</i>
+        <div className="arch-box hard"><b>Risk engine</b><span>bounded backward search over the temporal contact graph, reset breaks the path</span></div><i>→</i>
+        <div className="arch-box hard"><b>Policy + display</b><span>tier by evidence grade, dedup by pathway signature, 5 Hz, ≤ 2 taps</span></div>
       </div>
-      <div className="arch-foot">Learned models plug in behind the perception contract (any detector, MediaPipe hands optional) and in restriction normalization with a mandatory AMBIGUOUS fallback. <b>Nothing learned sits between the log and an intervention.</b></div>
+      <div className="arch-row ai" data-i="2">
+        <div className="arch-lbl">AI, read-only<span>after service, over the log, never in the alert path</span></div>
+        <div className="arch-box ai"><b>Ask the audit log in plain English</b><span>An LLM compiles "every near-miss at station 3 last week" into a typed query over the event log. Answers are event ids, never a verdict.</span></div><i>→</i>
+        <div className="arch-box ai"><b>Retrospective incident summaries</b><span>Tier 1 and 2 incidents clustered per shift and summarised for the shift lead. Every sentence cites the events behind it.</span></div>
+        <div className="arch-note">The model reads the log. It never writes to it and never touches a live alert.</div>
+      </div>
     </div>
   ),
   receipt: (
-    <div className="center">
-      <div>
-        <div className="micro" style={{ marginBottom: 40 }}>measured on the scenario suite, data/eval/2026-09-12</div>
-        <div className="numbers">
-          <div className="num amber"><div className="v">14<small>/14</small></div><div className="k">hazard scenarios caught, replayed byte-for-byte</div></div>
-          <div className="num petal"><div className="v">0</div><div className="k">silent misses</div></div>
-          <div className="num leaf"><div className="v">2</div><div className="k">taps, at most, to resolve any alert</div></div>
-        </div>
-        <p className="lede" style={{ margin: '48px auto 0', maxWidth: '50ch' }}>533 automated tests. Same answer every run.</p>
+    <div className="impact">
+      <div className="micro petal">What changes at scale</div>
+      <h1 className="h2" style={{ maxWidth: 'none' }}>Every one of these starts as an 8-second prompt.</h1>
+      <div className="numbers">
+        <div className="num amber"><div className="v">200,000<small>+</small></div><div className="k">emergency visits a year in the US from food allergy reactions</div><div className="s">one every 3 minutes · FARE</div></div>
+        <div className="num petal"><div className="v">1<small> in </small>3</div><div className="k">adult reactions happen in a restaurant</div><div className="s">FARE patient registry</div></div>
+        <div className="num leaf"><div className="v">8<small> s</small></div><div className="k">the cost of a Sequence reset prompt</div><div className="s">versus a remake, or an ambulance</div></div>
       </div>
+      <div className="proj">
+        <div className="proj-k">Projection</div>
+        <div className="proj-v">At <b>10%</b> of US restaurant prep stations, catching <b>1 in 4</b> kitchen cross-contact reactions: <b className="petal">about 1,700 emergency visits a year</b> that never happen.</div>
+        <div className="proj-s">200,000 × ⅓ in restaurants × 10% coverage × 25% caught. Assumptions on the slide on purpose.</div>
+      </div>
+      <div className="proven">Proven today, on the scenario suite: <b>14/14</b> hazard scenarios caught · <b>0</b> silent misses · <b>533</b> tests, same answer every run.</div>
     </div>
   ),
   different: (
-    <>
+    <div className="cmp-wrap">
       <div className="corner-tl"><Brand /></div>
-      <div className="left-col" style={{ width: '60vw' }}>
-        <div className="unlike">
-          <div className="row"><div className="k">Unlike</div><div className="v">a food-recognition camera: <span className="amber">it never looks at food.</span></div></div>
-          <div className="row"><div className="k">Unlike</div><div className="v">an AI risk score: <span className="amber">every alert is a rule chain</span> a cook can dispute in one tap.</div></div>
-          <div className="row"><div className="k">Unlike</div><div className="v">a wrapper: <span className="amber">unplug the camera</span> and the reset prompt still fires.</div></div>
-        </div>
+      <div className="cmp-head">
+        <div className="micro petal">Versus the status quo</div>
+        <h1 className="h2" style={{ maxWidth: 'none' }}>Today's tools trust memory. Sequence checks the record.</h1>
       </div>
-      <div className="corner-br">
-        <div className="micro petal">Uncertainty lowers the tier. It never lowers the bar.</div>
+      <div className="cmp">
+        <div className="cmp-h"></div>
+        <div className="cmp-h">Training + checklists</div>
+        <div className="cmp-h">POS allergy flag</div>
+        <div className="cmp-h">Food-recognition camera</div>
+        <div className="cmp-h us">Sequence</div>
+        {[
+          ['Knows what each glove, tool and container is carrying right now', 0, 0, 0, 1],
+          ['Knows a shared container just became a carrier', 0, 0, 0, 1],
+          ['Checks the reset actually happened before the order starts', 0, 0, 0, 1],
+          ['Every alert is a rule chain a cook can dispute in one tap', 0, 0, 0, 1],
+          ['Keeps working with the camera unplugged', 1, 1, 0, 1],
+          ['Replays any incident byte-for-byte', 0, 0, 0, 1],
+        ].map(([r, a, b, c, d], i) => (
+          <React.Fragment key={i}>
+            <div className="cmp-r">{r}</div>
+            <div className={'cmp-c' + (a ? ' y' : '')}>{a ? '✓' : '✗'}</div>
+            <div className={'cmp-c' + (b ? ' y' : '')}>{b ? '✓' : '✗'}</div>
+            <div className={'cmp-c' + (c ? ' y' : '')}>{c ? '✓' : '✗'}</div>
+            <div className={'cmp-c us' + (d ? ' y' : '')}>{d ? '✓' : '✗'}</div>
+          </React.Fragment>
+        ))}
       </div>
-    </>
+      <div className="micro petal cmp-foot">Uncertainty lowers the tier. It never lowers the bar.</div>
+    </div>
   ),
   implication: (
     <>

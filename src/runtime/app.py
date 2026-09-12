@@ -91,14 +91,14 @@ def _summary(e: Any) -> str:
     if t == "TRACK_IDENTITY_SUSPECT":
         return f"{e.a} ? {e.b} — taints merged, both STALE"
     if t == "HEALTH_DEGRADED":
-        return e.cause
+        return str(e.cause)
     if t.startswith("TICKET_"):
         return f"#{e.ticket} {t[7:].lower().replace('_', ' ')}"
     if t.startswith("ALERT_"):
         return f"{e.alert_id} {t[6:].lower()}"
     if t == "CONFIG_LOADED":
         return f"config v{e.config_version} knowledge v{e.knowledge_version}"
-    return t
+    return str(t)
 
 
 class Runtime:
@@ -201,7 +201,7 @@ class Runtime:
             key=lambda tk: tk.ticket_id,
         )
         assessments = assess(self.state, live, self.k, self.cfg)
-        for cmd in evaluate(assessments, self.alerts, self.cfg):
+        for cmd in evaluate(assessments, self.alerts, self.cfg, state=self.state):
             alert = self.alerts.apply(cmd)
             self.emit(
                 ALERT_TYPE[cmd.kind],

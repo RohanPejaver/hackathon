@@ -55,6 +55,11 @@ Status vocabulary per `docs/engineering/38-workflow.md`. A folds this into `PROJ
 ## Status drift for A to fold in
 - `PROJECT_STATE.md` §2: "no git repository" is stale — repo exists with remote `origin`.
 
+## Audit loop (13:20 EDT)
+Read-only audit against `26`/`02`/`37`/`39` §6 found 1 blocker, 6 majors, 4 minors — all fixed and
+re-verified live: `data/eval/2026-09-12/p3_audit_findings.json`. Final commit `5a38ea9`: 531 tests,
+mypy --strict 38 core files, lint-imports 8 kept, 14/14 fixtures deterministic.
+
 ## P3 gate statement (12:55 EDT)
 
 `38` §P3 has three clauses. **Two are green, one needs a person:**

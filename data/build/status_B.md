@@ -41,15 +41,16 @@ Status vocabulary per `docs/engineering/38-workflow.md`. A folds this into `PROJ
   S4 orders (normalizer, intake, sources). Integration contract is in each packet and mirrored in
   `openq_B.md` §P1 contract.
 
-## Phase status
+## Phase status (updated 12:00 EDT)
 
 | Phase | Status | Evidence |
 |---|---|---|
-| P0 (B's clauses: harness, lints, scaffold, packaging) | `OPEN` | — |
-| P3 Worker interface + `PROTOCOL_ONLY` | `OPEN` | — |
-| P4 Perception: zones/contact | `OPEN` — **BLOCKED on hardware** (no camera, no annotated fixtures) | hardware check above |
-| P5 Perception: carriers/resets | `OPEN` — **BLOCKED on hardware** | hardware check above |
-| P6 Demo hardening | `OPEN` — B's share (run book, fallback ladder rehearsal) tracked under P3 | — |
+| P0 Foundations | `VERIFIED` | `data/eval/2026-09-12/p0_gate_report.json` |
+| P1 Reasoning core | `PARTIAL` | reducer (79 tests), risk/policy/knowledge (91), orders (169) green with strict mypy + lint-imports; **fixtures A–M + replay runner (S3) still landing** → gate artifact pending |
+| P2 Orders & knowledge | `IMPLEMENTED` | normalizer with mandatory AMBIGUOUS, BLOCKED→BOUND unreachable (proof test), closure/provider; gate (scenario G end to end) runs with the replay suite |
+| P3 Worker interface + `PROTOCOL_ONLY` | `IMPLEMENTED` | `data/eval/2026-09-12/p3_protocol_only_rehearsal.json`: full demo path driven live through the display with no camera; three surfaces + carrier grid + trace + inspector verified; **teammate tap-count measurement not yet done** |
+| P4 / P5 Perception | `BLOCKED` — no camera, no annotated fixtures | hardware check above |
+| P6 Demo hardening | `OPEN` | fallback ladder rehearsal waits on `scenarios/demo.yaml` (S3) |
 
 ## Status drift for A to fold in
 - `PROJECT_STATE.md` §2: "no git repository" is stale — repo exists with remote `origin`.

@@ -1,0 +1,24 @@
+{
+  "phase": "P4/P5",
+  "date": "2026-09-12",
+  "status": "IMPLEMENTED \u2014 gate OPEN pending recordings",
+  "built": [
+    "src/perception (ArUco station frame, HSV gloves, marker identity, tracker with occlusion honesty, dwell/hysteresis assembly, GLOVE_CHANGE INFERRED, TOOL/SURFACE_SWAP, health)",
+    "scripts/{print_markers,calibrate,tune_hsv,record_fixture,eval_perception}.py",
+    "src/perception/{annotation,evaluation}.py (35 schema, 34 scorer)",
+    "runtime: STATION_CAMERA -> lazy pipeline, health polling -> controller, FULL only on healthy frames"
+  ],
+  "evidence": {
+    "synthetic_frames": "tests/perception 59 passed",
+    "runtime_camera_path": "tests/integration/runtime/test_camera_path.py: synthetic video -> ZONE_ENTRY -> gloves tainted",
+    "scorer_end_to_end": "scripts/eval_perception.py --synthetic: P/R 1.0 per type, occlusion recall 1.0, nuisance 0.0/h, passed true (synthetic)"
+  },
+  "not_verified": "P4 gate clauses require the 12 annotated clips + 30 min normal prep (34, 35, 38 \u00a7P4): precision/recall on real footage, occlusion recall >= 0.95, nuisance < 1.0/hr. Not measurable until recorded. Deferred by design: WASH_CYCLE, SURFACE_WIPE detection, persist_frames.",
+  "contract_gaps": [
+    "zone-fixed carriers (bins, landing) are not visually tracked; observed via zone events",
+    "CONTACT_BEGIN.b is a zone id for WORK/LANDING; reducer resolves it",
+    "per-type recall pass threshold 0.8 (34 gives no number)",
+    "nuisance fold binds a synthetic restricted ticket so Tier 1/2 can occur",
+    "PERCEPTION-sourced HEALTH_DEGRADED is re-fed from recorded logs (it is an observation)"
+  ]
+}

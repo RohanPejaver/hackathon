@@ -24,7 +24,7 @@ vocabulary) with `scenarios/` A–M + `demo.yaml`; `src/runtime` (config loader/
 checksums, clocks, `RuntimeController`, composition root with REPLAY feed); `src/ui` (FastAPI +
 WebSocket at 5Hz, worker display with the three `26` surfaces, carrier grid, evidence trace,
 read-only inspector, vendored assets, HMI styling with no green). `config/` holds the demo
-station and knowledge bundle. `src/perception/` is empty by decision (no hardware).
+station and knowledge bundle. `src/perception/` implements `21` on deterministic techniques (39 §3) with field scripts; verified on synthetic frames, awaiting recordings for the P4 gate.
 
 ## 3. What has been verified
 | Phase | Status | Evidence |
@@ -33,8 +33,8 @@ station and knowledge bundle. `src/perception/` is empty by decision (no hardwar
 | P1 Reasoning core | `VERIFIED` | `data/eval/2026-09-12/p1_replay_report.json` — 14/14 fixtures pass, byte-identical twice, IR 1.0, SMR 0.0; 526 tests; strict mypy; lint-imports |
 | P2 Orders & knowledge | `VERIFIED` | scenario G end to end; `BLOCKED→BOUND` unreachable proof; normalizer never RESOLVED below threshold; recipe-scoped Tier 0 |
 | P3 Worker interface | `IMPLEMENTED` | `data/eval/2026-09-12/p3_protocol_only_rehearsal.json` — full demo path live in PROTOCOL_ONLY with no camera; teammate tap-count measurement pending; audit findings fixed (`p3_audit_findings.json`) |
-| P4 Perception: zones/contact | `OPEN` (in progress) — pipeline being built against `21` on synthetic frames; gate needs the recorded clips (`data/build/runbook_B.md` §Field procedure) | — |
-| P5 Perception: carriers/resets | `OPEN` (in progress, same stream: marker identity, swaps, glove change) | — |
+| P4 Perception: zones/contact | `IMPLEMENTED` | `data/eval/2026-09-12/p4_perception_status.json`; gate needs the recorded clips (`data/build/runbook_B.md` §Field procedure) |
+| P5 Perception: carriers/resets | `IMPLEMENTED` | marker identity, TOOL/SURFACE_SWAP, GLOVE_CHANGE (INFERRED), TRACK_IDENTITY_SUSPECT; gate needs recordings |
 | P6 Demo hardening | `OPEN` | — |
 
 ## 4. What remains

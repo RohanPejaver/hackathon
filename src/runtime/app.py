@@ -29,10 +29,12 @@ from src import events as ev
 from src.knowledge import KnowledgeProvider
 from src.orders import ManualEntrySource, intake
 from src.policy import AlertState, evaluate
+from src.replay import seed_state
 from src.risk import assess
 from src.runtime.clock import Clock, LogClock, SystemClock
 from src.runtime.config import LoadedConfig, load, to_domain
 from src.runtime.controller import RuntimeController
+from src.runtime.feed import FeedItem, jsonl_feed, scenario_feed
 from src.state import initial, reduce
 from src.ui import wire
 from src.ui.server import create_app as create_fastapi
@@ -118,6 +120,9 @@ class Runtime:
         self.recent: deque[wire.EventLine] = deque(maxlen=200)
         self.last_contact: dict[str, int] = {}
         self.rejected: list[str] = []
+        self.feed: list[FeedItem] = []  # REPLAY inputs, time-ordered; empty when live
+        self._feed_origin = 0
+        self._wall_start: int | None = None
         self._n = 0
         self._jsonl = None
         if log_dir is not None:
@@ -222,7 +227,50 @@ class Runtime:
                 )
 
     # ---- periodic work ---------------------------------------------------------------------------
+    def load_replay(self, source: str | Path) -> None:
+        """REPLAY: a scenario fixture (.yaml) or a recorded session log (.jsonl)."""
+        path = Path(source)
+        if path.suffix in (".yaml", ".yml"):
+            scenario, self.feed, taint_seed = scenario_feed(path, self.station_cfg.station_id)
+            if taint_seed["carriers"]:
+                self.state = seed_state(self.state, taint_seed)
+        else:
+            self.feed = jsonl_feed(path)
+        self._feed_origin = self.feed[0].t if self.feed else 0
+        if isinstance(self.clock, LogClock):
+            self.clock.advance_to(self._feed_origin)
+
+    def feed_until(self, t: int) -> int:
+        """Emit every replay input due at or before t (log time); returns how many."""
+        n = 0
+        while self.feed and self.feed[0].t <= t:
+            item = self.feed.pop(0)
+            if isinstance(self.clock, LogClock):
+                self.clock.advance_to(item.t)
+            self.sink.emit(item.draft)
+            if item.needs_intake and isinstance(item.draft, ev.DraftTicketReceived):
+                received = item.draft
+                for draft in intake(
+                    received.ticket,
+                    [r.raw_text for r in received.restrictions],
+                    self.k,
+                    t=item.t,
+                    station_id=self.station_cfg.station_id,
+                    event_id_prefix=received.event_id,
+                ):
+                    self.sink.emit(draft)
+            n += 1
+        if isinstance(self.clock, LogClock):
+            self.clock.advance_to(t)
+        return n
+
     def tick(self) -> None:
+        if self.feed or self._wall_start is not None:
+            # Real-time playback: log time advances with the wall clock from the first input.
+            wall = SystemClock().now()
+            if self._wall_start is None:
+                self._wall_start = wall
+            self.feed_until(self._feed_origin + (wall - self._wall_start))
         now = self.clock.now()
         for raw in self.manual.poll():
             self.emit(
@@ -408,16 +456,17 @@ def build(
     knowledge_id: str = "demo",
     config_root: str = "config",
     log_dir: Path | None = Path("data/logs"),
-    replay: bool = False,
+    replay: str | Path | None = None,
 ) -> Runtime:
     loaded = load(config_root, profile, station_id, knowledge_id)  # type: ignore[arg-type]
     clock: Clock = LogClock(0) if replay else SystemClock()
     rt = Runtime(loaded, clock, log_dir)
-    rt.tick()  # commit CONFIG_LOADED
     rt.controller.report_vision("UNAVAILABLE")  # no perception pipeline in this build
-    rt.controller.request_mode(
-        "REPLAY" if replay else "PROTOCOL_ONLY", "no perception pipeline configured"
-    )
+    if replay:
+        rt.load_replay(replay)
+        rt.controller.request_mode("REPLAY", f"replaying {Path(replay).name}")
+    else:
+        rt.controller.request_mode("PROTOCOL_ONLY", "no perception pipeline configured")
     return rt
 
 
@@ -427,7 +476,7 @@ def make_app() -> FastAPI:
         profile=os.environ.get("STATION_PROFILE", "demo"),
         station_id=os.environ.get("STATION_ID", "demo"),
         knowledge_id=os.environ.get("KNOWLEDGE_ID", "demo"),
-        replay=bool(replay_src),
+        replay=replay_src,
     )
     push_hz = rt.loaded.values.runtime.ui_push_hz
 

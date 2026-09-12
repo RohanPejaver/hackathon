@@ -38,7 +38,7 @@ def main() -> None:
     frame_w, frame_h = st.calibration.width_mm, st.calibration.height_mm
     pw, ph = PAPER[args.paper]
     mat_w, mat_h = 2 * pw, ph
-    if frame_w + 2 * args.corner_mm > mat_w or frame_h + 2 * args.corner_mm > mat_h:
+    if frame_w + args.corner_mm > mat_w or frame_h + args.corner_mm > mat_h:
         raise SystemExit(f"frame {frame_w}x{frame_h} mm does not fit two {args.paper} sheets")
     ox, oy = (mat_w - frame_w) / 2, (mat_h - frame_h) / 2  # frame origin on the mat (mm)
     dpi = args.dpi
@@ -104,9 +104,7 @@ def main() -> None:
     cv2.imwrite(str(out / f"mat_{args.paper}_B.png"), img[:, half:])
     cv2.imwrite(str(out / f"mat_{args.paper}_preview.png"), cv2.resize(img, (W // 4, H // 4)))
     print(f"wrote {out}/mat_{args.paper}_A.png + _B.png ({pw:.0f}x{ph:.0f} mm each), _preview.png")
-    print(
-        f"corner markers {args.corner_mm:.0f} mm at the {frame_w:.0f}x{frame_h:.0f} mm frame corners"
-    )
+    print(f"corner markers {args.corner_mm:.0f} mm; frame {frame_w:.0f}x{frame_h:.0f} mm")
 
 
 if __name__ == "__main__":

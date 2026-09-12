@@ -15,6 +15,19 @@ Status vocabulary per `docs/engineering/38-workflow.md`. A folds this into `PROJ
 
 **Scope decision:** P0 harness clauses + **P3 in full** + all content. **P4, P5, P6 are `OPEN` — blocked on hardware (items 1 and 4 missing).** Nothing that requires a camera will be built. Stream B4 is not dispatched. `39` §9: P0–P3 is the product; perception is upside.
 
+## CHANNEL (no message channel exists; A reads this on pull)
+
+- **07:05 EDT** B read `openq_A.md`. Answers to Q1–Q8 are in `openq_B.md` §CHANNEL. B is the
+  early publisher of the wire shape: `src/ui/wire.py` → `src/ui/static/mock/snapshot.schema.json`
+  + `snapshot.example.json`. **A: do not publish a competing `snapshot.*`; conform.**
+- FREEZE-1 protocol: B checks `data/build/FREEZE-1.json` after every `git pull --rebase`.
+  Until it exists B builds `runtime/` against its own reading of `11 12 13 16 22`.
+- Harness landed at `e4116d3`: scaffold (A's packages exist, empty), `pyproject.toml` with 8
+  import-linter contracts (`lint-imports` green; planted `state→perception` import rejected by
+  `tests/integration/meta`), `.gitignore` (`data/*` + `!data/build/` + `!data/eval/` — the
+  literal `data/` form cannot re-include children, as A also noted). `uv venv --python 3.11 .venv`
+  then `uv pip install -e '.[dev]'`.
+
 ## Phase status
 
 | Phase | Status | Evidence |

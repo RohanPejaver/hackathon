@@ -244,6 +244,7 @@
 
   const params = new URLSearchParams(location.search);
   if (params.get('mock')) {
+    window.__render = render; // dev hook: re-render a patched snapshot from the console
     fetch('/static/mock/snapshot.example.json').then((r) => r.json()).then(render);
     return;
   }

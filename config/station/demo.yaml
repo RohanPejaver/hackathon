@@ -1,0 +1,130 @@
+# The demo station (37 §Physical setup; 03 header): bins pesto/mayo/turkey/bread, carriers
+# gloves/spreader/board/landing. One folding table, 1200mm x 600mm, station frame in mm with
+# origin at the front-left corner fiducial (20 §Station frame).
+#
+# Zone authoring rule (31, 20): INGREDIENT zones are authored GENEROUSLY (+30mm beyond the
+# physical bin; a false contact costs 8 seconds). CLEAN_STOCK is authored CONSERVATIVELY
+# (-20mm inside the physical rack; a false reset would silently clear real taint).
+station_id: demo-bagel
+config_version: 1
+schema_version: 1
+worker_slots: 1
+
+calibration:
+  units: mm
+  origin: front-left corner ArUco marker (id 0)
+  width_mm: 1200
+  height_mm: 600
+  # Established in CALIBRATION mode from four corner markers; null until a camera exists.
+  # PROTOCOL_ONLY needs no homography.
+  homography: null
+
+zones:
+  # ---- ingredient bins, back row, generous (+30mm) ---------------------------------------
+  - zone_id: bin:pesto
+    kind: INGREDIENT
+    contents: [pesto]
+    bound_carrier: bin:pesto
+    polygon: [[70, 370], [270, 370], [270, 570], [70, 570]]
+  - zone_id: bin:mayo
+    kind: INGREDIENT
+    contents: [mayo]
+    bound_carrier: bin:mayo
+    polygon: [[330, 370], [530, 370], [530, 570], [330, 570]]
+  - zone_id: bin:turkey
+    kind: INGREDIENT
+    contents: [turkey]
+    bound_carrier: bin:turkey
+    polygon: [[590, 370], [790, 370], [790, 570], [590, 570]]
+  - zone_id: bin:bread
+    kind: INGREDIENT
+    contents: [bread]
+    bound_carrier: bin:bread
+    polygon: [[850, 370], [1050, 370], [1050, 570], [850, 570]]
+  # ---- work surface and landing, front row -----------------------------------------------
+  - zone_id: work
+    kind: WORK
+    contents: []
+    bound_carrier: board
+    polygon: [[300, 60], [700, 60], [700, 320], [300, 320]]
+  - zone_id: landing
+    kind: LANDING
+    contents: []
+    bound_carrier: landing
+    polygon: [[740, 60], [1000, 60], [1000, 320], [740, 320]]
+  # ---- resets ----------------------------------------------------------------------------
+  - zone_id: tool_rack
+    kind: TOOL_RACK
+    contents: []
+    bound_carrier: null
+    polygon: [[40, 200], [260, 200], [260, 320], [40, 320]]
+  - zone_id: clean_stock            # conservative (-20mm inside the physical rack)
+    kind: CLEAN_STOCK
+    contents: []
+    bound_carrier: null
+    polygon: [[60, 80], [240, 80], [240, 180], [60, 180]]
+  - zone_id: glove_dispenser
+    kind: GLOVE_DISPENSER
+    contents: []
+    bound_carrier: null
+    polygon: [[1080, 380], [1180, 380], [1180, 560], [1080, 560]]
+  - zone_id: wash
+    kind: WASH
+    contents: []
+    bound_carrier: null
+    polygon: [[1040, 60], [1180, 60], [1180, 320], [1040, 320]]
+
+carriers:
+  - carrier_id: gloves
+    kind: GLOVES
+    home_zone: null
+    resettable_by: [GLOVE_CHANGE]
+  - carrier_id: spreader
+    kind: TOOL
+    home_zone: tool_rack
+    resettable_by: [TOOL_SWAP, WASH_CYCLE, OPERATOR_ASSERTION]
+  - carrier_id: board
+    kind: SURFACE
+    home_zone: work
+    resettable_by: [SURFACE_SWAP, OPERATOR_ASSERTION]
+  - carrier_id: landing
+    kind: SURFACE
+    home_zone: landing
+    resettable_by: [SURFACE_SWAP, OPERATOR_ASSERTION]
+  # A bin is both a zone and a container carrier (11 §Relationships). Shared containers are
+  # what back-contamination lands on (14 §Pathway classes).
+  - carrier_id: bin:pesto
+    kind: CONTAINER
+    home_zone: bin:pesto
+    resettable_by: [OPERATOR_ASSERTION]
+  - carrier_id: bin:mayo
+    kind: CONTAINER
+    home_zone: bin:mayo
+    resettable_by: [OPERATOR_ASSERTION]
+  - carrier_id: bin:turkey
+    kind: CONTAINER
+    home_zone: bin:turkey
+    resettable_by: [OPERATOR_ASSERTION]
+  - carrier_id: bin:bread
+    kind: CONTAINER
+    home_zone: bin:bread
+    resettable_by: [OPERATOR_ASSERTION]
+
+# ASSUMPTION: TOOL_SWAP / SURFACE_SWAP introduce a carrier "from clean stock" (13, 36 example
+# uses `spreader_2`). The spares are declared here so the introduced id is known to the
+# station map and validation can check it.
+clean_stock:
+  - carrier_id: spreader_2
+    kind: TOOL
+    resettable_by: [TOOL_SWAP, WASH_CYCLE, OPERATOR_ASSERTION]
+  - carrier_id: spreader_3
+    kind: TOOL
+    resettable_by: [TOOL_SWAP, WASH_CYCLE, OPERATOR_ASSERTION]
+  - carrier_id: board_2
+    kind: SURFACE
+    resettable_by: [SURFACE_SWAP, OPERATOR_ASSERTION]
+
+# Station-level threshold overrides (31 hierarchy: station overrides profile and defaults).
+thresholds:
+  temporal:
+    t_dwell_ms: 250

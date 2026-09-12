@@ -1,0 +1,2 @@
+profile: demo
+allow_env_overrides: false     # 31: demo rejects env overrides — no stray local variable on stage

@@ -1,0 +1,61 @@
+# Base of the config hierarchy (31 §Hierarchy):
+#   defaults.yaml <- profiles/<profile>.yaml <- station/<id>.yaml <- env overrides (dev only)
+# Every value here is a documented default from 19 §Windows, 14 §Parameters, 24 §Data
+# lifecycle, 39 §3/§6. 31 is authoritative; if this file and 19 disagree, this file is
+# the defect.
+schema_version: 1
+
+temporal:
+  t_dwell_ms: 250            # min zone dwell before ZONE_ENTRY — rejects pass-throughs
+  t_hysteresis_ms: 400       # contact absent this long before CONTACT_END
+  t_reorder_ms: 500          # log reorder buffer
+  t_stale_s:                 # epistemic decay per carrier kind (13)
+    GLOVES: 20
+    TOOL: 120
+    SURFACE: 300
+    CONTAINER: 600
+  t_occlusion_max_s: 3       # beyond this -> UNKNOWN, not STALE
+  t_escalate_s: 20           # Tier 1 -> Tier 2
+  t_cooldown_s: 120          # post-assertion suppression
+  t_abandon_s: 900           # ticket auto-void
+  t_manager_s: 60            # Tier 2 -> manager surface (deferred post-MVP)
+  # ASSUMPTION: 23 §P5 names t_recover (healthy frames before auto-return to FULL) with no
+  # default anywhere in docs. 10s is chosen so a flicker cannot bounce the mode.
+  t_recover_s: 10
+
+contamination:
+  max_hops: 3                                    # assumption A1 / EXP-001
+  strength_decay_per_hop: [PRESENT, PRESENT, POSSIBLE]
+  station_recent_window_s: 1800                  # pessimistic closure scope (13)
+
+# 21 §Grade assignment: confidence >= observed -> OBSERVED; >= inferred -> INFERRED; else dropped.
+# GLOVE_CHANGE is graded INFERRED by design (39 §3, EXP-004): its OBSERVED threshold is
+# unreachable until the experiment says otherwise.
+perception:
+  thresholds:
+    ZONE_ENTRY:                 { observed: 0.85, inferred: 0.60 }
+    ZONE_EXIT:                  { observed: 0.85, inferred: 0.60 }
+    CONTACT_BEGIN:              { observed: 0.85, inferred: 0.60 }
+    CONTACT_END:                { observed: 0.85, inferred: 0.60 }
+    GLOVE_CHANGE:               { observed: 1.01, inferred: 0.70 }
+    TOOL_SWAP:                  { observed: 0.90, inferred: 0.70 }
+    SURFACE_SWAP:               { observed: 0.90, inferred: 0.70 }
+    SURFACE_WIPE:               { observed: 0.80, inferred: 0.60 }
+    CARRIER_OBSERVABILITY_CHANGED: { observed: 0.00, inferred: 0.00 }  # always emitted (21 honesty)
+    TRACK_IDENTITY_SUSPECT:     { observed: 0.00, inferred: 0.00 }     # always emitted
+  frame_rate_floor_fps: 8      # below this -> HEALTH_DEGRADED -> PROTOCOL_ONLY
+
+capture:
+  resolution: [1280, 720]
+  fps: 15
+  frame_buffer_seconds: 3      # 24 §Data lifecycle
+  persist_frames: false        # only settable in dev/eval profiles; loud warning at startup
+
+retention:
+  audit_days: 7                # 24 §Data lifecycle
+
+runtime:
+  host: 127.0.0.1              # loopback only (24)
+  port: 8000
+  ui_push_hz: 5                # full state at 5Hz (39 §6)
+  log_dir: data/logs           # JSONL, one file per session (39 §5); gitignored

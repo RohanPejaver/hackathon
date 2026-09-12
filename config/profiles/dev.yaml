@@ -1,0 +1,2 @@
+profile: dev
+allow_env_overrides: true      # 31: env overrides are dev-only

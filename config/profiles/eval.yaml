@@ -1,0 +1,4 @@
+profile: eval
+allow_env_overrides: true
+capture:
+  persist_frames: false        # may be flipped for a dev/eval run only; never in demo/prod (24)

@@ -1,0 +1,27 @@
+# Allergen taxonomy — a graph, not a list (18 §1). Big-9 roots; specifics hang beneath.
+# Grouping policy is data: PINE_NUT sits under TREE_NUT by default because that is the
+# conservative (broader) grouping (decisions/README §Pending; 15 §Allergen matching).
+knowledge_version: 1
+schema_version: 1
+restaurant: demo-bagel
+allergens:
+  - { id: MILK,      display_name: Milk,           parents: [], regulatory_class: FDA_BIG9, aliases: [dairy, lactose, milk allergy] }
+  - { id: EGG,       display_name: Egg,            parents: [], regulatory_class: FDA_BIG9, aliases: [eggs, egg allergy] }
+  - { id: FISH,      display_name: Fish,           parents: [], regulatory_class: FDA_BIG9, aliases: [fish allergy] }
+  - { id: SHELLFISH, display_name: Crustacean shellfish, parents: [], regulatory_class: FDA_BIG9, aliases: [shellfish, crustacean] }
+  - { id: TREE_NUT,  display_name: Tree nut,       parents: [], regulatory_class: FDA_BIG9, aliases: [tree nuts, nuts, nut allergy] }
+  - { id: PEANUT,    display_name: Peanut,         parents: [], regulatory_class: FDA_BIG9, aliases: [peanuts, peanut allergy, groundnut] }
+  - { id: WHEAT,     display_name: Wheat,          parents: [], regulatory_class: FDA_BIG9, aliases: [wheat allergy, gluten] }
+  - { id: SOY,       display_name: Soy,            parents: [], regulatory_class: FDA_BIG9, aliases: [soya, soybean, soy allergy] }
+  - { id: SESAME,    display_name: Sesame,         parents: [], regulatory_class: FDA_BIG9, aliases: [sesame seed, tahini, sesame allergy] }
+  # specifics
+  - { id: PINE_NUT,  display_name: Pine nut,       parents: [TREE_NUT], aliases: [pine nuts, pignoli, pinoli, pignolia] }
+  - { id: ALMOND,    display_name: Almond,         parents: [TREE_NUT], aliases: [almonds] }
+  - { id: WALNUT,    display_name: Walnut,         parents: [TREE_NUT], aliases: [walnuts] }
+  - { id: CASHEW,    display_name: Cashew,         parents: [TREE_NUT], aliases: [cashews] }
+  - { id: PISTACHIO, display_name: Pistachio,      parents: [TREE_NUT], aliases: [pistachios] }
+  - { id: PECAN,     display_name: Pecan,          parents: [TREE_NUT], aliases: [pecans] }
+  - { id: HAZELNUT,  display_name: Hazelnut,       parents: [TREE_NUT], aliases: [hazelnuts, filbert] }
+  - { id: SHRIMP,    display_name: Shrimp,         parents: [SHELLFISH], aliases: [prawn, prawns] }
+  - { id: SALMON,    display_name: Salmon,         parents: [FISH], aliases: [lox, smoked salmon] }
+  - { id: TUNA,      display_name: Tuna,           parents: [FISH], aliases: [] }

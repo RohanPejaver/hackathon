@@ -1,0 +1,137 @@
+# Owned by Device B. Frozen after T+1 — changes go through the channel.
+# Dependency table is docs/engineering/39-implementation-plan.md §2, verbatim.
+# Layer contracts are docs/engineering/30-repository-layout.md §Dependency rules
+# and docs/architecture/22-interfaces.md §Dependency direction.
+
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "allergen-safety-layer"
+version = "0.1.0"
+description = "Allergen cross-contamination safety layer for one food-prep workstation"
+requires-python = ">=3.11"
+dependencies = [
+  # core
+  "pydantic~=2.9",
+  "pyyaml~=6.0",
+  # runtime
+  "fastapi~=0.115",
+  "uvicorn~=0.32",
+]
+
+[project.optional-dependencies]
+# Never a core or runtime dependency. Nothing under src/runtime may import these at module scope.
+perception = [
+  "opencv-python~=4.10",
+  "numpy~=2.1",
+]
+# Only if HSV segmentation proves insufficient (39 §3).
+mediapipe = ["mediapipe~=0.10"]
+dev = [
+  "pytest",
+  "pytest-asyncio",
+  "hypothesis~=6.0",
+  "import-linter~=2.0",
+  "mypy~=1.11",
+  "ruff~=0.7",
+  "types-PyYAML",
+]
+
+[tool.setuptools.packages.find]
+include = ["src*"]
+
+# ---------------------------------------------------------------------------
+# Layer DAG — 30 §Dependency rules 1-5, 22 §Dependency direction.
+# Rule 6 (no clock outside runtime/) is a pytest AST walk owned by Device A.
+# ---------------------------------------------------------------------------
+[tool.importlinter]
+root_packages = ["src"]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "rule 1: domain imports nothing internal"
+type = "forbidden"
+source_modules = ["src.domain"]
+forbidden_modules = [
+  "src.events", "src.knowledge", "src.state", "src.risk", "src.policy", "src.orders",
+  "src.perception", "src.replay", "src.runtime", "src.ui",
+]
+
+[[tool.importlinter.contracts]]
+name = "rule 2: perception imports only domain and events"
+type = "forbidden"
+source_modules = ["src.perception"]
+forbidden_modules = [
+  "src.knowledge", "src.state", "src.risk", "src.policy", "src.orders",
+  "src.replay", "src.runtime", "src.ui",
+]
+
+[[tool.importlinter.contracts]]
+name = "rule 3: state/risk/policy/orders never import perception, ui or runtime"
+type = "forbidden"
+source_modules = ["src.state", "src.risk", "src.policy", "src.orders"]
+forbidden_modules = ["src.perception", "src.ui", "src.runtime"]
+
+[[tool.importlinter.contracts]]
+name = "rule 4: runtime is the only composition root (nothing imports runtime; only runtime imports ui; only runtime and replay import across the core)"
+type = "forbidden"
+source_modules = [
+  "src.domain", "src.events", "src.knowledge", "src.state", "src.risk", "src.policy",
+  "src.orders", "src.perception", "src.replay", "src.ui",
+]
+forbidden_modules = ["src.runtime"]
+
+[[tool.importlinter.contracts]]
+name = "rule 4b: only runtime imports ui"
+type = "forbidden"
+source_modules = [
+  "src.domain", "src.events", "src.knowledge", "src.state", "src.risk", "src.policy",
+  "src.orders", "src.perception", "src.replay",
+]
+forbidden_modules = ["src.ui"]
+
+[[tool.importlinter.contracts]]
+name = "rule 4c: only runtime imports replay; replay imports only events/state/risk/policy/domain"
+type = "forbidden"
+source_modules = [
+  "src.domain", "src.events", "src.knowledge", "src.state", "src.risk", "src.policy",
+  "src.orders", "src.perception", "src.ui",
+]
+forbidden_modules = ["src.replay"]
+
+[[tool.importlinter.contracts]]
+name = "22 chain: domain <- events <- state <- risk <- policy <- ui (lower layers never import higher)"
+type = "layers"
+layers = ["src.ui", "src.policy", "src.risk", "src.state", "src.events", "src.domain"]
+
+[[tool.importlinter.contracts]]
+name = "rule 5: src never imports experiments"
+type = "forbidden"
+source_modules = ["src"]
+forbidden_modules = ["experiments"]
+
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-p no:cacheprovider"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["docs", "handoff", "data", "src/ui/static"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+packages = ["src"]
+warn_unused_ignores = true
+
+# 39 §2: --strict on the safety core.
+[[tool.mypy.overrides]]
+module = ["src.domain.*", "src.events.*", "src.state.*", "src.risk.*", "src.policy.*"]
+strict = true

@@ -1,0 +1,2 @@
+profile: prod
+allow_env_overrides: false

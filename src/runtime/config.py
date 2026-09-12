@@ -434,22 +434,7 @@ def to_domain(loaded: LoadedConfig) -> tuple[Any, Any, Any]:
     """Map the nested YAML values (seconds/ms) onto the flat millisecond `domain.Config`,
     the `StationConfig` and the `Knowledge` bundle. This is the only place the two layouts
     meet; `runtime/` is the composition root and may import everything (30 rule 4)."""
-    from src.domain import (
-        AllergenNode,
-        Carrier,
-        CarrierKind,
-        Config,
-        EpistemicStatus,
-        IngredientRecord,
-        Knowledge as DomainKnowledge,
-        MenuItemRecord,
-        Mode,
-        Point2D,
-        ResetKind,
-        StationConfig,
-        Strength,
-        Zone as DomainZone,
-    )
+    from src import domain as dom
 
     v = loaded.values
     t = v.temporal
@@ -457,13 +442,13 @@ def to_domain(loaded: LoadedConfig) -> tuple[Any, Any, Any]:
     # CONTRACT-GAP: 19 lists four t_stale kinds; FOOD carriers use the SURFACE value —
     # food sits on a surface and is observed with it.
     t_stale = {
-        CarrierKind.GLOVES: s["GLOVES"] * 1000,
-        CarrierKind.TOOL: s["TOOL"] * 1000,
-        CarrierKind.SURFACE: s["SURFACE"] * 1000,
-        CarrierKind.CONTAINER: s["CONTAINER"] * 1000,
-        CarrierKind.FOOD: s["SURFACE"] * 1000,
+        dom.CarrierKind.GLOVES: s["GLOVES"] * 1000,
+        dom.CarrierKind.TOOL: s["TOOL"] * 1000,
+        dom.CarrierKind.SURFACE: s["SURFACE"] * 1000,
+        dom.CarrierKind.CONTAINER: s["CONTAINER"] * 1000,
+        dom.CarrierKind.FOOD: s["SURFACE"] * 1000,
     }
-    cfg = Config(
+    cfg = dom.Config(
         config_version=str(loaded.config_version),
         knowledge_version=str(loaded.knowledge_version),
         max_hops=v.contamination.max_hops,
@@ -481,42 +466,43 @@ def to_domain(loaded: LoadedConfig) -> tuple[Any, Any, Any]:
         threshold_observed={k: th.observed for k, th in v.perception.thresholds.items()},
         threshold_inferred={k: th.inferred for k, th in v.perception.thresholds.items()},
         normalizer_threshold=v.orders.normalizer_threshold,
-        strength_decay_per_hop=[Strength(x) for x in v.contamination.strength_decay_per_hop],
+        strength_decay_per_hop=[dom.Strength(x) for x in v.contamination.strength_decay_per_hop],
     )
 
     ingredients = {i.ingredient_id: i for i in loaded.knowledge.ingredients.ingredients}
-    zone_allergens: dict[str, dict[str, Strength]] = {}
+    zone_allergens: dict[str, dict[str, dom.Strength]] = {}
     for z in loaded.station.zones:
-        profile: dict[str, Strength] = {}
+        profile: dict[str, dom.Strength] = {}
         for ing in z.contents:
             rec = ingredients[ing]
             for a in rec.may_contain:
-                profile.setdefault(a, Strength.POSSIBLE)
+                profile.setdefault(a, dom.Strength.POSSIBLE)
             for a in rec.contains:
-                profile[a] = Strength.PRESENT
+                profile[a] = dom.Strength.PRESENT
         if profile:
             zone_allergens[z.zone_id] = profile
 
-    station = StationConfig(
+    station = dom.StationConfig(
         station_id=loaded.station.station_id,
         config_version=str(loaded.config_version),
         knowledge_version=str(loaded.knowledge_version),
-        mode=Mode.CALIBRATION,  # 23 P12: nothing enters FULL before validation; the controller moves it
+        # 23 P12: nothing enters FULL before validation; the controller moves it.
+        mode=dom.Mode.CALIBRATION,
         worker_slots=loaded.station.worker_slots,
         carriers={
-            c.carrier_id: Carrier(
+            c.carrier_id: dom.Carrier(
                 carrier_id=c.carrier_id,
-                kind=CarrierKind(c.kind),
-                epistemic=EpistemicStatus.UNKNOWN,  # 13: never observed at station start
+                kind=dom.CarrierKind(c.kind),
+                epistemic=dom.EpistemicStatus.UNKNOWN,  # 13: never observed at station start
                 home_zone=c.home_zone,
-                resettable_by=frozenset(ResetKind(r) for r in c.resettable_by),
+                resettable_by=frozenset(dom.ResetKind(r) for r in c.resettable_by),
             )
             for c in loaded.station.carriers
         },
         zones={
-            z.zone_id: DomainZone(
+            z.zone_id: dom.Zone(
                 zone_id=z.zone_id,
-                polygon=[Point2D(x=x, y=y) for x, y in z.polygon],
+                polygon=[dom.Point2D(x=x, y=y) for x, y in z.polygon],
                 kind=z.kind,
                 contents=list(z.contents),
                 bound_carrier=z.bound_carrier,
@@ -528,19 +514,20 @@ def to_domain(loaded: LoadedConfig) -> tuple[Any, Any, Any]:
     )
 
     k = loaded.knowledge
-    knowledge = DomainKnowledge(
+    knowledge = dom.Knowledge(
         knowledge_version=str(k.version),
         allergens={
-            a.id: AllergenNode(
+            a.id: dom.AllergenNode(
                 id=a.id,
                 display_name=a.display_name,
                 parents=list(a.parents),
                 regulatory_class=a.regulatory_class,
+                aliases=list(a.aliases),
             )
             for a in k.taxonomy.allergens
         },
         ingredients={
-            i.ingredient_id: IngredientRecord(
+            i.ingredient_id: dom.IngredientRecord(
                 ingredient_id=i.ingredient_id,
                 display_name=i.display_name,
                 aliases=list(i.aliases),
@@ -553,7 +540,7 @@ def to_domain(loaded: LoadedConfig) -> tuple[Any, Any, Any]:
             for i in k.ingredients.ingredients
         },
         menu_items={
-            m.item_id: MenuItemRecord(
+            m.item_id: dom.MenuItemRecord(
                 item_id=m.item_id,
                 ingredient_ids=list(m.ingredient_ids),
                 required_zones=list(m.required_zones),

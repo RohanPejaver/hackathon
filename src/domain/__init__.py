@@ -1,3 +1,4 @@
+from .epistemic import effective_epistemic as effective_epistemic
 from .models import (
     GRADE_RANK as GRADE_RANK,
 )

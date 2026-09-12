@@ -173,6 +173,7 @@ class AllergenNode(Model):
     display_name: str
     parents: list[str] = Field(default_factory=list)
     regulatory_class: str | None = None
+    aliases: list[str] = Field(default_factory=list)  # normalizer vocabulary (17, 18)
 
 
 class IngredientRecord(Model):
@@ -370,8 +371,12 @@ class Alert(Model):
     raised_at: Timestamp
     state: AlertLifecycle
     acknowledged_by_slot: int | None = None
-    blocking_carriers: list[str] = Field(default_factory=list)
+    blocking_carriers: list[str] = Field(
+        default_factory=list
+    )  # still needing reset; checklist ticks as it shrinks
     updated_at: Timestamp
+    body: str | None = None  # one explanatory line for Tier 1/2 (26); template-generated
+    dismissed_until: Timestamp | None = None  # display suppressed until t; state unchanged (26)
 
 
 class AlertCommand(Model):

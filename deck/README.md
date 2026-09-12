@@ -64,15 +64,13 @@ glove, tool, surface and shared container is carrying, and checks the reset happ
 restricted ticket starts. Watch."
 
 **4 · 0:50 → press `→`** "Observations here are replayed from a recorded run; the reasoning,
-alerts and every tap are live." *(the replay runs at half speed: 55 s)*
-+0:04 "Ticket 47, pesto sandwich, no restriction. Watch how little happens: gloves, spreader,
-board go amber. No alert." · +0:12 "Same gloves, into the mayo." **stop talking; let the mayo
-tile flip** · +0:18 "Ticket 48. Turkey. Pine-nut allergy. Before any motion: new gloves, clean
-spreader, fresh board, and use the sealed backup mayo." · +0:24 "Change gloves, swap the tool,
-fresh board, sealed mayo. It ticks itself off. Silence." · +0:40 "Rerun it and ignore the
-prompt: dirty spreader onto the sandwich." · +0:44 "Stop." · +0:51 "Hold. Do not send. The
-reason is on screen, and the line that matters: *This is an observation, not a determination.
-Confirm with the cook.*"
+alerts and every tap are live." *(the replay runs in 17.5 s; speak over it, do not wait)*
++0:01 "Ticket 47, pesto sandwich, no restriction. Gloves, spreader, board go amber. No alert."
+· +0:04 "Same gloves, into the mayo." **beat** · +0:06 "Ticket 48, pine-nut allergy. Before any
+motion: new gloves, clean spreader, fresh board, sealed backup mayo." · +0:08 "It ticks itself
+off." · +0:14 "Rerun it, ignore the prompt, dirty spreader." · +0:17 "Hold. Do not send. *An
+observation, not a determination. Confirm with the cook.*" Then press `S` and step the six
+stills if you want to linger on any frame.
 
 **5 · 1:45** "Three decisions. Perception only says *a hand entered zone 7* — identity comes from
 the station map, not from recognizing food. Everything after the log is a pure fold, so the
@@ -96,7 +94,7 @@ and what counts as a reset."; (3) the demo's +0:24 line — the checklist tickin
 
 ## If the demo breaks
 
-- The product opens with `?stage=1`: a CSS-only presentation view (no observation column, no trace timestamps, bigger tickets). Drop the parameter to show the full display.
+- The product opens with `?stage=1`: a CSS-only presentation view (no top bar, no observation column, no trace timestamps, bigger tickets). Drop the parameter to show the full display.
 - Iframe black or frozen: `R` (restart, ~2 s). Still black: `V` — "this is a recording of the
   same run" — and keep the script. Or `S` and step the six stills with `→`.
 - Wrong scene: press its number. Lost: `Esc`.

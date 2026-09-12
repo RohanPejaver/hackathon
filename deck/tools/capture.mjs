@@ -10,13 +10,13 @@ import { restartReplay } from './stage.mjs'
 const HERE = dirname(fileURLToPath(import.meta.url))
 const OUT = resolve(HERE, '..', 'public', 'fallback')
 mkdirSync(OUT, { recursive: true })
-const BEATS = [   // demo_stage.yaml is 2x slower than scenarios/demo.yaml
-  { at: 6.5, name: 'ticket 47 · silence, amber spreads' },
-  { at: 14.5, name: 'the reach · mayo shared container' },
-  { at: 20.5, name: 'ticket 48 · Tier 0 before any motion' },
-  { at: 30.5, name: 'compliance · checklist ticks itself off' },
-  { at: 46.5, name: 'Tier 1 · STOP' },
-  { at: 54.0, name: 'Tier 2 · HOLD' },
+const BEATS = [   // demo_stage.yaml is 0.7x of scenarios/demo.yaml
+  { at: 2.4, name: 'ticket 47 · silence, amber spreads' },
+  { at: 5.3, name: 'the reach · mayo shared container' },
+  { at: 7.3, name: 'ticket 48 · Tier 0 before any motion' },
+  { at: 10.8, name: 'compliance · checklist ticks itself off' },
+  { at: 16.4, name: 'Tier 1 · STOP' },
+  { at: 19.2, name: 'Tier 2 · HOLD' },
 ]
 const r = await restartReplay()
 if (!r.ok) { console.error('replay server did not come up'); process.exit(1) }
@@ -33,7 +33,7 @@ for (const b of BEATS) {
   await page.screenshot({ path: join(OUT, `still-${n}.png`) })
   console.log(`still-${n}.png  +${b.at}s  ${b.name}`)
 }
-const rest = 58000 - (Date.now() - t0)
+const rest = 22000 - (Date.now() - t0)
 if (rest > 0) await page.waitForTimeout(rest)
 await ctx.close()
 await browser.close()

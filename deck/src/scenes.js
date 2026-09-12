@@ -101,10 +101,9 @@ export function stationAt(sceneId, t) {
       return out
     }
     case 'how': {
-      out.hand = { xz: P.park, y: 1.5 }
-      out.taint = { gloves: 1, 'bin:mayo': 1, spreader: 1, board: 1 }
-      out.labels = 'taint'
-      out.pathway = ramp(1.2, 2.2)
+      out.hand = null
+      out.labels = 'none'
+      out.dim = 1
       return out
     }
     case 'receipt': {

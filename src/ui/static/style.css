@@ -222,3 +222,4 @@ body[data-stage="1"] .body { font-size: 22px; }
 body[data-stage="1"] .disclaimer { font-size: 19px; }
 body[data-stage="1"] .checklist li { font-size: 28px; }
 body[data-stage="1"] .alert .head { font-size: 17px; }
+body[data-stage="1"] .topbar { display: none; }

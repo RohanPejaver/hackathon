@@ -26,7 +26,7 @@ function Sequence({ t }) {
               <div className="n">STEP {i + 1}</div>
               <div className="t">{s.t}</div>
               <div className="c">{i <= lit ? s.c : ''}</div>
-              <div className="link" />
+              {i < STEPS.length - 1 ? <div className={'arrow' + (i < lit ? ' hot' : '')}>→</div> : null}
             </div>
           ))}
         </div>
@@ -36,9 +36,10 @@ function Sequence({ t }) {
 }
 
 function How({ t }) {
-  const on = Math.floor(Math.max(0, t - 0.3) / 1.6)
+  const on = Math.floor(Math.max(0, t - 0.2) / 1.4)
   useEffect(() => {
-    document.querySelectorAll('.layer').forEach((el) => el.classList.toggle('on', Number(el.dataset.i) <= on))
+    document.querySelectorAll('.arch-row').forEach((el) => el.classList.toggle('on', Number(el.dataset.i) <= on))
+    document.querySelectorAll('.arch-boundary, .arch-foot').forEach((el) => el.classList.toggle('on', on >= 1))
   }, [on])
   return SCENE_TEXT.how
 }

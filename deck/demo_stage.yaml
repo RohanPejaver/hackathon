@@ -1,4 +1,4 @@
-# Stage copy of scenarios/demo.yaml with every timestamp doubled so the presenter can narrate.
+# Stage copy of scenarios/demo.yaml with every timestamp scaled to 0.7x (25 s -> 17.5 s).
 # Not a test fixture. scenarios/demo.yaml is the verified one.
 # 37 §Script — the 2-minute demo, beats 0-5, as ONE fixture that reproduces every beat with
 # zero hardware. This is the bottom rung of the fallback ladder
@@ -48,55 +48,55 @@ initial_state:
 events:
   # ---- beat 1: ticket 47, pesto sandwich, no restriction -----------------------------------
   - { t: 0,     type: TICKET_RECEIVED,      ticket: T47, items: [pesto_sandwich] }
-  - { t: 2000,  type: TICKET_BOUND,         ticket: T47 }
-  - { t: 3000,  type: TICKET_PREP_STARTED,  ticket: T47 }
-  - { t: 4000,  type: ZONE_ENTRY,           carrier: gloves, zone: "bin:pesto" }
-  - { t: 5000,  type: CONTACT_BEGIN,        a: gloves, b: spreader }
-  - { t: 6000,  type: CONTACT_BEGIN,        a: spreader, b: board }
-  - { t: 8000,  type: TICKET_ITEM_COMPLETE, ticket: T47 }
-  - { t: 9000,  type: TICKET_RELEASED,      ticket: T47 }
+  - { t: 700,  type: TICKET_BOUND,         ticket: T47 }
+  - { t: 1000,  type: TICKET_PREP_STARTED,  ticket: T47 }
+  - { t: 1400,  type: ZONE_ENTRY,           carrier: gloves, zone: "bin:pesto" }
+  - { t: 1800,  type: CONTACT_BEGIN,        a: gloves, b: spreader }
+  - { t: 2100,  type: CONTACT_BEGIN,        a: spreader, b: board }
+  - { t: 2800,  type: TICKET_ITEM_COMPLETE, ticket: T47 }
+  - { t: 3200,  type: TICKET_RELEASED,      ticket: T47 }
   # ---- beat 2: the reach ---------------------------------------------------------------------
-  - { t: 12000,  type: ZONE_ENTRY,           carrier: gloves, zone: "bin:mayo" }
+  - { t: 4200,  type: ZONE_ENTRY,           carrier: gloves, zone: "bin:mayo" }
   # ---- beat 3: ticket 48, turkey sandwich, PINE_NUT allergy -----------------------------------
-  - { t: 16000,  type: TICKET_RECEIVED,      ticket: T48, items: [turkey_sandwich],
+  - { t: 5600,  type: TICKET_RECEIVED,      ticket: T48, items: [turkey_sandwich],
       restrictions: [{ raw_text: "pine nut allergy" }] }
-  - { t: 18000,  type: TICKET_BOUND,         ticket: T48 }
+  - { t: 6300,  type: TICKET_BOUND,         ticket: T48 }
   # ---- beat 4: compliance, on camera ------------------------------------------------------------
-  - { t: 24000, type: GLOVE_CHANGE,         phase: DON }
-  - { t: 26000, type: TOOL_SWAP,            retired: spreader, introduced: spreader_2, from_zone: clean_stock }
-  - { t: 28000, type: SURFACE_SWAP,         retired: board, introduced: board_2, from_zone: clean_stock }
-  - { t: 32000, type: OPERATOR_ASSERTION,   carrier: "bin:mayo", claim: REPLACED }   # sealed backup
-  - { t: 34000, type: TICKET_PREP_STARTED,  ticket: T48 }
-  - { t: 36000, type: TICKET_ITEM_COMPLETE, ticket: T48 }
-  - { t: 38000, type: TICKET_RELEASED,      ticket: T48 }
+  - { t: 8400, type: GLOVE_CHANGE,         phase: DON }
+  - { t: 9100, type: TOOL_SWAP,            retired: spreader, introduced: spreader_2, from_zone: clean_stock }
+  - { t: 9800, type: SURFACE_SWAP,         retired: board, introduced: board_2, from_zone: clean_stock }
+  - { t: 11200, type: OPERATOR_ASSERTION,   carrier: "bin:mayo", claim: REPLACED }   # sealed backup
+  - { t: 11900, type: TICKET_PREP_STARTED,  ticket: T48 }
+  - { t: 12600, type: TICKET_ITEM_COMPLETE, ticket: T48 }
+  - { t: 13300, type: TICKET_RELEASED,      ticket: T48 }
   # ---- beat 5: failure branch — restage, rerun 48 as T49, ignore the prompt ------------------
-  - { t: 40000, type: ZONE_ENTRY,           carrier: spreader_2, zone: "bin:pesto" }   # restage
-  - { t: 41000, type: TICKET_RECEIVED,      ticket: T49, items: [turkey_sandwich],
+  - { t: 14000, type: ZONE_ENTRY,           carrier: spreader_2, zone: "bin:pesto" }   # restage
+  - { t: 14300, type: TICKET_RECEIVED,      ticket: T49, items: [turkey_sandwich],
       restrictions: [{ raw_text: "pine nut allergy" }] }
-  - { t: 42000, type: TICKET_BOUND,         ticket: T49 }
-  - { t: 43000, type: TICKET_PREP_STARTED,  ticket: T49 }                             # prompt ignored
-  - { t: 44000, type: CONTACT_BEGIN,        a: spreader_2, b: landing }               # to the pass
-  - { t: 50000, type: TICKET_ITEM_COMPLETE, ticket: T49 }
+  - { t: 14700, type: TICKET_BOUND,         ticket: T49 }
+  - { t: 15000, type: TICKET_PREP_STARTED,  ticket: T49 }                             # prompt ignored
+  - { t: 15400, type: CONTACT_BEGIN,        a: spreader_2, b: landing }               # to the pass
+  - { t: 17500, type: TICKET_ITEM_COMPLETE, ticket: T49 }
 
 expect:
   # beats 0-2: silence
-  - { no_alerts_of_tier: { tier: 0, before: 18000 } }
-  - { no_alerts_of_tier: { tier: 1, before: 44000 } }
-  - { no_alerts_of_tier: { tier: 2, before: 50000 } }
-  - at: 6000
+  - { no_alerts_of_tier: { tier: 0, before: 6300 } }
+  - { no_alerts_of_tier: { tier: 1, before: 15400 } }
+  - { no_alerts_of_tier: { tier: 2, before: 17500 } }
+  - at: 2100
     state_at:
       carriers:
         gloves:   { taints: { PINE_NUT: {} } }
         spreader: { taints: { PINE_NUT: {} } }
         board:    { taints: { PINE_NUT: {} } }
-  - { at: 12000, state_at: { carriers: { "bin:mayo": { taints: { PINE_NUT: { hops: 1 } } } } } }
+  - { at: 4200, state_at: { carriers: { "bin:mayo": { taints: { PINE_NUT: { hops: 1 } } } } } }
   # beat 3
-  - { at: 18000, alert: { tier: 0, ticket: T48,
+  - { at: 6300, alert: { tier: 0, ticket: T48,
       blocking_carriers: [gloves, spreader, board, "bin:mayo"] } }
   # beat 4
-  - { at: 32000, alert_resolved: { tier: 0, reason: RESOLVED_BY_ASSERTION } }
-  - { no_alerts_of_tier: { tier: 0, after: 32200, before: 42000 } }
-  - at: 32000
+  - { at: 11200, alert_resolved: { tier: 0, reason: RESOLVED_BY_ASSERTION } }
+  - { no_alerts_of_tier: { tier: 0, after: 11300, before: 14700 } }
+  - at: 11200
     state_at:
       carriers:
         gloves:     { taints: {} }
@@ -104,12 +104,12 @@ expect:
         board_2:    { taints: {} }
         "bin:mayo": { taints: {} }
   # beat 5
-  - { at: 42000, alert: { tier: 0, ticket: T49, blocking_carriers: [spreader_2] } }
-  - { at: 44000, alert: { tier: 1, ticket: T49 } }
-  - { at: 44000, pathway: { includes: [spreader_2], target: "food:T49" } }
-  - { at: 50000, alert: { tier: 2, ticket: T49, headline_contains: "hold" } }
-  - { at: 50000, held: { ticket: T49 } }
-  - { at: 50000, alert_open: { tier: 2 } }
+  - { at: 14700, alert: { tier: 0, ticket: T49, blocking_carriers: [spreader_2] } }
+  - { at: 15400, alert: { tier: 1, ticket: T49 } }
+  - { at: 15400, pathway: { includes: [spreader_2], target: "food:T49" } }
+  - { at: 17500, alert: { tier: 2, ticket: T49, headline_contains: "hold" } }
+  - { at: 17500, held: { ticket: T49 } }
+  - { at: 17500, alert_open: { tier: 2 } }
   - final_state:
       tickets:
         T47: { lifecycle: RELEASED }

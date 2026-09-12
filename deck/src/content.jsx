@@ -4,7 +4,9 @@ import React from 'react'
 export const PRODUCT = 'Sequence'
 export const TAG = 'allergen safety layer for one prep station'
 
-export const Brand = () => <div className="brand">{PRODUCT}<span className="dot">.</span></div>
+export const Brand = ({ big = false }) => (
+  <div className={'brand' + (big ? ' big' : '')}><span className="b1">Se</span><span className="b2">que</span><span className="b3">nce</span><span className="dot">.</span></div>
+)
 
 // Slide 3: the sequence of actions. Step 1 introduces pine nut; it spreads forward.
 export const STEPS = [
@@ -17,18 +19,21 @@ export const STEPS = [
 
 export const SCENE_TEXT = {
   intrigue: (
-    <div className="corner-tl"><Brand /></div>
+    <div className="corner-tl" style={{ gap: 6 }}>
+      <Brand big />
+      <div className="micro" style={{ fontSize: 'clamp(20px, 1.6vw, 28px)', color: 'var(--ink-1)' }}>{TAG}</div>
+    </div>
   ),
   failure: (
     <>
       <div className="corner-tl">
-        <div className="frost amber-edge" style={{ maxWidth: '58vw' }}>
+        <div className="frost amber-edge" style={{ maxWidth: '52vw' }}>
           <h1 className="h2">The shared mayo is now a <span className="amber">pine-nut carrier.</span></h1>
           <p className="lede" style={{ marginTop: 16 }}>In a restaurant, this is never tracked. Not by the ticket, not by the POS, not by the cook.</p>
         </div>
       </div>
       <div className="corner-bl">
-        <div className="micro petal">The two tickets</div>
+        <div className="micro petal" style={{ fontSize: "clamp(22px, 1.8vw, 30px)" }}>The two tickets</div>
         <div className="tickets">
           <div className="ticket">
             <span className="id">#47</span><span className="life">done</span>
@@ -42,8 +47,8 @@ export const SCENE_TEXT = {
           </div>
         </div>
       </div>
-      <div className="corner-br">
-        <div className="frost" style={{ maxWidth: '34vw', textAlign: 'right' }}>
+      <div className="corner-tr">
+        <div className="frost" style={{ maxWidth: '30vw', textAlign: 'right' }}>
           <div className="h3"><span className="petal">1 in 3</span> adult food-allergy reactions happen in a restaurant.</div>
           <div className="micro" style={{ marginTop: 10 }}>FARE patient registry</div>
         </div>
@@ -65,24 +70,29 @@ export const SCENE_TEXT = {
     </>
   ),
   how: (
-    <div className="right-col">
-      <div className="micro petal">Why it was hard: three decisions</div>
-      <div className="layers" id="layers">
-        <div className="layer" data-i="0">
-          <div className="t">The camera sees geometry, not food.</div>
-          <div className="d">Identity comes from the station map. Perception only says <b>"a hand entered zone 7."</b> No food recognition, no training data in the safety path.</div>
-        </div>
-        <div className="layer-arrow">↓ committed events only</div>
-        <div className="layer hard" data-i="1">
-          <div className="t">One append-only log. Everything after it is a pure fold.</div>
-          <div className="d">No clock, no I/O, no floats downstream. <b>The same log replays byte-for-byte</b>, which is why the demo you just saw is the product's own code path.</div>
-        </div>
-        <div className="layer-arrow">↓ taint on carriers · what was and was not observed</div>
-        <div className="layer" data-i="2">
-          <div className="t">Backward search over the sequence, with reset rules.</div>
-          <div className="d">A wipe is not a reset. Off-camera means <b>unverified</b>, not contaminated. Weak evidence can only ever reach the 8-second tier.</div>
-        </div>
+    <div className="arch">
+      <div className="arch-head">
+        <div className="micro petal">Why it was hard</div>
+        <h1 className="h2" style={{ maxWidth: 'none' }}>Our architecture: one boundary, one pure fold.</h1>
       </div>
+      <div className="arch-row" data-i="0">
+        <div className="arch-lbl">Perception<span>probabilistic, ephemeral, never persisted</span></div>
+        <div className="arch-box"><b>Overhead frames</b><span>1280×720 @ 15 fps</span></div><i>→</i>
+        <div className="arch-box"><b>Station frame</b><span>4 ArUco fiducials → homography, pixel ↔ mm</span></div><i>→</i>
+        <div className="arch-box"><b>Segmentation</b><span>HSV glove blobs · ArUco tool identity · pointPolygonTest zones</span></div><i>→</i>
+        <div className="arch-box"><b>Tracker</b><span>occlusion honesty → OBSERVABILITY_CHANGED · identity-suspect merges</span></div><i>→</i>
+        <div className="arch-box"><b>Assembler</b><span>dwell + hysteresis episodes → typed events · confidence thresholded to a grade</span></div>
+      </div>
+      <div className="arch-boundary"><i>↓</i> committed events only: 33 event types, pydantic discriminated unions, import-linter forbids anything else crossing <i>↓</i></div>
+      <div className="arch-row" data-i="1">
+        <div className="arch-lbl">Reasoning<span>deterministic, pure, no clock, no I/O, no floats</span></div>
+        <div className="arch-box hard"><b>Append-only log</b><span>reorder buffer · JSONL · replay byte-for-byte</span></div><i>→</i>
+        <div className="arch-box hard"><b>Reducer fold</b><span>taint × epistemic lattice per carrier · pessimistic closure · wipe ≠ reset</span></div><i>→</i>
+        <div className="arch-box hard"><b>Risk engine</b><span>bounded backward BFS over the temporal contact graph · allergen taxonomy closure · reset-breaks-path</span></div><i>→</i>
+        <div className="arch-box hard"><b>Policy</b><span>tier selection by evidence grade · alert dedup by pathway signature · escalation at COMPLETE</span></div><i>→</i>
+        <div className="arch-box"><b>Worker display</b><span>WebSocket 5 Hz · ≤ 2 taps · every tap re-enters the log as OPERATOR_ASSERTION</span></div>
+      </div>
+      <div className="arch-foot">Learned models plug in behind the perception contract (any detector, MediaPipe hands optional) and in restriction normalization with a mandatory AMBIGUOUS fallback. <b>Nothing learned sits between the log and an intervention.</b></div>
     </div>
   ),
   receipt: (

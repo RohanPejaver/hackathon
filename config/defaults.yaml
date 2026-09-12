@@ -44,6 +44,21 @@ perception:
     CARRIER_OBSERVABILITY_CHANGED: { observed: 0.00, inferred: 0.00 }  # always emitted (21 honesty)
     TRACK_IDENTITY_SUSPECT:     { observed: 0.00, inferred: 0.00 }     # always emitted
   frame_rate_floor_fps: 8      # below this -> HEALTH_DEGRADED -> PROTOCOL_ONLY
+  camera:
+    source: 0                  # device index or a video path; STATION_CAMERA overrides
+  markers:                     # 39 §3: ArUco corners for the station frame, tags on tools
+    dictionary: DICT_4X4_50
+    corner_ids: [0, 1, 2, 3]   # front-left (origin), front-right, back-right, back-left
+    corner_size_mm: 80
+    tool_size_mm: 25
+  gloves:                      # HSV segmentation of blue/purple nitrile; tune with scripts/tune_hsv.py
+    hsv_lower: [95, 80, 60]
+    hsv_upper: [140, 255, 255]
+    min_area_px: 1500
+  glove_change_absence_s: 2    # 39 §3: dispenser entry + hand absence >= 2 s + reappearance -> GLOVE_CHANGE (INFERRED)
+  health:
+    frame_timeout_s: 1.0       # no frame for this long -> UNAVAILABLE
+    static_frames: 45          # identical frames in a row (~3 s at 15 fps) -> DEGRADED
 
 capture:
   resolution: [1280, 720]

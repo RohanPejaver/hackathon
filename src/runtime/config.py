@@ -78,9 +78,36 @@ class Threshold(Strict):
         return self
 
 
+class Camera(Strict):
+    source: int | str
+
+
+class Markers(Strict):
+    dictionary: str
+    corner_ids: list[int] = Field(min_length=4, max_length=4)
+    corner_size_mm: int = Field(gt=0)
+    tool_size_mm: int = Field(gt=0)
+
+
+class Gloves(Strict):
+    hsv_lower: tuple[int, int, int]
+    hsv_upper: tuple[int, int, int]
+    min_area_px: int = Field(gt=0)
+
+
+class PerceptionHealth(Strict):
+    frame_timeout_s: float = Field(gt=0)
+    static_frames: int = Field(gt=0)
+
+
 class Perception(Strict):
     thresholds: dict[str, Threshold]
     frame_rate_floor_fps: int = Field(gt=0, le=120)
+    camera: Camera
+    markers: Markers
+    gloves: Gloves
+    glove_change_absence_s: float = Field(gt=0)
+    health: PerceptionHealth
 
 
 class Capture(Strict):
@@ -152,6 +179,11 @@ class StockCarrier(Strict):
     resettable_by: list[ResetKind]
 
 
+class StationMarkers(Strict):
+    tools: dict[int, str] = {}
+    surfaces: dict[int, str] = {}
+
+
 class Station(Strict):
     station_id: str
     config_version: int = Field(ge=1)
@@ -161,6 +193,7 @@ class Station(Strict):
     zones: list[Zone] = Field(min_length=1)
     carriers: list[Carrier] = Field(min_length=1)
     clean_stock: list[StockCarrier] = []
+    markers: StationMarkers = StationMarkers()
     thresholds: dict[str, Any] = {}
 
     @model_validator(mode="after")
@@ -180,6 +213,12 @@ class Station(Strict):
                 )
             if z.contents and z.kind != "INGREDIENT":
                 raise ValueError(f"zone {z.zone_id}: only INGREDIENT zones have contents")
+        for marker_map in (self.markers.tools, self.markers.surfaces):
+            for mid, cid in marker_map.items():
+                if cid not in carrier_ids:
+                    raise ValueError(
+                        f"marker {mid}: {cid!r} is not a carrier or clean-stock carrier"
+                    )
         for c in self.carriers:
             if c.home_zone is not None and c.home_zone not in zone_ids:
                 raise ValueError(f"carrier {c.carrier_id}: home_zone {c.home_zone!r} is not a zone")

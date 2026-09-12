@@ -124,6 +124,16 @@ clean_stock:
     kind: SURFACE
     resettable_by: [SURFACE_SWAP, OPERATOR_ASSERTION]
 
+# ArUco marker ids on physical objects (39 §3): guaranteed tool identity.
+markers:
+  tools:
+    10: spreader
+    11: spreader_2
+    12: spreader_3
+  surfaces:
+    20: board
+    21: board_2
+
 # Station-level threshold overrides (31 hierarchy: station overrides profile and defaults).
 thresholds:
   temporal:

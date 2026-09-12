@@ -132,6 +132,10 @@ python_version = "3.11"
 packages = ["src"]
 warn_unused_ignores = true
 
+[[tool.mypy.overrides]]
+module = ["cv2", "cv2.*"]
+ignore_missing_imports = true
+
 # 39 §2: --strict on the safety core.
 [[tool.mypy.overrides]]
 module = ["src.domain.*", "src.events.*", "src.state.*", "src.risk.*", "src.policy.*"]

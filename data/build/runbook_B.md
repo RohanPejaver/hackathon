@@ -55,3 +55,33 @@ failure."*
 | 0 | Reset prompt | Already clean / Already swapped per item | | | |
 | 1 | Interrupt | Already swapped | | | |
 | 2 | Hold | Cook confirms tool was clean **or** Remake | | | |
+
+## Field procedure — bringing perception up (P4/P5)
+
+Prerequisites: a table (1200 × 600 mm work area), an overhead camera fixed straight down at
+1.0–1.3 m, blue/purple nitrile gloves, a white mat or cloth, matte-printed markers.
+
+```bash
+source .venv/bin/activate && pip install -e '.[dev,perception]'
+python scripts/print_markers.py                       # PNGs -> data/markers/ (+ SHEET.md placement guide)
+#   tape corners: id 0 front-left (origin), 1 front-right, 2 back-right, 3 back-left; tools ids 10-12; boards 20-21
+export STATION_CAMERA=0                               # device index, or a video file path
+python scripts/calibrate.py --source 0 --frames 30    # dry run: prints the homography + reprojection error (mm)
+python scripts/calibrate.py --source 0 --write        # writes calibration.homography, bumps config_version
+python scripts/tune_hsv.py --source 0                 # trackbars; aim for one solid blob on each glove, none elsewhere
+python scripts/tune_hsv.py --source 0 --write         # stores the thresholds in config/defaults.yaml
+python scripts/record_fixture.py clean_prep --seconds 60         # one clip per 35 §Minimum viable dataset (12 total)
+python scripts/record_fixture.py normal_01 --seconds 600 --normal  # 30 minutes total of hazard-free prep
+#   then fill data/fixtures/video/<clip>.json events + occlusion_intervals from the video
+python scripts/eval_perception.py                      # -> data/eval/<date>/p4_perception_report.json (the P4 gate)
+STATION_CAMERA=0 uvicorn src.runtime.app:app           # live: FULL once the camera reports healthy frames
+```
+
+Order matters: markers before calibration, calibration before HSV tuning (the mat changes the
+white balance), tuning before recording, recording before eval. Re-run `calibrate.py --write`
+after ANY camera move — it bumps `config_version`, which is what invalidates old fixtures (20).
+
+Clips to record (30–90 s each; annotate at the event level, including occlusion intervals):
+`clean_prep`, `direct_transfer`, `tool_transfer`, `surface_transfer`, `back_contamination`,
+`glove_change`, `tool_swap`, `wipe`, `occlusion`, `identity_confusion`, `two_tickets`,
+`camera_obstruction`; plus `normal_01..normal_03` (10 min each, `--normal`).

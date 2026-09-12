@@ -122,6 +122,8 @@ class Runtime:
         self.last_contact: dict[str, int] = {}
         self.rejected: list[str] = []
         self.feed: list[FeedItem] = []  # REPLAY inputs, time-ordered; empty when live
+        self.pipeline: Any = None  # PerceptionPipeline when a camera is configured (lazy import)
+        self._pipeline_handle: Any = None
         self._feed_origin = 0
         self._wall_start: int | None = None
         self._n = 0
@@ -265,7 +267,36 @@ class Runtime:
             self.clock.advance_to(t)
         return n
 
+    # ---- perception (layers 1-4): the only place the extra is imported, and only lazily ------
+    def start_perception(self, camera_source: int | str) -> None:
+        """39 §2: opencv is an extra; nothing in the core or at module scope imports it."""
+        from src.perception.pipeline import PerceptionPipeline  # lazy: needs the extra
+
+        self.pipeline = PerceptionPipeline()
+        self._pipeline_handle = self.pipeline.start(
+            perception_config(self.loaded, self.station_cfg, camera_source),
+            self.station_cfg,
+            self.sink,
+        )
+
+    def stop_perception(self) -> None:
+        if self.pipeline is not None and self._pipeline_handle is not None:
+            self.pipeline.stop(self._pipeline_handle)
+
+    def _poll_vision(self) -> None:
+        """Perception reports; the controller decides (22 RuntimeController, 10)."""
+        if self.pipeline is None:
+            return
+        state = str(self.pipeline.vision_state)
+        self.controller.report_vision(state)  # type: ignore[arg-type]
+        if state == "OK" and self.controller.mode() == "PROTOCOL_ONLY":
+            # report_vision re-enters FULL after t_recover of healthy frames (23 P5)
+            return
+        if state == "OK" and self.controller.mode() == "CALIBRATION":
+            self.controller.request_mode("FULL", "camera healthy")
+
     def tick(self) -> None:
+        self._poll_vision()
         if self.feed or self._wall_start is not None:
             # Real-time playback: log time advances with the wall clock from the first input.
             wall = SystemClock().now()
@@ -464,17 +495,71 @@ def build(
     config_root: str = "config",
     log_dir: Path | None = Path("data/logs"),
     replay: str | Path | None = None,
+    camera: int | str | None = None,
 ) -> Runtime:
     loaded = load(config_root, profile, station_id, knowledge_id)  # type: ignore[arg-type]
     clock: Clock = LogClock(0) if replay else SystemClock()
     rt = Runtime(loaded, clock, log_dir)
-    rt.controller.report_vision("UNAVAILABLE")  # no perception pipeline in this build
     if replay:
+        rt.controller.report_vision("UNAVAILABLE")
         rt.load_replay(replay)
         rt.controller.request_mode("REPLAY", f"replaying {Path(replay).name}")
+    elif camera is not None:
+        # FULL is entered only once the pipeline reports healthy frames (23 P12 / P5); until
+        # then the station stays in PROTOCOL_ONLY so Tier 0 keeps firing (ADR-0011).
+        rt.controller.report_vision("UNAVAILABLE")
+        rt.controller.request_mode("PROTOCOL_ONLY", "camera starting")
+        rt.start_perception(camera)
     else:
+        rt.controller.report_vision("UNAVAILABLE")  # no perception pipeline in this build
         rt.controller.request_mode("PROTOCOL_ONLY", "no perception pipeline configured")
     return rt
+
+
+def perception_config(loaded: LoadedConfig, station: Any, camera_source: int | str) -> Any:
+    """Map the loaded YAML onto the pipeline's config (perception may not import runtime)."""
+    from src.perception.config import PerceptionConfig  # lazy: needs the extra
+
+    v = loaded.values
+    p = v.perception
+    cal = loaded.station.calibration
+    return PerceptionConfig.build(
+        station_id=station.station_id,
+        width_mm=float(cal.width_mm),
+        height_mm=float(cal.height_mm),
+        homography=(
+            tuple(tuple(float(x) for x in row) for row in cal.homography)
+            if cal.homography
+            else None
+        ),
+        fps=v.capture.fps,
+        t_dwell_ms=v.temporal.t_dwell_ms,
+        t_hysteresis_ms=v.temporal.t_hysteresis_ms,
+        t_occlusion_max_ms=v.temporal.t_occlusion_max_s * 1000,
+        heartbeat_ms=min(v.temporal.t_stale_s.values()) * 500,
+        threshold_observed={k: t.observed for k, t in p.thresholds.items()},
+        threshold_inferred={k: t.inferred for k, t in p.thresholds.items()},
+        camera_source=camera_source,
+        marker_dictionary=p.markers.dictionary,
+        corner_ids=tuple(p.markers.corner_ids),
+        corner_size_mm=float(p.markers.corner_size_mm),
+        tool_size_mm=float(p.markers.tool_size_mm),
+        hsv_lower=tuple(p.gloves.hsv_lower),
+        hsv_upper=tuple(p.gloves.hsv_upper),
+        min_area_px=p.gloves.min_area_px,
+        glove_change_absence_ms=int(p.glove_change_absence_s * 1000),
+        frame_timeout_ms=int(p.health.frame_timeout_s * 1000),
+        static_frames=p.health.static_frames,
+        frame_rate_floor_fps=p.frame_rate_floor_fps,
+        tool_markers=dict(loaded.station.markers.tools),
+        surface_markers=dict(loaded.station.markers.surfaces),
+    )
+
+
+def _camera_source(raw: str | None) -> int | str | None:
+    if raw is None or raw == "":
+        return None
+    return int(raw) if raw.isdigit() else raw
 
 
 def calibration_app(error: str, station_id: str) -> FastAPI:
@@ -521,6 +606,7 @@ def make_app() -> FastAPI:
             knowledge_id=os.environ.get("KNOWLEDGE_ID", "demo"),
             config_root=os.environ.get("STATION_CONFIG_ROOT", "config"),
             replay=replay_src,
+            camera=_camera_source(os.environ.get("STATION_CAMERA")),
         )
     except ConfigError as err:
         return calibration_app(str(err), station_id)
@@ -538,6 +624,7 @@ def make_app() -> FastAPI:
             yield
         finally:
             task.cancel()
+            rt.stop_perception()
 
     app = create_fastapi(rt.snapshot, rt.on_action, push_hz)
     app.router.lifespan_context = lifespan

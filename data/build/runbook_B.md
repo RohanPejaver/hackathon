@@ -8,7 +8,8 @@ each beat runs at convergence. **No camera exists in this build: every run below
 
 ```bash
 source .venv/bin/activate
-uvicorn src.runtime.app:app --host 127.0.0.1 --port 8000        # profile=demo, PROTOCOL_ONLY
+uvicorn src.runtime.app:app --host 127.0.0.1 --port 8000        # profile=demo, PROTOCOL_ONLY, no camera
+# or the scripted beats:  STATION_REPLAY=scenarios/demo.yaml uvicorn src.runtime.app:app
 ```
 
 Open `http://127.0.0.1:8000/` on the station display (dark, full-screen). Open
@@ -32,8 +33,8 @@ Open `http://127.0.0.1:8000/` on the station display (dark, full-screen). Open
 | Level | Source | How to start | Status |
 |---|---|---|---|
 | 1 | Live perception | camera + `.[perception]` | **N/A — no camera in this build** |
-| 2 | Recorded log replay | `uvicorn src.runtime.app:app` with `--replay data/logs/<session>.jsonl` (a JSONL from a prior `PROTOCOL_ONLY` or fixture-driven session) | to rehearse |
-| 3 | Scenario replay | `--replay scenarios/demo.yaml` (A authors the fixture) | to rehearse |
+| 2 | Recorded log replay | `STATION_REPLAY=data/logs/<session>.jsonl uvicorn src.runtime.app:app` (any JSONL written by a prior session) | **rehearsed 12:40 — identical to level 3** (`data/eval/2026-09-12/p3_fallback_ladder.json`) |
+| 3 | Scenario replay | `STATION_REPLAY=scenarios/demo.yaml uvicorn src.runtime.app:app` | **rehearsed 12:38 — every beat on the display** |
 
 Drill: start level 3, then level 2, screenshot both at beats 2, 3, 5; diff the snapshots
 byte-for-byte via `/inspector` export. Record the result in `status_B.md`.

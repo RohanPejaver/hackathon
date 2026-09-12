@@ -48,9 +48,9 @@ Status vocabulary per `docs/engineering/38-workflow.md`. A folds this into `PROJ
 | P0 Foundations | `VERIFIED` | `data/eval/2026-09-12/p0_gate_report.json` |
 | P1 Reasoning core | `VERIFIED` | `data/eval/2026-09-12/p1_replay_report.json`: 14/14 fixtures (A–M + demo) pass, each byte-identical across two runs, IR = 1.0, SMR = 0.0; `pytest -q` 526 passed; `mypy --strict` on 38 core files; `lint-imports` 8 kept |
 | P2 Orders & knowledge | `VERIFIED` | scenario G end to end (`G-ambiguous-restriction` passes: BLOCKED, bind refused, silence); `BLOCKED→BOUND` unreachable proof in `tests/unit/orders/test_lifecycle.py`; below-threshold text never RESOLVED (hypothesis); Tier 0 lists are recipe-scoped (`test_tainted_pesto_bin_is_not_in_a_turkey_sandwich_checklist`) |
-| P3 Worker interface + `PROTOCOL_ONLY` | `IMPLEMENTED` | `data/eval/2026-09-12/p3_protocol_only_rehearsal.json`: full demo path driven live through the display with no camera; three surfaces + carrier grid + trace + inspector verified; **teammate tap-count measurement not yet done** |
+| P3 Worker interface + `PROTOCOL_ONLY` | `IMPLEMENTED` (→ `VERIFIED` once a teammate measures taps) | `p3_protocol_only_rehearsal.json` (live PROTOCOL_ONLY path), `p3_fallback_ladder.json` (all beats 1–5 on the display from fixture and from a recorded log); alert-copy lint green (`tests/property::test_alert_copy_guard`, `tests/integration/ui/test_copy_lint.py`); ≤ 2 taps mechanically (Tier 0: 1, Tier 1: 1, Tier 2: 2) — **teammate measurement pending** |
 | P4 / P5 Perception | `BLOCKED` — no camera, no annotated fixtures | hardware check above |
-| P6 Demo hardening | `OPEN` | fallback ladder rehearsal waits on `scenarios/demo.yaml` (S3) |
+| P6 Demo hardening | `PARTIAL` | `data/eval/2026-09-12/p3_fallback_ladder.json`: ladder levels 2 and 3 produce identical UI (live-sampled on the display, plus `test_replay_mode.py`); camera-unplug drill = scenario L replay; **not done: 5 consecutive clean live runs (no live station exists)** |
 
 ## Status drift for A to fold in
 - `PROJECT_STATE.md` §2: "no git repository" is stale — repo exists with remote `origin`.

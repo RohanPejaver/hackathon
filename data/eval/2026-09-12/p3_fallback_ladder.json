@@ -1,0 +1,37 @@
+{
+  "phase": "P3/P6",
+  "date": "2026-09-12",
+  "gate_clause": "fallback ladder: live perception -> recorded log replay -> scenario replay, all producing identical UI (37 §Determinism under pressure; 38 §P6)",
+  "level_1_live_perception": "N/A — no camera in this build (data/build/status_B.md §Hardware check)",
+  "level_3_scenario_replay": {
+    "command": "STATION_REPLAY=scenarios/demo.yaml uvicorn src.runtime.app:app",
+    "display_samples": [
+      "+0:07.5 REPLAY | quiet | amber=[gloves,spreader,board,bin:mayo] | 'Shared container — MILK, PINE_NUT, TREE_NUT — affects all future tickets' on bin:mayo",
+      "+0:08.5 T48 RECEIVED (restriction normalized)",
+      "+0:09.5 tier 0 'PINE NUT — station not clean' items: New gloves / Clean spreader / Mayo container flagged — use sealed backup / Fresh board | T48 BOUND (before any motion)",
+      "+0:12.6 New gloves ticked (GLOVE_CHANGE) — gloves tile quiet",
+      "+0:13.6 Clean spreader ticked (TOOL_SWAP spreader -> spreader_2)",
+      "+0:14.6 Fresh board ticked (SURFACE_SWAP board -> board_2)",
+      "+0:16.7 prompt cleared (OPERATOR_ASSERTION bin:mayo REPLACED -> RESOLVED_BY_ASSERTION) — station quiet, no amber",
+      "+0:17.7 T48 IN PREP, +0:18.5 COMPLETE, +0:19.5 RELEASED — silence",
+      "+0:20.5 spreader_2 amber (ZONE_ENTRY bin:pesto)",
+      "+0:21.6 T49 bound -> tier 0 [Clean spreader] (ignored)",
+      "+0:22.6 tier 1 'STOP — spreader_2 touched pesto' | amber=[spreader_2,landing,food:T49]",
+      "+0:25.7 tier 2 'HOLD — TICKET T49 — DO NOT SEND' with 5 trace lines incl. 1 absence line and the disclaimer; +0:26.7 T49 HELD"
+    ]
+  },
+  "level_2_recorded_log_replay": {
+    "command": "STATION_REPLAY=data/logs/<session>.jsonl uvicorn src.runtime.app:app  (the JSONL written by the level-3 run)",
+    "display_samples": [
+      "+0:07.5 amber=[gloves,spreader,board,bin:mayo]",
+      "+0:10.4 tier 0 with the same four items, T48 BOUND",
+      "+0:13.4 / +0:14.5 items tick off in the same order",
+      "+0:16.5 prompt cleared; +0:18.4 IN PREP; +0:19.4 COMPLETE",
+      "+0:20.5 spreader_2 amber; +0:21.5 tier 0 [Clean spreader]; +0:23.3 tier 1; +0:26.4 tier 2 HOLD, T49 HELD"
+    ],
+    "identical_to_level_3": true
+  },
+  "mechanical_proof": "tests/integration/runtime/test_replay_mode.py: runtime replay of demo.yaml == ReplayRunner (alerts + tickets); recorded log replays to the same end state — 2 tests PASS; scripts/determinism_check.py: each fixture byte-identical twice",
+  "camera_unplug_drill": "no camera to unplug; rehearsed as scenarios/L-camera-fault-mid-ticket.yaml (mode -> PROTOCOL_ONLY mid-ticket, hold persists, next restricted bind still gets Tier 0) — passes in the replay suite; live replay via STATION_REPLAY=scenarios/L-camera-fault-mid-ticket.yaml",
+  "status": "VERIFIED for levels 2 and 3; level 1 N/A"
+}

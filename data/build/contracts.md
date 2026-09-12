@@ -1,6 +1,6 @@
-# Device A contract transcription — NOT FROZEN
+# Device A contract transcription — FREEZE-1
 
-Status: BLOCKED before implementation. This table inventories every callable in `22`; symbols and module destinations are proposed, not existing Python implementations. No FREEZE-1 tag or wire schema has been published. Language-neutral unresolved parameter types are retained verbatim rather than invented or replaced with `Any`. Return-record notation for ReplayResult is recorded below, not counted as a callable.
+Status: initial types and event boundary implemented under final Q1–Q8 ruling. This table inventories every callable in `22`; symbols and module destinations are proposed, not existing Python implementations. The freeze manifest records the published source commit; wire schema follows at Handshake 2. Language-neutral unresolved parameter types are retained verbatim rather than invented or replaced with `Any`. Return-record notation for ReplayResult is recorded below, not counted as a callable.
 
 | `22` signature | Python symbol (proposed) | File | Owner (A/B) | Invariants carried over verbatim |
 |---|---|---|---|---|
@@ -47,3 +47,9 @@ See openq_A.md Q1–Q4. In particular, `InterventionPolicy.evaluate(assessments,
 `EventLog.append(e: Event) -> Seq` accepts a committed envelope while EventSink says the log assigns the missing DraftEvent fields at append. A synchronous final Seq also needs a defined relationship to delayed reorder commitment. Recommended proposal: specify the draft-ingestion/reorder-drain boundary and injected time explicitly before implementing it. Do not silently add flush/drain methods absent from `22`.
 
 The table is total for the registry's 33 callable signatures, but is not a claim of completed Python contracts. No source code exists yet.
+
+## Published symbol locations
+
+All shared types: `src/domain/models.py`, re-exported from `src/domain/__init__.py`. Events/drafts/graded discriminated unions: `src/events/catalog.py`. `EventLog`, `EventSink`: `src/events/log.py`. `project(Event) -> GradedEvent`: `src/events/graded.py`. `ScenarioFile`, `ReplayResult`: `src/replay/schema.py`. `state/`, `risk/`, `policy/` currently re-export their semantic types; reasoning logic follows only after this freeze. Numeric Config fields have no authored defaults.
+
+Earlier blocker/proposal descriptions above are retained for traceability but superseded by final user rulings in openq_A.md. Public callable implementations beyond EventLog/EventSink are P1/P2 work and are not claimed complete by this contract freeze.

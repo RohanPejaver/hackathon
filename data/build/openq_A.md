@@ -1,3 +1,13 @@
+# FINAL RULING APPLIED — FREEZE UNBLOCKED
+
+Q1–Q8 are resolved by the user's subsequent ruling. The earlier blocker notice below is historical and superseded. Documentary silence is not a stop. All newly chosen payload fields/private machinery are marked `# CONTRACT-GAP:` in source. Q1: lifecycle added. Q2: private draft buffer/drain. Q3: TRACKED/STALE/UNKNOWN only. Q4: substitution/suppression events, proposed patch in doc_patches.md. Q5: ADR-0005 grade floor. Q6: wipe log-only. Q7: Config numeric values required from B; no numeric defaults authored by A. Q8: replay expands shorthand with synthetic seed provenance events.
+
+A claims the newly authorized paths data/build/doc_patches.md, data/build/FREEZE-1.json and data/build/snapshot.schema.json per the user's ruling. Generated handoff/core.md is generated context only, not a new semantic source.
+
+Config wire layout is explicitly `src/domain/models.py:Config`: flat millisecond windows and typed dictionaries. B supplies values through its loader/config files. ScenarioFile supports the documented path-based config plus optional embedded versioned bundles for independent fixtures. No runtime config loader is implemented in replay.
+
+---
+
 # Device A open questions and channel notice
 
 ## CHANNEL: CONTRACT FREEZE BLOCKED — 2026-09-12

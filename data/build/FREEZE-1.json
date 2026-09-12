@@ -1,0 +1,22 @@
+{
+  "sha": "76f02c8",
+  "modules": [
+    "src.domain",
+    "src.events",
+    "src.events.catalog",
+    "src.events.log",
+    "src.events.graded",
+    "src.state",
+    "src.risk",
+    "src.policy",
+    "src.replay.schema"
+  ],
+  "partial": [
+    "Contract freeze only; reducer/risk/policy implementations follow in P1.",
+    "33 event variants imported and round-tripped; architecture smoke assertions pass under Python 3.12/Pydantic 2.13.5.",
+    "Formal pytest/mypy/ruff and joint P0 planted-violation gates pending dev install.",
+    "Config fields require B-provided values; no numeric defaults added.",
+    "Snapshot wire schema follows this freeze."
+  ],
+  "ruling": "Q1-Q8 final user ruling applied; public registry signatures unchanged."
+}

@@ -13,7 +13,7 @@ Two devices work from this file: the demo laptop (station, rehearsal) and the de
 
 ## 1. Shopping / gather list (one bag)
 
-- Printed from `data/markers/` at **100% scale, matte paper**: mat sheets (`mat_letter_A.png`,
+- Printed from `data/build/print/` (tracked; also regenerable into `data/markers/`) at **100% scale, matte paper**: mat sheets (`mat_letter_A.png`,
   `mat_letter_B.png` or the A4 pair; corner markers are printed ON the mat), `tool_10_spreader.png`, `tool_11_spreader_2.png`,
   `surface_20_board.png`, `surface_21_board_2.png`, spare `corner_00..03.png`.
 - Clear tape, scissors.
@@ -113,6 +113,6 @@ charger, adapter, spare markers. Both servers running; four tabs open; video pau
 
 - Run book with all beats and the field procedure: `data/build/runbook_B.md`
 - Status and evidence: `data/build/status_B.md`, `data/eval/2026-09-12/`
-- Marker and mat images: `data/markers/` (regenerate with `python scripts/print_markers.py`)
+- Marker and mat images: `data/build/print/` (tracked; also regenerable into `data/markers/`) (regenerate with `python scripts/print_markers.py`)
 - Station config for the mat: `config/station/mat.yaml` (380 x 230 mm frame; run servers with `STATION_ID=mat`)
-- Mat sheets: `data/markers/mat_letter_A.png` + `_B.png` (or `mat_a4_*`); `python scripts/print_mat.py --paper a4` to regenerate
+- Mat sheets: `data/build/print/mat_letter_A.png` + `_B.png` (or `mat_a4_*`); `python scripts/print_mat.py --paper a4` to regenerate

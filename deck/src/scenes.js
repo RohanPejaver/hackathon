@@ -83,7 +83,7 @@ export function stationAt(sceneId, t) {
     case 'failure': {
       out.hand = { xz: P.park, y: 1.5 }
       out.taint = { gloves: 1, 'bin:mayo': 1 }
-      out.labels = 'all'
+      out.labels = 'taint'
       return out
     }
     case 'insight': {

@@ -1,0 +1,18 @@
+{
+  "phase": "P3",
+  "date": "2026-09-12",
+  "gate_clause": "a complete demo runs in PROTOCOL_ONLY with no camera attached (38 §P3)",
+  "how": "uvicorn src.runtime.app:app (profile demo, no perception pipeline) driven through the real worker display at http://127.0.0.1:8000/ via the page's own buttons; each step waited past t_reorder (500 ms)",
+  "observed": [
+    "start: PROTOCOL ONLY — VISION UNAVAILABLE | surface quiet | every carrier UNKNOWN | log: CONFIG_LOADED, STATION_MODE_CHANGED",
+    "ticket 47 pesto_sandwich, no restriction: RECEIVED -> Bind -> BOUND | alerts=0 | surface quiet (03 A: silence)",
+    "ticket 48 turkey_sandwich 'pine nut allergy': normalized RESOLVED {PINE_NUT} before bind",
+    "Bind 48 -> Tier 0 before any motion: 'PINE NUT — station not clean' with 7 items (gloves, spreader, bin:bread, bin:turkey, bin:mayo, board, landing) — all UNKNOWN in PROTOCOL_ONLY (10, ADR-0011)",
+    "one tap 'All done — station reset' -> 7 OPERATOR_ASSERTION events -> 6 ALERT_UPDATED (checklist ticking) + ALERT_RESOLVED (RESOLVED_BY_ASSERTION) | alerts=0 | surface quiet",
+    "Start prep -> IN_PREP, Item complete -> COMPLETE (no observed pathway, so no hold), Send -> TICKET_RELEASED",
+    "log tail: ALERT_UPDATED x6 > ALERT_RESOLVED > TICKET_PREP_STARTED > TICKET_ITEM_COMPLETE > TICKET_RELEASED"
+  ],
+  "taps": {"tier0_resolve": 1, "note": "≤ 2 taps per alert type is satisfied mechanically for Tier 0 (1), Tier 1 (1: Already swapped) and Tier 2 (2: Cook confirms + Release, or 1: Remake). The gate additionally requires measurement on a teammate; not done by the driver — recorded as PARTIAL until a person measures it."},
+  "fix_found": "uvicorn without the [standard] extra has no WebSocket implementation (server log: 'No supported WebSocket library detected'); FastAPI's TestClient masked it. Pinned uvicorn[standard].",
+  "status": "IMPLEMENTED (live path verified by the driver); VERIFIED pending the teammate tap-count measurement and the replay fallback ladder"
+}

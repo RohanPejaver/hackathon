@@ -83,3 +83,5 @@ same basis as the snapshot that carries it.
 | CG-B11 | Tier 0 checklist ticking | `done` = `carrier_id not in alert.blocking_carriers`; policy shrinks the list via UPDATE as resets land. | UI + S2 |
 | CG-B12 | Q5 ruling adopted | Tier 1 → Tier 2 at `COMPLETE` while the OBSERVED pathway is open; no 20 s timer. Weak evidence never leaves Tier 0. | S2 packet |
 | CG-B13 | Recipe scoping vs `03`'s "spreader" | Required carriers = carriers bound to the recipe's `required_zones` + gloves (15/18). A tool whose home is `tool_rack` is not recipe-required; fixtures B/D use the board. | S3 packet |
+
+| CG-B14 | `uvicorn` alone has no WebSocket implementation; `39` §6 mandates FastAPI + WebSocket and `39` §2 lists `uvicorn ~0.32` | Pin `uvicorn[standard]~=0.32` (same package; the extra supplies `websockets`). Not a new dependency line; recorded per `32` §Selection gate. Found only when the real server was driven from a browser — the FastAPI TestClient speaks WebSocket itself and hid it. | `pyproject.toml` |

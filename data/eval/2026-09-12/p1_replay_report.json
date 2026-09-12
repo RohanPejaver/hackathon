@@ -1,0 +1,1111 @@
+{
+  "all_passed": true,
+  "date": "2026-09-12",
+  "fixtures": {
+    "A-no-risk": {
+      "assertions": [
+        {
+          "assertion": {
+            "silence": true
+          },
+          "detail": "no RAISE/ESCALATE in the run",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "carriers": {
+                "gloves": {
+                  "taints": {
+                    "MILK": {},
+                    "PINE_NUT": {}
+                  }
+                },
+                "spreader": {
+                  "taints": {
+                    "PINE_NUT": {}
+                  }
+                }
+              },
+              "tickets": {
+                "T1": {
+                  "lifecycle": "RELEASED"
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": false,
+      "intervention_before_complete": false,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "B-direct-risk-prevented": {
+      "assertions": [
+        {
+          "assertion": {
+            "alert": {
+              "blocking_carriers": [
+                "gloves",
+                "spreader"
+              ],
+              "ticket": "T48",
+              "tier": 0
+            },
+            "at": 1000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert_resolved": {
+              "reason": "RESOLVED_BY_RESET",
+              "tier": 0
+            },
+            "at": 15000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_after": 15100
+          },
+          "detail": "no RAISE/ESCALATE after t=15100",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "carriers": {
+                "gloves": {
+                  "taints": {}
+                },
+                "spreader_2": {
+                  "taints": {}
+                }
+              },
+              "tickets": {
+                "T48": {
+                  "lifecycle": "RELEASED"
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": true,
+      "intervention_before_complete": true,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "C-indirect-risk": {
+      "assertions": [
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "before": 1500,
+              "tier": 0
+            }
+          },
+          "detail": "no tier-0 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "ticket": "T2",
+              "tier": 1
+            },
+            "at": 4000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "at": 4000,
+            "pathway": {
+              "includes": [
+                "gloves",
+                "board"
+              ],
+              "target": "food:T2"
+            }
+          },
+          "detail": "matched ['bin:pesto', 'gloves', 'board', 'food:T2'] at t=4000",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "ticket": "T2",
+              "tier": 2
+            },
+            "at": 9000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "at": 9000,
+            "held": {
+              "ticket": "T2"
+            }
+          },
+          "detail": "T2 HELD after C-indirect-risk:0013 (t=9000)",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "tickets": {
+                "T2": {
+                  "lifecycle": "HELD"
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": true,
+      "intervention_before_complete": true,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "D-false-positive-already-swapped": {
+      "assertions": [
+        {
+          "assertion": {
+            "alert": {
+              "blocking_carriers": [
+                "spreader"
+              ],
+              "ticket": "T3",
+              "tier": 0
+            },
+            "at": 1000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert_resolved": {
+              "reason": "RESOLVED_BY_ASSERTION",
+              "tier": 0
+            },
+            "at": 5000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_after": 5100
+          },
+          "detail": "no RAISE/ESCALATE after t=5100",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "carriers": {
+                "spreader": {
+                  "taints": {}
+                }
+              },
+              "tickets": {
+                "T3": {
+                  "lifecycle": "RELEASED"
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": false,
+      "intervention_before_complete": true,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "E-false-negative-unobserved": {
+      "assertions": [
+        {
+          "assertion": {
+            "alert": {
+              "blocking_carriers": [
+                "gloves",
+                "board"
+              ],
+              "ticket": "T4",
+              "tier": 0
+            },
+            "at": 1000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "tier": 1
+            }
+          },
+          "detail": "no tier-1 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "tier": 2
+            }
+          },
+          "detail": "no tier-2 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "tickets": {
+                "T4": {
+                  "lifecycle": "RELEASED"
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": true,
+      "intervention_before_complete": true,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "F-concurrent-restricted": {
+      "assertions": [
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "before": 2000,
+              "tier": 0
+            }
+          },
+          "detail": "no tier-0 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "headline_contains": "sequence",
+              "tier": 0
+            },
+            "at": 2000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "tier": 1
+            }
+          },
+          "detail": "no tier-1 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "tier": 2
+            }
+          },
+          "detail": "no tier-2 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "conditions": [
+                "MULTI_RESTRICTION"
+              ],
+              "tickets": {
+                "T5": {
+                  "lifecycle": "BOUND"
+                },
+                "T6": {
+                  "lifecycle": "BOUND"
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": false,
+      "intervention_before_complete": true,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "G-ambiguous-restriction": {
+      "assertions": [
+        {
+          "assertion": {
+            "silence": true
+          },
+          "detail": "no RAISE/ESCALATE in the run",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "at": 0,
+            "state_at": {
+              "tickets": {
+                "T7": {
+                  "lifecycle": "BLOCKED"
+                }
+              }
+            }
+          },
+          "detail": "matched state after G-ambiguous-restriction:0000:blocked",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "tickets": {
+                "T7": {
+                  "lifecycle": "BLOCKED"
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": false,
+      "intervention_before_complete": false,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "H-out-of-view": {
+      "assertions": [
+        {
+          "assertion": {
+            "at": 500,
+            "state_at": {
+              "carriers": {
+                "gloves": {
+                  "epistemic": "UNKNOWN"
+                }
+              }
+            }
+          },
+          "detail": "matched state after H-out-of-view:0002",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "blocking_carriers": [
+                "gloves"
+              ],
+              "ticket": "T8",
+              "tier": 0
+            },
+            "at": 1000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert_resolved": {
+              "reason": "RESOLVED_BY_RESET",
+              "tier": 0
+            },
+            "at": 9000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_after": 9100
+          },
+          "detail": "no RAISE/ESCALATE after t=9100",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "carriers": {
+                "gloves": {
+                  "epistemic": "TRACKED",
+                  "taints": {}
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": false,
+      "intervention_before_complete": true,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "I-back-contamination": {
+      "assertions": [
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "before": 5000,
+              "tier": 0
+            }
+          },
+          "detail": "no tier-0 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "tier": 1
+            }
+          },
+          "detail": "no tier-1 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "tier": 2
+            }
+          },
+          "detail": "no tier-2 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "at": 3000,
+            "state_at": {
+              "carriers": {
+                "bin:mayo": {
+                  "taints": {
+                    "PINE_NUT": {
+                      "hops": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "detail": "matched state after I-back-contamination:0006",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "blocking_carriers": [
+                "gloves",
+                "board",
+                "bin:mayo"
+              ],
+              "ticket": "T48",
+              "tier": 0
+            },
+            "at": 6000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "carriers": {
+                "bin:mayo": {
+                  "taints": {
+                    "PINE_NUT": {}
+                  }
+                }
+              },
+              "tickets": {
+                "T47": {
+                  "lifecycle": "RELEASED"
+                },
+                "T48": {
+                  "lifecycle": "BOUND"
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": true,
+      "intervention_before_complete": true,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "J-wipe-is-not-a-reset": {
+      "assertions": [
+        {
+          "assertion": {
+            "at": 3000,
+            "state_at": {
+              "carriers": {
+                "board": {
+                  "taints": {
+                    "PINE_NUT": {}
+                  }
+                }
+              }
+            }
+          },
+          "detail": "matched state after J-wipe-is-not-a-reset:0002",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "blocking_carriers": [
+                "gloves",
+                "board"
+              ],
+              "ticket": "T9",
+              "tier": 0
+            },
+            "at": 4000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "carriers": {
+                "board": {
+                  "taints": {
+                    "PINE_NUT": {}
+                  }
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": true,
+      "intervention_before_complete": true,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "K-identity-switch": {
+      "assertions": [
+        {
+          "assertion": {
+            "at": 3000,
+            "state_at": {
+              "carriers": {
+                "board": {
+                  "epistemic": "STALE",
+                  "taints": {
+                    "PINE_NUT": {}
+                  }
+                },
+                "landing": {
+                  "epistemic": "STALE",
+                  "taints": {
+                    "PINE_NUT": {}
+                  }
+                }
+              }
+            }
+          },
+          "detail": "matched state after K-identity-switch:0002",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "blocking_carriers": [
+                "gloves",
+                "board",
+                "landing"
+              ],
+              "ticket": "T10",
+              "tier": 0
+            },
+            "at": 4000
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": false,
+      "intervention_before_complete": true,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "L-camera-fault-mid-ticket": {
+      "assertions": [
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "before": 1500,
+              "tier": 0
+            }
+          },
+          "detail": "no tier-0 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "ticket": "T11",
+              "tier": 1
+            },
+            "at": 2500
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "ticket": "T11",
+              "tier": 2
+            },
+            "at": 3000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "at": 3000,
+            "held": {
+              "ticket": "T11"
+            }
+          },
+          "detail": "T11 HELD after L-camera-fault-mid-ticket:0009 (t=3000)",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "at": 4000,
+            "mode": {
+              "mode": "PROTOCOL_ONLY"
+            }
+          },
+          "detail": "mode at t=4000 is PROTOCOL_ONLY",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "at": 4000,
+            "state_at": {
+              "carriers": {
+                "board": {
+                  "epistemic": "UNKNOWN"
+                },
+                "gloves": {
+                  "epistemic": "UNKNOWN"
+                }
+              }
+            }
+          },
+          "detail": "matched state after L-camera-fault-mid-ticket:0013",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert_open": {
+              "tier": 2
+            },
+            "at": 4000
+          },
+          "detail": "open tier-2 alerts at t=4000: ['al-2']",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "blocking_carriers_include": [
+                "gloves"
+              ],
+              "ticket": "T12",
+              "tier": 0
+            },
+            "at": 6000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert_open": {
+              "tier": 2
+            },
+            "at": 6000
+          },
+          "detail": "open tier-2 alerts at t=6000: ['al-2']",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "tickets": {
+                "T11": {
+                  "lifecycle": "HELD"
+                },
+                "T12": {
+                  "lifecycle": "BOUND"
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": false,
+      "intervention_before_complete": true,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "M-alert-storm-suppression": {
+      "assertions": [
+        {
+          "assertion": {
+            "alert": {
+              "ticket": "T13",
+              "tier": 1
+            },
+            "at": 3000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "raise_count": {
+              "equals": 1,
+              "tier": 1
+            }
+          },
+          "detail": "1 tier-1 RAISE/ESCALATE",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "tier": 2
+            }
+          },
+          "detail": "no tier-2 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "tickets": {
+                "T13": {
+                  "lifecycle": "IN_PREP"
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": false,
+      "intervention_before_complete": true,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    },
+    "demo": {
+      "assertions": [
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "before": 9000,
+              "tier": 0
+            }
+          },
+          "detail": "no tier-0 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "before": 22000,
+              "tier": 1
+            }
+          },
+          "detail": "no tier-1 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "before": 25000,
+              "tier": 2
+            }
+          },
+          "detail": "no tier-2 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "at": 3000,
+            "state_at": {
+              "carriers": {
+                "board": {
+                  "taints": {
+                    "PINE_NUT": {}
+                  }
+                },
+                "gloves": {
+                  "taints": {
+                    "PINE_NUT": {}
+                  }
+                },
+                "spreader": {
+                  "taints": {
+                    "PINE_NUT": {}
+                  }
+                }
+              }
+            }
+          },
+          "detail": "matched state after demo:0006",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "at": 6000,
+            "state_at": {
+              "carriers": {
+                "bin:mayo": {
+                  "taints": {
+                    "PINE_NUT": {
+                      "hops": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "detail": "matched state after demo:0009",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "blocking_carriers": [
+                "gloves",
+                "spreader",
+                "board",
+                "bin:mayo"
+              ],
+              "ticket": "T48",
+              "tier": 0
+            },
+            "at": 9000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert_resolved": {
+              "reason": "RESOLVED_BY_ASSERTION",
+              "tier": 0
+            },
+            "at": 16000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "no_alerts_of_tier": {
+              "after": 16100,
+              "before": 21000,
+              "tier": 0
+            }
+          },
+          "detail": "no tier-0 RAISE/ESCALATE in window",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "at": 16000,
+            "state_at": {
+              "carriers": {
+                "bin:mayo": {
+                  "taints": {}
+                },
+                "board_2": {
+                  "taints": {}
+                },
+                "gloves": {
+                  "taints": {}
+                },
+                "spreader_2": {
+                  "taints": {}
+                }
+              }
+            }
+          },
+          "detail": "matched state after demo:0020",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "blocking_carriers": [
+                "spreader_2"
+              ],
+              "ticket": "T49",
+              "tier": 0
+            },
+            "at": 21000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "ticket": "T49",
+              "tier": 1
+            },
+            "at": 22000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "at": 22000,
+            "pathway": {
+              "includes": [
+                "spreader_2"
+              ],
+              "target": "food:T49"
+            }
+          },
+          "detail": "matched ['bin:pesto', 'spreader_2', 'food:T49'] at t=22000",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert": {
+              "headline_contains": "hold",
+              "ticket": "T49",
+              "tier": 2
+            },
+            "at": 25000
+          },
+          "detail": "matched",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "at": 25000,
+            "held": {
+              "ticket": "T49"
+            }
+          },
+          "detail": "T49 HELD after demo:0035 (t=25000)",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "alert_open": {
+              "tier": 2
+            },
+            "at": 25000
+          },
+          "detail": "open tier-2 alerts at t=25000: ['al-3']",
+          "passed": true
+        },
+        {
+          "assertion": {
+            "final_state": {
+              "tickets": {
+                "T47": {
+                  "lifecycle": "RELEASED"
+                },
+                "T48": {
+                  "lifecycle": "RELEASED"
+                },
+                "T49": {
+                  "lifecycle": "HELD"
+                }
+              }
+            }
+          },
+          "detail": "matched",
+          "passed": true
+        }
+      ],
+      "deterministic": true,
+      "hazard": true,
+      "intervention_before_complete": true,
+      "passed": true,
+      "rejected": [],
+      "silent_miss": false
+    }
+  },
+  "hazard_fixtures": 6,
+  "intervention_recall": 1.0,
+  "phase": "P1",
+  "silent_miss_rate": 0.0
+}

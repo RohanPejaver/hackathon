@@ -18,7 +18,7 @@ dependencies = [
   "pyyaml~=6.0",
   # runtime
   "fastapi~=0.115",
-  "uvicorn~=0.32",
+  "uvicorn[standard]~=0.32",  # the standard extra supplies the WebSocket implementation 39 §6 relies on
 ]
 
 [project.optional-dependencies]

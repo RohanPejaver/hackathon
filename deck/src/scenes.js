@@ -22,12 +22,12 @@ export const center = (z) => {
 export const size = (z) => [(z.x[1] - z.x[0]) / 100, (z.y[1] - z.y[0]) / 100]
 
 export const POSES = {
-  overhead:      { pos: [0, 14.2, 0.3],  look: [0, 0, -0.6] },
+  overhead:      { pos: [0, 14.6, 0.1],  look: [0, 0, -1.0] },
   overheadFar:   { pos: [0, 19, 1],      look: [0, 0, 0] },
   overheadFit:   { pos: [0, 17.5, 2.5],  look: [0, 0, 0.6] },
   overheadClose: { pos: [0.4, 9.5, 3.2], look: [0.4, 0, -0.8] },
   threeQuarter:  { pos: [7.5, 6.5, 8.5], look: [0.2, 0, -0.4] },
-  lowInside:     { pos: [-3.2, 2.6, 6.8],look: [-1.2, 0.5, -1.5] },
+  lowInside:     { pos: [-3.0, 4.2, 10.5],look: [-0.6, 0.3, -1.6] },
   diagram:       { pos: [1, 15.5, 13.5], look: [4.6, 0, -0.3] },
   overheadUp:    { pos: [0, 14.2, 1.8],  look: [0, 0, 1.0] },
   side:          { pos: [12, 5.5, 5.5],  look: [4.2, 0, -0.6] },
@@ -90,7 +90,7 @@ export function stationAt(sceneId, t) {
       out.hand = null
       out.taint = { gloves: 1, 'bin:mayo': 1, spreader: 1, board: 1 }
       out.labels = 'none'
-      out.dim = 0.55
+      out.dim = 0.6
       return out
     }
     case 'reveal': {

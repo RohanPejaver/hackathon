@@ -33,7 +33,7 @@ export const SCENE_TEXT = {
         </div>
       </div>
       <div className="corner-bl">
-        <div className="micro petal" style={{ fontSize: "clamp(22px, 1.8vw, 30px)" }}>The two tickets</div>
+        <div className="micro petal" style={{ fontSize: "clamp(17px, min(1.4vw, 2.4vh), 24px)" }}>The two tickets</div>
         <div className="tickets">
           <div className="ticket">
             <span className="id">#47</span><span className="life">done</span>
@@ -130,9 +130,9 @@ export const SCENE_TEXT = {
       </div>
       <div className="corner-bl" style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 40, bottom: '4vh' }}>
         <div className="frost petal-edge" style={{ maxWidth: '56vw', padding: '22px 30px' }}>
-          <h1 className="h3" style={{ fontSize: 'clamp(34px, 3.1vw, 54px)' }}>It doesn't replace the protocol.<br /><span className="petal">It checks that the protocol happened.</span></h1>
+          <h1 className="h3" style={{ fontSize: 'clamp(26px, min(2.4vw, 4.2vh), 42px)' }}>It doesn't replace the protocol.<br /><span className="petal">It checks that the protocol happened.</span></h1>
         </div>
-        <div className="h1" style={{ color: 'var(--ink)', fontSize: 'clamp(80px, 8.5vw, 150px)', lineHeight: 1 }}>{PRODUCT}<span className="petal">.</span></div>
+        <div className="brand big" style={{ fontSize: 'clamp(64px, min(6.5vw, 11vh), 118px)' }}><span className="b1">Se</span><span className="b2">que</span><span className="b3">nce</span><span className="dot">.</span></div>
       </div>
     </>
   ),

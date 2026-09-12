@@ -14,9 +14,9 @@ function Sequence({ t }) {
   return (
     <>
       <div className="corner-tl"><Brand /></div>
-      <div className="corner-tl" style={{ top: '13vh' }}>
-        <div className="frost petal-edge" style={{ maxWidth: '70vw' }}>
-          <h1 className="h2" style={{ maxWidth: '22ch' }}>Contamination happens over a <span className="petal">sequence of actions,</span> not one picture.</h1>
+      <div className="corner-tl" style={{ top: '12vh' }}>
+        <div className="frost petal-edge" style={{ maxWidth: '62vw' }}>
+          <h1 className="h2" style={{ maxWidth: '24ch' }}>Contamination happens over a <span className="petal">sequence of actions,</span> not one picture.</h1>
         </div>
       </div>
       <div className="corner-bl">

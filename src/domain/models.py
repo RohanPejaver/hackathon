@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import re
 from enum import IntEnum, StrEnum
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator, model_validator
 
 Timestamp = int  # CONTRACT-GAP: timestamp representation omitted; scenario milliseconds (36).
 CarrierId = str
@@ -16,6 +17,12 @@ StationId = str
 Seq = int
 AlertKey = str
 KnowledgeVersion = str
+
+
+# 02 §Unsupported claims. "clean" alone is permitted: 26's approved copy uses it.
+PROHIBITED_CLAIMS = re.compile(
+    r"\bsafe\b|\bunsafe\b|\bcontaminat\w*|allergen[- ]free|\bsanitiz\w*|\bdisinfect\w*", re.I
+)
 
 
 class Model(BaseModel):
@@ -377,6 +384,23 @@ class Alert(Model):
     updated_at: Timestamp
     body: str | None = None  # one explanatory line for Tier 1/2 (26); template-generated
     dismissed_until: Timestamp | None = None  # display suppressed until t; state unchanged (26)
+
+    @field_validator("headline")
+    @classmethod
+    def _glanceable_and_honest(cls, v: str) -> str:
+        # 26: headline <= 6 words. 02: structurally incapable of a safety claim.
+        if len([w for w in v.split() if re.search(r"[A-Za-z0-9]", w)]) > 6:
+            raise ValueError("headline must be <= 6 words (26)")
+        if PROHIBITED_CLAIMS.search(v):
+            raise ValueError("headline carries a prohibited claim word (02)")
+        return v
+
+    @field_validator("body")
+    @classmethod
+    def _honest_body(cls, v: str | None) -> str | None:
+        if v and PROHIBITED_CLAIMS.search(v):
+            raise ValueError("body carries a prohibited claim word (02)")
+        return v
 
 
 class AlertCommand(Model):

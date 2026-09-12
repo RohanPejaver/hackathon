@@ -40,10 +40,12 @@ byte-for-byte via `/inspector` export. Record the result in `status_B.md`.
 
 ## Camera-unplug drill (rehearse once for real)
 
-With no camera the equivalent is a forced health failure: `POST /action {kind: HEALTH_DRILL}`
-from the inspector → `HEALTH_DEGRADED` → controller emits `STATION_MODE_CHANGED(PROTOCOL_ONLY)`
-→ all carriers `UNKNOWN` → banner states vision unavailable → bind a restricted ticket →
-Tier 0 still fires. Narrate it: *"A failure that is part of the script is not a failure."*
+With no camera there is no FULL mode to fall from, so the drill is scenario L replayed through
+the display: `STATION_REPLAY=scenarios/L-camera-fault-mid-ticket.yaml uvicorn src.runtime.app:app`.
+Watch: Tier 2 hold raised → `STATION_MODE_CHANGED(PROTOCOL_ONLY, camera fault)` → every carrier
+`UNKNOWN`, banner **PROTOCOL ONLY — VISION UNAVAILABLE** → the hold persists → the next
+restricted bind still gets Tier 0. Narrate it: *"A failure that is part of the script is not a
+failure."*
 
 ## Tap-count measurement (P3 gate — measured on a teammate, not the author)
 

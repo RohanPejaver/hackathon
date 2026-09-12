@@ -503,7 +503,7 @@ def to_domain(loaded: LoadedConfig) -> tuple[Any, Any, Any]:
             z.zone_id: dom.Zone(
                 zone_id=z.zone_id,
                 polygon=[dom.Point2D(x=x, y=y) for x, y in z.polygon],
-                kind=z.kind,
+                kind=dom.ZoneKind(z.kind),
                 contents=list(z.contents),
                 bound_carrier=z.bound_carrier,
             )

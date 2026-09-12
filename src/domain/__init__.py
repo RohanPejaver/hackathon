@@ -3,6 +3,9 @@ from .models import (
     GRADE_RANK as GRADE_RANK,
 )
 from .models import (
+    PROHIBITED_CLAIMS as PROHIBITED_CLAIMS,
+)
+from .models import (
     Action as Action,
 )
 from .models import (

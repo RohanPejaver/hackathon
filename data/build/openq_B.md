@@ -62,3 +62,24 @@ signature in `22`. Read `data/build/status_B.md` for the wire-shape location.
 **Timestamp**: integer milliseconds. `WALL` = Unix epoch ms (`SystemClock`); `LOG` = ms from
 scenario/log start (`LogClock`). `Snapshot.time.kind` says which. Event `t_occurred` uses the
 same basis as the snapshot that carries it.
+
+
+---
+
+## Sole-driver decisions (after Device A stopped) — every one is a CONTRACT-GAP resolution, not a doc edit
+
+| id | gap (docs silent) | decision | where |
+|---|---|---|---|
+| CG-B1 | Who runs the reorder pump | The runtime tick calls the log's private `_drain(now)` every 100 ms with the injected clock (39 §1 puts reorder in the runtime loop; Q2 keeps the buffer inside `events/`). | `src/runtime/app.py::Runtime.tick` |
+| CG-B2 | How derived alert events and holds enter the log | After `evaluate`, each `AlertCommand` is emitted as `ALERT_<KIND>` (`source=SYSTEM`) carrying the command; a Tier 2 RAISE/ESCALATE also emits `TICKET_HELD` so the hold is state (16 Tier 2, 17 HELD). Replay re-derives these; a recorded log's derived events are inputs to nothing. | `app.py::_assess`; S3 runner |
+| CG-B3 | When risk is evaluated | Synchronously after every committed `mutates_state` event (37 req 3: Tier 0 before any motion). | `app.py::_on_committed` |
+| CG-B4 | Ticket intake | `TICKET_RECEIVED` is immediately followed by `src.orders.intake` → `TICKET_RESTRICTION_RESOLVED` or `TICKET_BLOCKED`, in the runtime and in replay alike (17: normalization cached on the ticket as events). | `app.py::tick`; S4 `intake` |
+| CG-B5 | Worker action → event map | NEW_TICKET→ManualEntrySource→TICKET_RECEIVED(+intake); BIND_TICKET→TICKET_BOUND (refused unless RECEIVED, all RESOLVED, mode≠CALIBRATION); PREP_STARTED; ITEM_COMPLETE; RESOLVE_HOLD→TICKET_RELEASED; REMAKE→TICKET_VOIDED+TICKET_REWORK_OPENED(`<id>R`); ASSERT_CLEAN/REPLACED→OPERATOR_ASSERTION per carrier (ASSERTED); ACKNOWLEDGE→ALERT_ACKNOWLEDGED; DISMISS→ALERT_UPDATED with worker_slot (Tier 2 refused). | `app.py::on_action` |
+| CG-B6 | Start mode with no camera | `report_vision(UNAVAILABLE)` then `request_mode(PROTOCOL_ONLY)`; REPLAY when `STATION_REPLAY` is set. | `app.py::build` |
+| CG-B7 | Camera-unplug drill without a camera | Rehearsed as scenario L replayed through the UI (HEALTH→PROTOCOL_ONLY mid-ticket, hold persists, Tier 0 still fires). Level 1 of the ladder is N/A. | `runbook_B.md` |
+| CG-B8 | Staleness by time | `src/domain/epistemic.py::effective_epistemic(carrier, now, cfg)`: computed at query time by risk and the snapshot projection; the reducer never runs a timer. | domain |
+| CG-B9 | FOOD carriers' `t_stale` | SURFACE value. | `config.py::to_domain` |
+| CG-B10 | Alert headline honesty | `domain.Alert` validators: ≤ 6 alnum words, no prohibited claim word — structural, per 02. | `src/domain/models.py` |
+| CG-B11 | Tier 0 checklist ticking | `done` = `carrier_id not in alert.blocking_carriers`; policy shrinks the list via UPDATE as resets land. | UI + S2 |
+| CG-B12 | Q5 ruling adopted | Tier 1 → Tier 2 at `COMPLETE` while the OBSERVED pathway is open; no 20 s timer. Weak evidence never leaves Tier 0. | S2 packet |
+| CG-B13 | Recipe scoping vs `03`'s "spreader" | Required carriers = carriers bound to the recipe's `required_zones` + gloves (15/18). A tool whose home is `tool_rack` is not recipe-required; fixtures B/D use the board. | S3 packet |

@@ -46,8 +46,8 @@ Status vocabulary per `docs/engineering/38-workflow.md`. A folds this into `PROJ
 | Phase | Status | Evidence |
 |---|---|---|
 | P0 Foundations | `VERIFIED` | `data/eval/2026-09-12/p0_gate_report.json` |
-| P1 Reasoning core | `PARTIAL` | reducer (79 tests), risk/policy/knowledge (91), orders (169) green with strict mypy + lint-imports; **fixtures A–M + replay runner (S3) still landing** → gate artifact pending |
-| P2 Orders & knowledge | `IMPLEMENTED` | normalizer with mandatory AMBIGUOUS, BLOCKED→BOUND unreachable (proof test), closure/provider; gate (scenario G end to end) runs with the replay suite |
+| P1 Reasoning core | `VERIFIED` | `data/eval/2026-09-12/p1_replay_report.json`: 14/14 fixtures (A–M + demo) pass, each byte-identical across two runs, IR = 1.0, SMR = 0.0; `pytest -q` 526 passed; `mypy --strict` on 38 core files; `lint-imports` 8 kept |
+| P2 Orders & knowledge | `VERIFIED` | scenario G end to end (`G-ambiguous-restriction` passes: BLOCKED, bind refused, silence); `BLOCKED→BOUND` unreachable proof in `tests/unit/orders/test_lifecycle.py`; below-threshold text never RESOLVED (hypothesis); Tier 0 lists are recipe-scoped (`test_tainted_pesto_bin_is_not_in_a_turkey_sandwich_checklist`) |
 | P3 Worker interface + `PROTOCOL_ONLY` | `IMPLEMENTED` | `data/eval/2026-09-12/p3_protocol_only_rehearsal.json`: full demo path driven live through the display with no camera; three surfaces + carrier grid + trace + inspector verified; **teammate tap-count measurement not yet done** |
 | P4 / P5 Perception | `BLOCKED` — no camera, no annotated fixtures | hardware check above |
 | P6 Demo hardening | `OPEN` | fallback ladder rehearsal waits on `scenarios/demo.yaml` (S3) |

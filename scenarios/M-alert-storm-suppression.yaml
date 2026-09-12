@@ -1,0 +1,81 @@
+# 03 §M — Alert storm suppression. Ten seconds of continuous contact between one tainted
+# carrier and the item: exactly ONE alert, not forty. Same (ticket, allergen, source, nodes)
+# -> same pathway_signature -> same alert_key -> UPDATED, never re-raised (16 §Alert
+# identity). Assembly already collapsed 30fps into episodes; this fixture feeds twenty
+# episodes and expects the policy layer to hold the line.
+scenario: M-alert-storm-suppression
+description: >-
+  T13 (turkey sandwich, "pine nut allergy") binds and starts prep on a TRACKED-clean
+  station. Gloves enter the pesto bin at t=2000, then touch the landing zone (where the
+  item sits) in twenty CONTACT_BEGIN/CONTACT_END episodes from t=3000 to t=12900. Expected:
+  a single Tier 1 raise (the first episode opens the pathway bin:pesto -> gloves ->
+  food:T13); every later episode re-derives the same signature and may UPDATE it. No Tier 2
+  — the item never completes.
+schema_version: 1
+hazard: false
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    gloves:       { epistemic: TRACKED }
+    spreader:     { epistemic: TRACKED }
+    board:        { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  - { t: 0,     type: TICKET_RECEIVED,     ticket: T13, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 1000,  type: TICKET_BOUND,        ticket: T13 }
+  - { t: 1500,  type: TICKET_PREP_STARTED, ticket: T13 }
+  - { t: 2000,  type: ZONE_ENTRY,          carrier: gloves, zone: "bin:pesto" }
+  # twenty contact episodes, 400 ms each, every 500 ms
+  - { t: 3000,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 3400,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 3500,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 3900,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 4000,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 4400,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 4500,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 4900,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 5000,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 5400,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 5500,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 5900,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 6000,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 6400,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 6500,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 6900,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 7000,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 7400,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 7500,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 7900,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 8000,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 8400,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 8500,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 8900,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 9000,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 9400,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 9500,  type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 9900,  type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 10000, type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 10400, type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 10500, type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 10900, type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 11000, type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 11400, type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 11500, type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 11900, type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 12000, type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 12400, type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+  - { t: 12500, type: CONTACT_BEGIN, a: gloves, b: landing }
+  - { t: 12900, type: CONTACT_END,   a: gloves, b: landing, duration_ms: 400 }
+
+expect:
+  - { at: 3000, alert: { tier: 1, ticket: T13 } }
+  - { raise_count: { tier: 1, equals: 1 } }
+  - { no_alerts_of_tier: { tier: 2 } }
+  - { final_state: { tickets: { T13: { lifecycle: IN_PREP } } } }

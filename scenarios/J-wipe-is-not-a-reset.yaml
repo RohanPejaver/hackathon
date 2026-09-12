@@ -1,0 +1,37 @@
+# 03 §J — Wipe is not a reset (ADR-0009). Wiping redistributes protein; SURFACE_WIPE is
+# recorded (so the UI can explain why the prompt persists) and clears NOTHING. The reducer
+# returns the same state. This is the single most counter-intuitive event in the system and
+# a future contributor will be tempted to make it clear taint — this fixture is why not.
+scenario: J-wipe-is-not-a-reset
+description: >-
+  TRACKED-clean station. Gloves enter the pesto bin and touch the board; the board is then
+  wiped at t=3000. The board still carries PINE_NUT after the wipe. T9 (turkey sandwich,
+  "pine nut allergy") binds at t=4000: Tier 0 with blocking_carriers exactly [gloves,
+  board] — the wipe bought nothing. The board's taint persists to the end.
+schema_version: 1
+hazard: true
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    gloves:       { epistemic: TRACKED }
+    spreader:     { epistemic: TRACKED }
+    board:        { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  - { t: 1000, type: ZONE_ENTRY,      carrier: gloves, zone: "bin:pesto" }
+  - { t: 2000, type: CONTACT_BEGIN,   a: gloves, b: board }
+  - { t: 3000, type: SURFACE_WIPE,    carrier: board }
+  - { t: 3500, type: TICKET_RECEIVED, ticket: T9, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 4000, type: TICKET_BOUND,    ticket: T9 }
+
+expect:
+  - { at: 3000, state_at: { carriers: { board: { taints: { PINE_NUT: {} } } } } }
+  - { at: 4000, alert: { tier: 0, ticket: T9, blocking_carriers: [gloves, board] } }
+  - { final_state: { carriers: { board: { taints: { PINE_NUT: {} } } } } }

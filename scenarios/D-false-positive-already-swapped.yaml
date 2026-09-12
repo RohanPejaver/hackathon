@@ -1,0 +1,45 @@
+# 03 §D — False positive: the worker actually cleaned. The swap happened off-camera, so the
+# system still believes the spreader is tainted. One tap ("Already swapped") is an
+# OPERATOR_ASSERTION in the same log; the carrier becomes ASSERTED-clean and the prompt
+# clears. No remake. No argument.
+scenario: D-false-positive-already-swapped
+description: >-
+  The spreader carries OBSERVED PINE_NUT (hop 1) — it was last observed contacting pesto
+  and its replacement was not observed; everything else is TRACKED and clean. T3 (turkey
+  sandwich, "pine nut allergy") binds: Tier 0 with blocking_carriers exactly [spreader].
+  At t=5000 the worker asserts the spreader was REPLACED (grade ASSERTED, an operator
+  event). The alert resolves RESOLVED_BY_ASSERTION, the taint is cleared at ASSERTED grade
+  (never promoted to OBSERVED), and prep proceeds in silence.
+schema_version: 1
+hazard: false
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    spreader:     { taints: { PINE_NUT: { grade: OBSERVED, hops: 1 } }, epistemic: TRACKED }
+    gloves:       { epistemic: TRACKED }
+    board:        { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  - { t: 0,     type: TICKET_RECEIVED,      ticket: T3, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 1000,  type: TICKET_BOUND,         ticket: T3 }
+  - { t: 5000,  type: OPERATOR_ASSERTION,   carrier: spreader, claim: REPLACED }
+  - { t: 6000,  type: TICKET_PREP_STARTED,  ticket: T3 }
+  - { t: 9000,  type: TICKET_ITEM_COMPLETE, ticket: T3 }
+  - { t: 10000, type: TICKET_RELEASED,      ticket: T3 }
+
+expect:
+  - { at: 1000, alert: { tier: 0, ticket: T3, blocking_carriers: [spreader] } }
+  - { at: 5000, alert_resolved: { tier: 0, reason: RESOLVED_BY_ASSERTION } }
+  - { no_alerts_after: 5100 }
+  - final_state:
+      carriers:
+        spreader: { taints: {} }
+      tickets:
+        T3: { lifecycle: RELEASED }

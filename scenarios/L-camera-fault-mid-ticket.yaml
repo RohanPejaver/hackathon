@@ -1,0 +1,54 @@
+# 03 §L — Camera fault mid-ticket (ADR-0011). Clean transition to PROTOCOL_ONLY: all
+# carriers UNKNOWN, Tier 1 disabled, existing Tier 2 holds persist, and Tier 0 still fires on
+# every restricted bind with zero perception.
+scenario: L-camera-fault-mid-ticket
+description: >-
+  T11 (turkey sandwich, "pine nut allergy") binds on a TRACKED-clean station (no Tier 0 at
+  bind). Gloves enter the pesto bin and go straight to the landing zone at t=2500: an
+  OBSERVED pathway bin:pesto -> gloves -> food:T11 -> Tier 1. The item completes at t=3000
+  -> Tier 2 HOLD. At t=4000 the camera fails: STATION_MODE_CHANGED(PROTOCOL_ONLY) sets
+  every carrier UNKNOWN. The Tier 2 hold persists (never auto-resolved) and T11 stays HELD.
+  T12 (turkey, no mayo, "pine nut allergy") binds at t=6000 with no perception at all and
+  Tier 0 still fires, gloves among the carriers requiring reset.
+schema_version: 1
+hazard: false
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    gloves:       { epistemic: TRACKED }
+    spreader:     { epistemic: TRACKED }
+    board:        { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  - { t: 0,    type: TICKET_RECEIVED,      ticket: T11, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 1000, type: TICKET_BOUND,         ticket: T11 }
+  - { t: 1500, type: TICKET_PREP_STARTED,  ticket: T11 }
+  - { t: 2000, type: ZONE_ENTRY,           carrier: gloves, zone: "bin:pesto" }
+  - { t: 2500, type: CONTACT_BEGIN,        a: gloves, b: landing }
+  - { t: 3000, type: TICKET_ITEM_COMPLETE, ticket: T11 }
+  - { t: 4000, type: STATION_MODE_CHANGED, mode: PROTOCOL_ONLY, cause: "camera fault" }
+  - { t: 5000, type: TICKET_RECEIVED,      ticket: T12, items: [turkey_no_mayo],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 6000, type: TICKET_BOUND,         ticket: T12 }
+
+expect:
+  - { no_alerts_of_tier: { tier: 0, before: 1500 } }
+  - { at: 2500, alert: { tier: 1, ticket: T11 } }
+  - { at: 3000, alert: { tier: 2, ticket: T11 } }
+  - { at: 3000, held: { ticket: T11 } }
+  - { at: 4000, mode: { mode: PROTOCOL_ONLY } }
+  - { at: 4000, state_at: { carriers: { gloves: { epistemic: UNKNOWN }, board: { epistemic: UNKNOWN } } } }
+  - { at: 4000, alert_open: { tier: 2 } }
+  - { at: 6000, alert: { tier: 0, ticket: T12, blocking_carriers_include: [gloves] } }
+  - { at: 6000, alert_open: { tier: 2 } }
+  - final_state:
+      tickets:
+        T11: { lifecycle: HELD }
+        T12: { lifecycle: BOUND }

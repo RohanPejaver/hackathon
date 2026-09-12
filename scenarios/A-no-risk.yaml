@@ -1,0 +1,41 @@
+# 03 §A — No risk. The system is quiet by default: a ticket with no restriction is prepared
+# with pesto on a tracked station and nothing fires, while carrier state still updates.
+scenario: A-no-risk
+description: >-
+  Ticket T1 (pesto sandwich, no restriction) is bound and built with pesto on a fully
+  TRACKED, clean station. Expected: complete silence — no Tier 0, no alert — while gloves
+  and spreader honestly pick up the pesto profile (PINE_NUT, MILK). Asserting the absence
+  of output is as important as asserting its presence.
+schema_version: 1
+hazard: false
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    gloves:       { epistemic: TRACKED }
+    spreader:     { epistemic: TRACKED }
+    board:        { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  - { t: 0,    type: TICKET_RECEIVED,      ticket: T1, items: [pesto_sandwich] }
+  - { t: 1000, type: TICKET_BOUND,         ticket: T1 }
+  - { t: 2000, type: ZONE_ENTRY,           carrier: gloves, zone: "bin:pesto" }
+  - { t: 3000, type: CONTACT_BEGIN,        a: gloves, b: spreader }
+  - { t: 3500, type: TICKET_PREP_STARTED,  ticket: T1 }
+  - { t: 4000, type: CONTACT_BEGIN,        a: spreader, b: landing }
+  - { t: 5000, type: TICKET_ITEM_COMPLETE, ticket: T1 }
+  - { t: 6000, type: TICKET_RELEASED,      ticket: T1 }
+
+expect:
+  - { silence: true }
+  - final_state:
+      carriers:
+        gloves:   { taints: { PINE_NUT: {}, MILK: {} } }
+        spreader: { taints: { PINE_NUT: {} } }
+      tickets:
+        T1: { lifecycle: RELEASED }

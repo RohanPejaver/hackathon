@@ -1,0 +1,44 @@
+# 03 §F — Concurrent restricted orders. Two tickets with different restrictions bound to one
+# station at once. No per-ticket attribution is attempted: the station raises condition
+# MULTI_RESTRICTION and a Tier 0 says "Two active restrictions — sequence them" (17
+# §Concurrency). The system enforces the existing kitchen protocol, not one it invented.
+scenario: F-concurrent-restricted
+description: >-
+  T5 (turkey sandwich, "pine nut allergy") binds at t=1000 on a TRACKED-clean station — no
+  Tier 0. T6 (turkey, no mayo, "egg allergy", resolved via the EGG alias) binds at t=2000
+  while T5 is still bound: the station condition MULTI_RESTRICTION is set and a Tier 0
+  whose headline asks to sequence the tickets is raised. No Tier 1/2 — nothing was
+  observed touching anything.
+schema_version: 1
+hazard: false
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    gloves:       { epistemic: TRACKED }
+    spreader:     { epistemic: TRACKED }
+    board:        { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  - { t: 0,    type: TICKET_RECEIVED, ticket: T5, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 500,  type: TICKET_RECEIVED, ticket: T6, items: [turkey_no_mayo],
+      restrictions: [{ raw_text: "egg allergy" }] }
+  - { t: 1000, type: TICKET_BOUND,    ticket: T5 }
+  - { t: 2000, type: TICKET_BOUND,    ticket: T6 }
+
+expect:
+  - { no_alerts_of_tier: { tier: 0, before: 2000 } }
+  - { at: 2000, alert: { tier: 0, headline_contains: "sequence" } }
+  - { no_alerts_of_tier: { tier: 1 } }
+  - { no_alerts_of_tier: { tier: 2 } }
+  - final_state:
+      conditions: [MULTI_RESTRICTION]
+      tickets:
+        T5: { lifecycle: BOUND }
+        T6: { lifecycle: BOUND }

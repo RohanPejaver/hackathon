@@ -25,7 +25,10 @@ def test_example_validates_and_covers_the_handshake_minimum():
     assert any(st.rule_id == "absence" for a in s.interventions for st in a.derivation)
     assert any("2 hops" in st.narrative for a in s.interventions for st in a.derivation)
     # the A-owned half is exactly A's DisplayPayload
-    DisplayPayload.model_validate({"state_summary": _example()["state_summary"], "interventions": _example()["interventions"]})
+    ex = _example()
+    DisplayPayload.model_validate(
+        {"state_summary": ex["state_summary"], "interventions": ex["interventions"]}
+    )
 
 
 def test_schema_file_is_generated_from_the_models():
@@ -36,7 +39,16 @@ def test_schema_file_is_generated_from_the_models():
 def test_exactly_three_epistemic_values_and_no_safe_member_or_identity():
     schema = json.dumps(wire.Snapshot.model_json_schema())
     assert '"enum": ["TRACKED", "STALE", "UNKNOWN"]' in schema
-    for bad in ("SAFE", "UNOBSERVED", "SUSPECT", '"name"', '"worker_id"', '"customer"', '"employee"'):
+    forbidden = (
+        "SAFE",
+        "UNOBSERVED",
+        "SUSPECT",
+        '"name"',
+        '"worker_id"',
+        '"customer"',
+        '"employee"',
+    )
+    for bad in forbidden:
         assert bad not in schema, bad
 
 

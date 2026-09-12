@@ -1,0 +1,39 @@
+# 03 §K — Tracker identity switch between two carriers. When perception cannot tell the
+# board from the landing surface, TRACK_IDENTITY_SUSPECT merges their taint sets
+# pessimistically and marks both STALE (13 §Transition table). Never a silent reassignment.
+scenario: K-identity-switch
+description: >-
+  TRACKED-clean station. Gloves enter the pesto bin and touch the board (board tainted).
+  At t=3000 the tracker reports it cannot distinguish board from landing (occlusion): both
+  now carry PINE_NUT and both are STALE. T10 (turkey sandwich, "pine nut allergy") binds at
+  t=4000: Tier 0 with blocking_carriers exactly [gloves, board, landing].
+schema_version: 1
+hazard: false
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    gloves:       { epistemic: TRACKED }
+    spreader:     { epistemic: TRACKED }
+    board:        { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  - { t: 1000, type: ZONE_ENTRY,             carrier: gloves, zone: "bin:pesto" }
+  - { t: 2000, type: CONTACT_BEGIN,          a: gloves, b: board }
+  - { t: 3000, type: TRACK_IDENTITY_SUSPECT, a: board, b: landing, cause: occlusion }
+  - { t: 3500, type: TICKET_RECEIVED,        ticket: T10, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 4000, type: TICKET_BOUND,           ticket: T10 }
+
+expect:
+  - at: 3000
+    state_at:
+      carriers:
+        board:   { epistemic: STALE, taints: { PINE_NUT: {} } }
+        landing: { epistemic: STALE, taints: { PINE_NUT: {} } }
+  - { at: 4000, alert: { tier: 0, ticket: T10, blocking_carriers: [gloves, board, landing] } }

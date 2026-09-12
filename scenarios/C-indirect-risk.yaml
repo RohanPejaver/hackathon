@@ -1,0 +1,48 @@
+# 03 §C — Indirect risk (multi-hop). Transitive propagation through a surface: the pathway
+# search is not a first-order adjacency check.
+#
+# The bread has no carrier of its own in the demo station; the pesto reaches the item via
+# gloves -> board -> (item on the landing). The contact board->landing resolves to the landing
+# surface AND to food:T2, the ticket's food carrier created at TICKET_PREP_STARTED.
+scenario: C-indirect-risk
+description: >-
+  T2 (turkey sandwich, "pine nut allergy") binds on a TRACKED-clean station — no Tier 0 at
+  bind. During prep the gloves enter the pesto bin, touch the board, take clean bread, and
+  the board-built item lands: an OBSERVED pathway of length 3 (bin:pesto -> gloves -> board
+  -> food:T2) opens at t=4000 -> Tier 1 while IN_PREP. The item completes unresolved at
+  t=9000 -> escalation to Tier 2 and the ticket is HELD. No reset anywhere. The tier-0
+  silence is asserted only up to TICKET_PREP_STARTED: whether the precondition check
+  re-fires mid-prep when a required carrier becomes tainted is not what C proves.
+schema_version: 1
+hazard: true
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    gloves:       { epistemic: TRACKED }
+    spreader:     { epistemic: TRACKED }
+    board:        { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  - { t: 0,    type: TICKET_RECEIVED,      ticket: T2, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 1000, type: TICKET_BOUND,         ticket: T2 }
+  - { t: 1500, type: TICKET_PREP_STARTED,  ticket: T2 }
+  - { t: 2000, type: ZONE_ENTRY,           carrier: gloves, zone: "bin:pesto" }
+  - { t: 3000, type: CONTACT_BEGIN,        a: gloves, b: board }
+  - { t: 3500, type: ZONE_ENTRY,           carrier: gloves, zone: "bin:bread" }   # clean bread, same hands
+  - { t: 4000, type: CONTACT_BEGIN,        a: board, b: landing }                 # the item lands
+  - { t: 9000, type: TICKET_ITEM_COMPLETE, ticket: T2 }
+
+expect:
+  - { no_alerts_of_tier: { tier: 0, before: 1500 } }
+  - { at: 4000, alert: { tier: 1, ticket: T2 } }
+  - { at: 4000, pathway: { includes: [gloves, board], target: "food:T2" } }
+  - { at: 9000, alert: { tier: 2, ticket: T2 } }
+  - { at: 9000, held: { ticket: T2 } }
+  - { final_state: { tickets: { T2: { lifecycle: HELD } } } }

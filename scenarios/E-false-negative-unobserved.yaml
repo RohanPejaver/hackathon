@@ -1,0 +1,44 @@
+# 03 §E — False negative: an unobserved transfer. A real transfer happens entirely outside
+# the contact model (a splash from the board onto the item at ~t=3000; perception emits
+# nothing for it). The system produces NO Tier 1/2 — and that is not a silent miss, because
+# the relevant carriers were reported UNKNOWN / tainted and Tier 0 fired at bind. A Silent
+# Miss is recorded only when the system asserted TRACKED-clean and was wrong (34).
+scenario: E-false-negative-unobserved
+description: >-
+  Ground truth: the item T4 receives pesto via a splash that no contact event captures.
+  Station belief at bind: gloves UNKNOWN (never observed), board OBSERVED PINE_NUT, the
+  rest TRACKED-clean. T4 (turkey sandwich, "pine nut allergy") binds at t=1000: Tier 0 with
+  blocking_carriers exactly [gloves, board] — the intervention. No contact events follow;
+  the item completes and is released with no Tier 1/2, which is the correct output for
+  evidence the system does not have. Reading this fixture depends on ADR-0005 / Q5: an
+  unmet Tier 0 is never escalated to Tier 1 at TICKET_PREP_STARTED (16's Tier 0 -> Tier 1
+  row is superseded by the grade floor).
+schema_version: 1
+hazard: true
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    gloves:       { epistemic: UNKNOWN }
+    board:        { taints: { PINE_NUT: { grade: OBSERVED, hops: 1 } }, epistemic: TRACKED }
+    spreader:     { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  - { t: 0,    type: TICKET_RECEIVED,      ticket: T4, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 1000, type: TICKET_BOUND,         ticket: T4 }
+  - { t: 2000, type: TICKET_PREP_STARTED,  ticket: T4 }
+  # t=3000: the splash. Deliberately no event — that is the scenario.
+  - { t: 5000, type: TICKET_ITEM_COMPLETE, ticket: T4 }
+  - { t: 6000, type: TICKET_RELEASED,      ticket: T4 }
+
+expect:
+  - { at: 1000, alert: { tier: 0, ticket: T4, blocking_carriers: [gloves, board] } }
+  - { no_alerts_of_tier: { tier: 1 } }
+  - { no_alerts_of_tier: { tier: 2 } }
+  - { final_state: { tickets: { T4: { lifecycle: RELEASED } } } }

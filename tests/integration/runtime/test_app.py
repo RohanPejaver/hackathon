@@ -43,6 +43,18 @@ def _types(r: Runtime) -> list[str]:
     return [e.type for e in r.recent]
 
 
+def _new_ticket(r: Runtime, ticket_id: str, item: str, note: str | None = None) -> None:
+    restrictions = [{"raw_text": note}] if note else []
+    r.on_action(
+        {
+            "kind": "NEW_TICKET",
+            "ticket_id": ticket_id,
+            "items": [item],
+            "restrictions": restrictions,
+        }
+    )
+
+
 def test_starts_in_protocol_only_with_config_loaded_first(rt: Runtime):
     types = _types(rt)
     assert types[0] == "CONFIG_LOADED"
@@ -55,7 +67,7 @@ def test_starts_in_protocol_only_with_config_loaded_first(rt: Runtime):
 
 
 def test_unrestricted_ticket_is_silent(rt: Runtime):
-    rt.on_action({"kind": "NEW_TICKET", "ticket_id": "T47", "items": ["pesto_sandwich"], "restrictions": []})
+    _new_ticket(rt, "T47", "pesto_sandwich")
     _settle(rt)
     assert rt.on_action({"kind": "BIND_TICKET", "ticket_id": "T47"})["accepted"]
     _settle(rt)
@@ -65,7 +77,7 @@ def test_unrestricted_ticket_is_silent(rt: Runtime):
 
 
 def test_restricted_bind_fires_tier0_before_any_motion_and_resolves_in_one_tap(rt: Runtime):
-    rt.on_action({"kind": "NEW_TICKET", "ticket_id": "T48", "items": ["turkey_sandwich"], "restrictions": [{"raw_text": "pine nut allergy"}]})
+    _new_ticket(rt, "T48", "turkey_sandwich", "pine nut allergy")
     _settle(rt)
     snap = rt.snapshot()
     (ticket,) = snap["state_summary"]["tickets"]
@@ -83,7 +95,9 @@ def test_restricted_bind_fires_tier0_before_any_motion_and_resolves_in_one_tap(r
     blocking = set(alert["blocking_carriers"])
     assert {"gloves", "board", "landing", "bin:bread", "bin:turkey", "bin:mayo"} <= blocking
     # one tap: assert all — enters the log as OPERATOR_ASSERTION events, never a state write
-    r = rt.on_action({"kind": "ASSERT_REPLACED", "alert_id": alert["alert_id"], "carrier_ids": sorted(blocking)})
+    r = rt.on_action(
+        {"kind": "ASSERT_REPLACED", "alert_id": alert["alert_id"], "carrier_ids": sorted(blocking)}
+    )
     assert r["accepted"] and len(r["event_ids"]) == len(blocking)
     _settle(rt)
     snap = rt.snapshot()
@@ -96,7 +110,7 @@ def test_restricted_bind_fires_tier0_before_any_motion_and_resolves_in_one_tap(r
 
 
 def test_ambiguous_restriction_blocks_binding(rt: Runtime):
-    rt.on_action({"kind": "NEW_TICKET", "ticket_id": "T50", "items": ["pesto_sandwich"], "restrictions": [{"raw_text": "ALLERGY"}]})
+    _new_ticket(rt, "T50", "pesto_sandwich", "ALLERGY")
     _settle(rt)
     snap = rt.snapshot()
     assert snap["state_summary"]["tickets"][0]["lifecycle"] == "BLOCKED"
@@ -106,7 +120,7 @@ def test_ambiguous_restriction_blocks_binding(rt: Runtime):
 
 
 def test_hold_is_only_released_by_a_person(rt: Runtime):
-    rt.on_action({"kind": "NEW_TICKET", "ticket_id": "T51", "items": ["turkey_sandwich"], "restrictions": [{"raw_text": "pine nut allergy"}]})
+    _new_ticket(rt, "T51", "turkey_sandwich", "pine nut allergy")
     _settle(rt)
     rt.on_action({"kind": "BIND_TICKET", "ticket_id": "T51"})
     _settle(rt)
@@ -116,7 +130,8 @@ def test_hold_is_only_released_by_a_person(rt: Runtime):
     _settle(rt)
     snap = rt.snapshot()
     (ticket,) = snap["state_summary"]["tickets"]
-    assert ticket["lifecycle"] == "COMPLETE"  # a Tier 0 prompt does not hold; no observed pathway exists
+    # a Tier 0 prompt does not hold; no observed pathway exists
+    assert ticket["lifecycle"] == "COMPLETE"
     (alert,) = snap["interventions"]
     assert alert["tier"] == 0
     assert not rt.on_action({"kind": "DISMISS", "alert_id": "nope"})["accepted"]

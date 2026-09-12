@@ -1,0 +1,51 @@
+# 03 §B — Direct risk, prevented. The primary value path: Tier 0 fires AT BIND, before any
+# motion, naming exactly the carriers that need a reset; observed resets tick them off.
+# This is 36's own worked example, verbatim in intent.
+#
+# Required carriers are recipe-scoped (15, 18) PLUS the shared instruments: gloves and every
+# TOOL-kind carrier are always on the list, which is how 03 (B, D), 36 and 37 all come to
+# name the spreader. The board, bins and landing are seeded TRACKED-clean so ONLY taint blocks.
+scenario: B-direct-risk-prevented
+description: >-
+  Gloves (hop 0) and spreader (hop 1) carry OBSERVED PINE_NUT from a prior ticket;
+  everything else is TRACKED and clean. T48 (turkey sandwich, "pine nut allergy") binds at
+  t=1000: Tier 0 with blocking_carriers exactly [gloves, spreader]. A GLOVE_CHANGE(DON) at
+  12s shrinks the checklist; a TOOL_SWAP to spreader_2 from clean stock at 15s empties it
+  and the alert resolves RESOLVED_BY_RESET. Prep then proceeds in silence. Reading this
+  fixture depends on: a carrier introduced from CLEAN_STOCK is TRACKED-clean at the swap
+  (it was observed being introduced).
+schema_version: 1
+hazard: true
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    gloves:       { taints: { PINE_NUT: { grade: OBSERVED, hops: 0 } }, epistemic: TRACKED }
+    spreader:     { taints: { PINE_NUT: { grade: OBSERVED, hops: 1 } }, epistemic: TRACKED }
+    board:        { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  - { t: 0,     type: TICKET_RECEIVED, ticket: T48, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 1000,  type: TICKET_BOUND,    ticket: T48 }
+  - { t: 12000, type: GLOVE_CHANGE,    phase: DON }
+  - { t: 15000, type: TOOL_SWAP,       retired: spreader, introduced: spreader_2, from_zone: clean_stock }
+  - { t: 16000, type: TICKET_PREP_STARTED,  ticket: T48 }
+  - { t: 20000, type: TICKET_ITEM_COMPLETE, ticket: T48 }
+  - { t: 21000, type: TICKET_RELEASED,      ticket: T48 }
+
+expect:
+  - { at: 1000,  alert: { tier: 0, ticket: T48, blocking_carriers: [gloves, spreader] } }
+  - { at: 15000, alert_resolved: { tier: 0, reason: RESOLVED_BY_RESET } }
+  - { no_alerts_after: 15100 }
+  - final_state:
+      carriers:
+        gloves:     { taints: {} }
+        spreader_2: { taints: {} }
+      tickets:
+        T48: { lifecycle: RELEASED }

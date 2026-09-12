@@ -1,0 +1,46 @@
+# 03 §H — Out of view. Hands leave the station frame for longer than t_stale_gloves.
+# Occlusion is an input to the design, not a failure of it: gloves -> UNKNOWN -> pessimistic
+# closure -> Tier 0 at the next restricted bind, resolved by an 8-second action.
+#
+# The honest perception obligation (21 degradation ladder) is to SAY it lost the hands:
+# CARRIER_OBSERVABILITY_CHANGED(gloves, UNKNOWN, "out of frame"). That event is the
+# fixture's primary path. The time-only variant (a TRACKED carrier ageing past t_stale with
+# no event at all) is computed at query time by effective_epistemic and is not what this
+# fixture exercises.
+scenario: H-out-of-view
+description: >-
+  TRACKED-clean station. At t=500 perception reports the gloves out of frame (epistemic
+  UNKNOWN). T8 (turkey sandwich, "pine nut allergy") binds at t=1000: Tier 0 with
+  blocking_carriers exactly [gloves] — everything else is TRACKED and clean, so the only
+  thing the worker is asked for is new gloves. GLOVE_CHANGE(DON) at t=9000 makes the gloves
+  TRACKED-clean again and the alert resolves RESOLVED_BY_RESET; prep starts in silence.
+schema_version: 1
+hazard: false
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    gloves:       { epistemic: TRACKED }
+    spreader:     { epistemic: TRACKED }
+    board:        { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  - { t: 0,     type: TICKET_RECEIVED, ticket: T8, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 500,   type: CARRIER_OBSERVABILITY_CHANGED, carrier: gloves, epistemic: UNKNOWN,
+      cause: "out of frame" }
+  - { t: 1000,  type: TICKET_BOUND,        ticket: T8 }
+  - { t: 9000,  type: GLOVE_CHANGE,        phase: DON }
+  - { t: 10000, type: TICKET_PREP_STARTED, ticket: T8 }
+
+expect:
+  - { at: 500,  state_at: { carriers: { gloves: { epistemic: UNKNOWN } } } }
+  - { at: 1000, alert: { tier: 0, ticket: T8, blocking_carriers: [gloves] } }
+  - { at: 9000, alert_resolved: { tier: 0, reason: RESOLVED_BY_RESET } }
+  - { no_alerts_after: 9100 }
+  - { final_state: { carriers: { gloves: { epistemic: TRACKED, taints: {} } } } }

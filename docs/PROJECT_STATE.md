@@ -3,7 +3,7 @@
 **Operational checkpoint.** Authoritative for **status only** — never for design. Update at
 the end of every working session and at every phase gate.
 
-**Last updated:** 2026-09-12 08:05 EDT · **Phase:** P0 VERIFIED, P1 in progress · **Mode:** sole driver (Device A stopped at FREEZE-1)
+**Last updated:** 2026-09-12 12:10 EDT · **Phase:** P0–P2 VERIFIED, P3 IMPLEMENTED · **Mode:** sole driver
 
 ---
 
@@ -28,9 +28,9 @@ profiles, demo station, demo knowledge bundle). P1 packages (`state`, `risk`, `p
 | Phase | Status | Evidence |
 |---|---|---|
 | P0 Foundations | `VERIFIED` | `data/eval/2026-09-12/p0_gate_report.json`: ruff/mypy --strict/lint-imports/pytest green; planted `state→perception` import, planted `datetime.now()` in `state/`, malformed bundle, and claim word in `policy/copy.py` each rejected then reverted |
-| P1 Reasoning core | `OPEN` (in progress) | — |
-| P2 Orders & knowledge | `OPEN` (in progress, dispatched with P1) | — |
-| P3 Worker interface | `PARTIAL` | runtime + UI shell exist against the wire shape; gate needs P1/P2 |
+| P1 Reasoning core | `VERIFIED` | `data/eval/2026-09-12/p1_replay_report.json` — 14/14 fixtures pass, byte-identical twice, IR 1.0, SMR 0.0; 526 tests; strict mypy; lint-imports |
+| P2 Orders & knowledge | `VERIFIED` | scenario G end to end; `BLOCKED→BOUND` unreachable proof; normalizer never RESOLVED below threshold; recipe-scoped Tier 0 |
+| P3 Worker interface | `IMPLEMENTED` | `data/eval/2026-09-12/p3_protocol_only_rehearsal.json` — full demo path live in PROTOCOL_ONLY with no camera; teammate tap-count measurement pending |
 | P4 Perception: zones/contact | `BLOCKED` — no camera, no annotated fixtures (`data/build/status_B.md` §Hardware check) | — |
 | P5 Perception: carriers/resets | `BLOCKED` — same | — |
 | P6 Demo hardening | `OPEN` | — |

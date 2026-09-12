@@ -1,0 +1,22 @@
+# 03 §G — Ambiguous restriction. Free text reads "ALLERGY" with no allergen named. The
+# normaliser may never guess: the restriction resolves AMBIGUOUS, the ticket is BLOCKED, and
+# binding is unreachable (17 invariant 1). Bad input is surfaced before food is made.
+scenario: G-ambiguous-restriction
+description: >-
+  T7 (pesto sandwich) arrives with the note "ALLERGY". Intake produces TICKET_BLOCKED
+  (AMBIGUOUS). The operator's TICKET_BOUND at t=1000 is a no-op in the reducer because
+  BLOCKED -> BOUND is unreachable. Nothing is assessed, nothing fires: silence, and the
+  ticket ends BLOCKED.
+schema_version: 1
+hazard: false
+config: { station: demo, knowledge: demo, profile: eval }
+
+events:
+  - { t: 0,    type: TICKET_RECEIVED, ticket: T7, items: [pesto_sandwich],
+      restrictions: [{ raw_text: "ALLERGY" }] }
+  - { t: 1000, type: TICKET_BOUND,    ticket: T7 }
+
+expect:
+  - { silence: true }
+  - { at: 0, state_at: { tickets: { T7: { lifecycle: BLOCKED } } } }
+  - { final_state: { tickets: { T7: { lifecycle: BLOCKED } } } }

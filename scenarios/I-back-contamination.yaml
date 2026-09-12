@@ -1,0 +1,54 @@
+# 03 §I — Back-contamination: pesto -> gloves -> mayo tub; a later ticket uses the mayo.
+# The signature capability, REQUIRED FOR DEMO (37 beat 2). It is not a special case: an
+# ordinary pathway whose terminal node is a CONTAINER, which then becomes a source for every
+# later ticket (14 §Pathway classes).
+scenario: I-back-contamination
+description: >-
+  TRACKED-clean station. T47 (pesto sandwich, no restriction) is built: gloves enter the
+  pesto bin, touch the board, and — without a glove change — reach into the mayo tub at
+  t=3000. Silence throughout (no restriction, nothing to intersect), but the shared mayo
+  container now carries PINE_NUT at hop 1. T48 (turkey sandwich, "pine nut allergy") binds
+  at t=6000: Tier 0 before any motion with blocking_carriers exactly [gloves, board,
+  bin:mayo] — the third item is the one that matters ("use sealed backup mayo"). The
+  spreader is untouched and bins bread/turkey are clean, so they are not on the list.
+schema_version: 1
+hazard: true
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    gloves:       { epistemic: TRACKED }
+    spreader:     { epistemic: TRACKED }
+    board:        { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  - { t: 0,    type: TICKET_RECEIVED,      ticket: T47, items: [pesto_sandwich] }
+  - { t: 1000, type: TICKET_BOUND,         ticket: T47 }
+  - { t: 1500, type: TICKET_PREP_STARTED,  ticket: T47 }
+  - { t: 2000, type: ZONE_ENTRY,           carrier: gloves, zone: "bin:pesto" }
+  - { t: 2500, type: CONTACT_BEGIN,        a: gloves, b: board }
+  - { t: 3000, type: ZONE_ENTRY,           carrier: gloves, zone: "bin:mayo" }   # the reach
+  - { t: 4000, type: TICKET_ITEM_COMPLETE, ticket: T47 }
+  - { t: 4500, type: TICKET_RELEASED,      ticket: T47 }
+  - { t: 5000, type: TICKET_RECEIVED,      ticket: T48, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 6000, type: TICKET_BOUND,         ticket: T48 }
+
+expect:
+  - { no_alerts_of_tier: { tier: 0, before: 5000 } }
+  - { no_alerts_of_tier: { tier: 1 } }
+  - { no_alerts_of_tier: { tier: 2 } }
+  - { at: 3000, state_at: { carriers: { "bin:mayo": { taints: { PINE_NUT: { hops: 1 } } } } } }
+  - { at: 6000, alert: { tier: 0, ticket: T48,
+      blocking_carriers: [gloves, board, "bin:mayo"] } }
+  - final_state:
+      carriers:
+        "bin:mayo": { taints: { PINE_NUT: {} } }
+      tickets:
+        T47: { lifecycle: RELEASED }
+        T48: { lifecycle: BOUND }

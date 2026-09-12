@@ -3,7 +3,7 @@
 **Operational checkpoint.** Authoritative for **status only** — never for design. Update at
 the end of every working session and at every phase gate.
 
-**Last updated:** 2026-09-12 12:55 EDT · **Phase:** P0–P2 VERIFIED, P3 IMPLEMENTED (teammate tap measurement pending), P4–P6 blocked on hardware · **Mode:** sole driver
+**Last updated:** 2026-09-12 13:05 EDT · **Phase:** P0–P2 VERIFIED, P3 IMPLEMENTED (teammate tap measurement pending), P4–P6 blocked on hardware · **Mode:** sole driver
 
 ---
 
@@ -41,9 +41,9 @@ station and knowledge bundle. `src/perception/` implements `21` on deterministic
 All of P0-P6 (`engineering/38-workflow.md`).
 
 ## 5. Currently being worked on
-Convergence: read-only audit of the worker interface against `26`/`02`/`37`/`39` §6 (findings
-become fixes or scenario fixtures), then the teammate tap-count measurement (the only P3 gate
-clause a single driver cannot close).
+The 4 pm pitch: `deck/` built and screenshot-verified at 1920×1080 (`deck/README.md`); rehearsal
+against the script; the live mat go/no-go on the demo laptop (`DEMO_PLAN.md` §4). Still open:
+the teammate tap-count measurement (the only P3 gate clause a single driver cannot close).
 
 ## 6. Recent decisions
 ADR-0001 through ADR-0012, all accepted 2026-09-12. The load-bearing three: **0001**
@@ -59,7 +59,8 @@ the tier, never the bar), **0008** (carriers hold taint, not dishes).
 6. `docs/engineering/38-workflow.md` — gates and the doc-maintenance protocol
 
 ## 8. Single most appropriate next action
-**Measure taps on a teammate** (Tier 0, 1, 2 from `data/build/runbook_B.md`) and record the
+**Rehearse the deck twice against `deck/README.md` §Script, ending under 2:50; run the failure
+drill (`R`, `V`, `S`) once.** Then measure taps on a teammate (Tier 0, 1, 2 from `data/build/runbook_B.md`) and record the
 numbers in `data/build/status_B.md`; that closes P3 → `VERIFIED`. Then, if a camera and the 12
 annotated clips appear, start P4 in `src/perception/` against `21` — nothing else is blocked.
 

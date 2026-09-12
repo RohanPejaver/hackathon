@@ -205,3 +205,20 @@ table.kv td.num, table.kv td.mono { font-family: var(--font-mono); font-variant-
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pane:nth-child(2) { border-right: 0; }
 }
+
+/* ---- stage view (?stage=1): presentation-only, no state or copy changes ------------------ */
+body[data-stage="1"] .panes { grid-template-columns: 1.3fr 2.2fr 1.5fr; }
+body[data-stage="1"] .pane[data-pane="log"] { display: none; }
+body[data-stage="1"] .trace, body[data-stage="1"] .surface .trace, body[data-stage="1"] .alert .trace { display: none; }
+body[data-stage="1"] .ticket .id { font-size: 30px; }
+body[data-stage="1"] .ticket .items { font-size: 20px; }
+body[data-stage="1"] .ticket .restr { font-size: 18px; }
+body[data-stage="1"] .ticket .life { font-size: 13px; }
+body[data-stage="1"] .new-ticket { display: none; }
+body[data-stage="1"] .tile-head .id { font-size: 19px; }
+body[data-stage="1"] .taint { font-size: 14px; }
+body[data-stage="1"] .headline { font-size: clamp(34px, 4.4vw, 58px); }
+body[data-stage="1"] .body { font-size: 22px; }
+body[data-stage="1"] .disclaimer { font-size: 19px; }
+body[data-stage="1"] .checklist li { font-size: 28px; }
+body[data-stage="1"] .alert .head { font-size: 17px; }

@@ -1,0 +1,117 @@
+# Stage copy of scenarios/demo.yaml with every timestamp doubled so the presenter can narrate.
+# Not a test fixture. scenarios/demo.yaml is the verified one.
+# 37 §Script — the 2-minute demo, beats 0-5, as ONE fixture that reproduces every beat with
+# zero hardware. This is the bottom rung of the fallback ladder
+# (live perception -> recorded log -> scenario replay), and the UI it drives must be the
+# same. Ticket ids T47/T48 are the ones the script uses on stage; T49 is the rerun of 48.
+#
+# Where the fixture pins down a reading of 37:
+#   * Beat 3's checklist is [gloves, spreader, board, bin:mayo]: gloves and the shared TOOL
+#     are always required (03 B/D, 36, 37 all name the spreader), the board because the
+#     spreader touched it, and bin:mayo — "use sealed backup mayo" — is the line that matters.
+#   * Beat 1 does not model plating the pesto sandwich onto the landing zone: under 3-hop
+#     propagation the landing surface would join the checklist as a fifth line. The item
+#     completes on the board.
+#   * Beat 5 "rerun 48, ignore the prompt, build with the dirty spreader": after the
+#     compliant T48 is released, the hazard is restaged by dipping the (new) spreader in the
+#     pesto, T49 — the same order — is bound, Tier 0 names exactly [spreader_2], and the
+#     cook ignores it: builds with that spreader and moves the item to the pass. OBSERVED
+#     pathway bin:pesto -> spreader_2 -> food:T49 -> Tier 1, then Tier 2 HOLD at completion.
+scenario: demo_stage
+description: >-
+  Beat 0: all carriers TRACKED and clean. Beat 1: T47 (pesto sandwich, no restriction) —
+  scoop pesto, spread, done; silence; gloves/spreader/board carry PINE_NUT. Beat 2: without
+  changing gloves, reach into the mayo tub; bin:mayo carries PINE_NUT at hop 1. Beat 3: T48
+  (turkey sandwich, "pine nut allergy") binds; Tier 0 before any motion with checklist
+  exactly [gloves, spreader, board, bin:mayo]. Beat 4: new gloves, spreader and board
+  swapped from clean stock on camera, "using sealed backup" asserted for the mayo; the
+  checklist ticks itself off, the alert resolves RESOLVED_BY_ASSERTION, and T48 is
+  prepared and released in silence. Beat 5: the hazard is restaged (spreader_2 into the
+  pesto), T49 — the rerun of 48 — binds and Tier 0 says exactly [spreader_2]; the cook
+  ignores it, builds with that spreader and moves the item to the pass: Tier 1 on the
+  OBSERVED pathway, Tier 2 HOLD when the item completes. The hold stays open; T49 is HELD.
+schema_version: 1
+hazard: true
+config: { station: demo, knowledge: demo, profile: eval }
+
+initial_state:
+  carriers:
+    gloves:       { epistemic: TRACKED }
+    spreader:     { epistemic: TRACKED }
+    board:        { epistemic: TRACKED }
+    landing:      { epistemic: TRACKED }
+    "bin:pesto":  { epistemic: TRACKED }
+    "bin:mayo":   { epistemic: TRACKED }
+    "bin:turkey": { epistemic: TRACKED }
+    "bin:bread":  { epistemic: TRACKED }
+
+events:
+  # ---- beat 1: ticket 47, pesto sandwich, no restriction -----------------------------------
+  - { t: 0,     type: TICKET_RECEIVED,      ticket: T47, items: [pesto_sandwich] }
+  - { t: 2000,  type: TICKET_BOUND,         ticket: T47 }
+  - { t: 3000,  type: TICKET_PREP_STARTED,  ticket: T47 }
+  - { t: 4000,  type: ZONE_ENTRY,           carrier: gloves, zone: "bin:pesto" }
+  - { t: 5000,  type: CONTACT_BEGIN,        a: gloves, b: spreader }
+  - { t: 6000,  type: CONTACT_BEGIN,        a: spreader, b: board }
+  - { t: 8000,  type: TICKET_ITEM_COMPLETE, ticket: T47 }
+  - { t: 9000,  type: TICKET_RELEASED,      ticket: T47 }
+  # ---- beat 2: the reach ---------------------------------------------------------------------
+  - { t: 12000,  type: ZONE_ENTRY,           carrier: gloves, zone: "bin:mayo" }
+  # ---- beat 3: ticket 48, turkey sandwich, PINE_NUT allergy -----------------------------------
+  - { t: 16000,  type: TICKET_RECEIVED,      ticket: T48, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 18000,  type: TICKET_BOUND,         ticket: T48 }
+  # ---- beat 4: compliance, on camera ------------------------------------------------------------
+  - { t: 24000, type: GLOVE_CHANGE,         phase: DON }
+  - { t: 26000, type: TOOL_SWAP,            retired: spreader, introduced: spreader_2, from_zone: clean_stock }
+  - { t: 28000, type: SURFACE_SWAP,         retired: board, introduced: board_2, from_zone: clean_stock }
+  - { t: 32000, type: OPERATOR_ASSERTION,   carrier: "bin:mayo", claim: REPLACED }   # sealed backup
+  - { t: 34000, type: TICKET_PREP_STARTED,  ticket: T48 }
+  - { t: 36000, type: TICKET_ITEM_COMPLETE, ticket: T48 }
+  - { t: 38000, type: TICKET_RELEASED,      ticket: T48 }
+  # ---- beat 5: failure branch — restage, rerun 48 as T49, ignore the prompt ------------------
+  - { t: 40000, type: ZONE_ENTRY,           carrier: spreader_2, zone: "bin:pesto" }   # restage
+  - { t: 41000, type: TICKET_RECEIVED,      ticket: T49, items: [turkey_sandwich],
+      restrictions: [{ raw_text: "pine nut allergy" }] }
+  - { t: 42000, type: TICKET_BOUND,         ticket: T49 }
+  - { t: 43000, type: TICKET_PREP_STARTED,  ticket: T49 }                             # prompt ignored
+  - { t: 44000, type: CONTACT_BEGIN,        a: spreader_2, b: landing }               # to the pass
+  - { t: 50000, type: TICKET_ITEM_COMPLETE, ticket: T49 }
+
+expect:
+  # beats 0-2: silence
+  - { no_alerts_of_tier: { tier: 0, before: 18000 } }
+  - { no_alerts_of_tier: { tier: 1, before: 44000 } }
+  - { no_alerts_of_tier: { tier: 2, before: 50000 } }
+  - at: 6000
+    state_at:
+      carriers:
+        gloves:   { taints: { PINE_NUT: {} } }
+        spreader: { taints: { PINE_NUT: {} } }
+        board:    { taints: { PINE_NUT: {} } }
+  - { at: 12000, state_at: { carriers: { "bin:mayo": { taints: { PINE_NUT: { hops: 1 } } } } } }
+  # beat 3
+  - { at: 18000, alert: { tier: 0, ticket: T48,
+      blocking_carriers: [gloves, spreader, board, "bin:mayo"] } }
+  # beat 4
+  - { at: 32000, alert_resolved: { tier: 0, reason: RESOLVED_BY_ASSERTION } }
+  - { no_alerts_of_tier: { tier: 0, after: 32200, before: 42000 } }
+  - at: 32000
+    state_at:
+      carriers:
+        gloves:     { taints: {} }
+        spreader_2: { taints: {} }
+        board_2:    { taints: {} }
+        "bin:mayo": { taints: {} }
+  # beat 5
+  - { at: 42000, alert: { tier: 0, ticket: T49, blocking_carriers: [spreader_2] } }
+  - { at: 44000, alert: { tier: 1, ticket: T49 } }
+  - { at: 44000, pathway: { includes: [spreader_2], target: "food:T49" } }
+  - { at: 50000, alert: { tier: 2, ticket: T49, headline_contains: "hold" } }
+  - { at: 50000, held: { ticket: T49 } }
+  - { at: 50000, alert_open: { tier: 2 } }
+  - final_state:
+      tickets:
+        T47: { lifecycle: RELEASED }
+        T48: { lifecycle: RELEASED }
+        T49: { lifecycle: HELD }

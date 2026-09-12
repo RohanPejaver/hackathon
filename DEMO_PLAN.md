@@ -111,6 +111,11 @@ charger, adapter, spare markers. Both servers running; four tabs open; video pau
 
 ## 9. Where things are
 
+- **The deck** (3D presentation that hands off to the real display and back): `deck/README.md`
+  (start: `cd deck && npm run build && npm run stage` → `http://127.0.0.1:5174/#0`; keys, script,
+  fallback drill there). Storyboard and rationale: `deck/PITCH.md`. Numbers in §7 are the ones on
+  the receipt scene; the suite is now 533 passed.
+
 - Run book with all beats and the field procedure: `data/build/runbook_B.md`
 - Status and evidence: `data/build/status_B.md`, `data/eval/2026-09-12/`
 - Marker and mat images: `data/build/print/` (tracked; also regenerable into `data/markers/`) (regenerate with `python scripts/print_markers.py`)

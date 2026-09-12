@@ -260,6 +260,7 @@
   if (page === 'inspector') $('scrub').addEventListener('input', () => { if (snap) { $('scrub-val').textContent = $('scrub').value; renderLog(snap, Number($('scrub').value)); } });
 
   const params = new URLSearchParams(location.search);
+  if (params.get('stage')) document.body.dataset.stage = '1'; // presentation view: hides the log pane and trace detail (CSS only)
   if (params.get('mock')) {
     window.__render = render; // dev hook: re-render a patched snapshot from the console
     fetch('/static/mock/snapshot.example.json').then((r) => r.json()).then(render);

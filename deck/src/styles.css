@@ -142,6 +142,13 @@ body.pointer { cursor: default; }
 .demo .status { position: absolute; right: 18px; bottom: 8px; font: 700 13px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: rgba(7,9,12,.85); padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); }
 .demo .status.amber { color: var(--amber); border-color: #7a5218; }
 
+/* slide 5 (index 4): the room on the left, the worker display on the right, one run */
+.demo.split { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #0a0c0f; }
+.demo.split .pane { position: relative; overflow: hidden; background: #0a0c0f; }
+.demo.split .pane video { width: 100%; height: 100%; object-fit: contain; background: #0a0c0f; }
+.demo.split .pane iframe { width: 100%; height: 100%; border: 0; display: block; background: #0a0c0f; }
+.demo.split .pane-label { position: absolute; left: 14px; top: 14px; z-index: 3; font: 700 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); background: rgba(7,9,12,.85); padding: 5px 9px; border: 1px solid var(--line); border-radius: var(--r); }
+
 .hud { position: fixed; left: 14px; bottom: 10px; font: 500 12px var(--mono); color: var(--muted); opacity: .4; letter-spacing: .06em; }
 .hud b { color: var(--ink-1); font-weight: 600; }
 .progress { position: fixed; left: 0; right: 0; bottom: 0; height: 3px; background: var(--line); }

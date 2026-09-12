@@ -12,7 +12,7 @@ export default function App() {
     return Number.isFinite(h) && h >= 0 && h < ALL.length ? h : 0
   })
   const LOCAL = /^(127\.0\.0\.1|localhost)$/.test(location.hostname)   // hosted copies have no product server: use the recording
-  const [demoMode, setDemoMode] = useState(LOCAL ? 'replay' : 'video')   // replay | video | stills | live
+  const [demoMode, setDemoMode] = useState(LOCAL ? 'split' : 'video')   // replay | video | stills | live
   const [still, setStill] = useState(1)
   const [interact, setInteract] = useState(false)
   const [tick, setTick] = useState(0)
@@ -28,7 +28,7 @@ export default function App() {
     entryRef.current = null
     setInteract(false)
     setStill(1)
-    if (scene.demo) setDemoMode(LOCAL ? 'replay' : 'video')
+    if (scene.demo) setDemoMode(LOCAL ? 'split' : 'video')
     location.hash = String(i)
     document.body.classList.remove('pointer')
   }, [i])
@@ -67,10 +67,11 @@ export default function App() {
       else if (k === 'h' || k === 'H') { setHud((x) => !x) }
       else if (k === 'End') { go(SCENES.length - 1) }
       else if (scene.demo) {
-        if (k === 'r' || k === 'R') { setDemoMode('x'); setTimeout(() => setDemoMode('replay'), 0) }
+        if (k === 'r' || k === 'R') { const m = demoMode === 'split' ? 'split' : 'replay'; setDemoMode('x'); setTimeout(() => setDemoMode(m), 0) }
         else if (k === 'v' || k === 'V') setDemoMode('video')
         else if (k === 's' || k === 'S') { setDemoMode('stills'); setStill(1) }
         else if (k === 'l' || k === 'L') setDemoMode('live')
+        else if (k === 'd' || k === 'D') { setDemoMode('x'); setTimeout(() => setDemoMode('split'), 0) }
         else if (k === 'p' || k === 'P') { setInteract((x) => !x); document.body.classList.toggle('pointer') }
         else if (k === 'z' || k === 'Z') setZoom((z) => (z >= 1.35 ? 1 : z === 1 ? 1.2 : 1.35))
       }
@@ -102,7 +103,7 @@ export default function App() {
       </div>
       {!scene.demo && <Overlay scene={scene} t={t} />}
       {scene.demo && <Demo mode={demoMode} still={still} interact={interact} zoom={zoom} />}
-      {hud && <div className="hud"><b>{i}</b> · {scene.hud} · {isBackup ? 'B' : `${i + 1}/${SCENES.length}`} · → next · ← prev · 0-9 jump · B backup · Esc reset{scene.demo ? ' · R restart · V video · S stills · L live · P interact · Z zoom' : ''} · F fullscreen · H hud</div>}
+      {hud && <div className="hud"><b>{i}</b> · {scene.hud} · {isBackup ? 'B' : `${i + 1}/${SCENES.length}`} · → next · ← prev · 0-9 jump · B backup · Esc reset{scene.demo ? ' · R restart · D split · V video · S stills · L live · P interact · Z zoom' : ''} · F fullscreen · H hud</div>}
       <div className="progress"><i style={{ width: `${((Math.min(i, SCENES.length - 1) + 1) / SCENES.length) * 100}%` }} /></div>
     </>
   )

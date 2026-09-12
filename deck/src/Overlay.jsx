@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { SCENE_TEXT, BACKUP_TEXT, STEPS, Brand } from './content.jsx'
 
 const API = `http://127.0.0.1:5174`
@@ -50,18 +50,55 @@ export function Demo({ mode, still, interact, zoom = 1, onStatus }) {
   const [stillsN, setStillsN] = useState(0)
   const [ready, setReady] = useState(false)
   useEffect(() => { fetch('/fallback/stills.json').then((r) => r.json()).then((j) => setStillsN(j.count || 0)).catch(() => {}) }, [])
+  // Split mode starts the recording at the same instant the replay server comes up, so the
+  // worker display on the right is showing the same run the video on the left is showing.
+  const videoRef = useRef(null)
+  const startVideo = useCallback(() => {
+    const v = videoRef.current
+    if (!v) return
+    try { v.currentTime = 0; const p = v.play(); if (p && p.catch) p.catch(() => {}) } catch {}
+  }, [])
   useEffect(() => {
-    if (mode !== 'replay' && mode !== 'live') return
+    if (mode !== 'replay' && mode !== 'live' && mode !== 'split') return
     if (mode === 'live') { setSrc(LIVE_URL + '&ts=' + Date.now()); setStatus('live · :8000'); return }
     let alive = true
     setSrc(null); setReady(false); setStatus('starting replay')
     fetch(API + '/api/replay/restart', { method: 'POST' })
       .then((r) => r.json())
-      .then((j) => { if (!alive) return; setSrc(DEMO_URL + '&ts=' + Date.now()); setStatus(j.ok ? 'replay · deck/demo_stage.yaml' : 'replay restart failed: press V') })
-      .catch(() => { if (!alive) return; setSrc(DEMO_URL + '&ts=' + Date.now()); setStatus('no stage server: replay may be mid-run, V for video') })
+      .then((j) => {
+        if (!alive) return
+        setSrc(DEMO_URL + '&ts=' + Date.now())
+        if (mode === 'split') { setStatus(j.ok ? 'same run · recording left, live reasoning right' : 'replay restart failed: press V'); startVideo() }
+        else setStatus(j.ok ? 'replay · deck/demo_stage.yaml' : 'replay restart failed: press V')
+      })
+      .catch(() => {
+        if (!alive) return
+        setSrc(DEMO_URL + '&ts=' + Date.now())
+        setStatus('no stage server: replay may be mid-run, V for video')
+        if (mode === 'split') startVideo()
+      })
     return () => { alive = false }
-  }, [mode])
+  }, [mode, startVideo])
   useEffect(() => { onStatus && onStatus(status) }, [status])
+
+  const splitZoom = zoom === 1 ? 0.5 : zoom
+  if (mode === 'split') return (
+    <div className={'demo split' + (interact ? ' interact' : '') + (ready ? ' ready' : '')}>
+      <div className="pane">
+        <div className="pane-label">the recording</div>
+        <video ref={videoRef} src="/fallback/demo.webm" playsInline muted key="split-v" />
+      </div>
+      <div className="pane">
+        <div className="pane-label">what Sequence sees</div>
+        {src ? (
+          <iframe src={src} title="worker display" allow="autoplay" onLoad={() => setTimeout(() => setReady(true), 350)} style={{ width: `${100 / splitZoom}%`, height: `${100 / splitZoom}%`, transform: `scale(${splitZoom})`, transformOrigin: '0 0' }} />
+        ) : null}
+      </div>
+      <div className="strip" />
+      <div className="status amber">{status}{interact ? ' · INTERACT (click top strip to exit)' : ''}</div>
+    </div>
+  )
+
   return (
     <div className={'demo' + (interact ? ' interact' : '') + (ready || mode !== 'replay' ? ' ready' : '')}>
       {mode === 'video' ? (

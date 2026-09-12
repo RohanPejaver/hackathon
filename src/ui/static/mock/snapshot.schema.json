@@ -1,0 +1,941 @@
+{
+  "$defs": {
+    "Alert": {
+      "additionalProperties": false,
+      "properties": {
+        "alert_id": {
+          "title": "Alert Id",
+          "type": "string"
+        },
+        "alert_key": {
+          "title": "Alert Key",
+          "type": "string"
+        },
+        "pathway_signature": {
+          "title": "Pathway Signature",
+          "type": "string"
+        },
+        "tier": {
+          "enum": [
+            0,
+            1,
+            2
+          ],
+          "title": "Tier",
+          "type": "integer"
+        },
+        "ticket_id": {
+          "title": "Ticket Id",
+          "type": "string"
+        },
+        "allergen_id": {
+          "title": "Allergen Id",
+          "type": "string"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        },
+        "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Body"
+        },
+        "state": {
+          "enum": [
+            "RAISED",
+            "ACKNOWLEDGED",
+            "ESCALATED",
+            "RESOLVED_BY_RESET",
+            "RESOLVED_BY_ASSERTION",
+            "RESOLVED_BY_REMAKE",
+            "EXPIRED"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "raised_at": {
+          "title": "Raised At",
+          "type": "integer"
+        },
+        "acknowledged_by_slot": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Acknowledged By Slot"
+        },
+        "required_actions": {
+          "items": {
+            "$ref": "#/$defs/RequiredAction"
+          },
+          "title": "Required Actions",
+          "type": "array"
+        },
+        "derivation": {
+          "items": {
+            "$ref": "#/$defs/TraceStep"
+          },
+          "title": "Derivation",
+          "type": "array"
+        },
+        "dismissed_until": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dismissed Until"
+        }
+      },
+      "required": [
+        "alert_id",
+        "alert_key",
+        "pathway_signature",
+        "tier",
+        "ticket_id",
+        "allergen_id",
+        "headline",
+        "body",
+        "state",
+        "raised_at",
+        "acknowledged_by_slot",
+        "required_actions",
+        "derivation"
+      ],
+      "title": "Alert",
+      "type": "object"
+    },
+    "Carrier": {
+      "additionalProperties": false,
+      "properties": {
+        "carrier_id": {
+          "title": "Carrier Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "GLOVES",
+            "TOOL",
+            "SURFACE",
+            "CONTAINER",
+            "FOOD"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "epistemic": {
+          "enum": [
+            "TRACKED",
+            "STALE",
+            "UNKNOWN"
+          ],
+          "title": "Epistemic",
+          "type": "string"
+        },
+        "last_observed_at": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Observed At"
+        },
+        "home_zone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Home Zone"
+        },
+        "taints": {
+          "items": {
+            "$ref": "#/$defs/Taint"
+          },
+          "title": "Taints",
+          "type": "array"
+        },
+        "source_allergens": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Allergens",
+          "type": "array"
+        },
+        "shared": {
+          "default": false,
+          "title": "Shared",
+          "type": "boolean"
+        },
+        "last_wiped_at": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Wiped At"
+        },
+        "asserted_at": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Asserted At"
+        }
+      },
+      "required": [
+        "carrier_id",
+        "kind",
+        "epistemic",
+        "last_observed_at",
+        "home_zone",
+        "taints"
+      ],
+      "title": "Carrier",
+      "type": "object"
+    },
+    "Condition": {
+      "additionalProperties": false,
+      "properties": {
+        "multi_restriction": {
+          "default": false,
+          "title": "Multi Restriction",
+          "type": "boolean"
+        }
+      },
+      "title": "Condition",
+      "type": "object"
+    },
+    "EventLine": {
+      "additionalProperties": false,
+      "properties": {
+        "seq": {
+          "title": "Seq",
+          "type": "integer"
+        },
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "t_occurred": {
+          "title": "T Occurred",
+          "type": "integer"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "PERCEPTION",
+            "OPERATOR",
+            "ORDER_SYSTEM",
+            "SYSTEM"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "grade": {
+          "anyOf": [
+            {
+              "enum": [
+                "OBSERVED",
+                "INFERRED",
+                "ASSERTED",
+                "PESSIMISTIC"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Grade"
+        },
+        "participants": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Participants",
+          "type": "array"
+        },
+        "mutates_state": {
+          "title": "Mutates State",
+          "type": "boolean"
+        },
+        "late": {
+          "title": "Late",
+          "type": "boolean"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "seq",
+        "event_id",
+        "t_occurred",
+        "type",
+        "source",
+        "grade",
+        "participants",
+        "mutates_state",
+        "late",
+        "summary"
+      ],
+      "title": "EventLine",
+      "type": "object"
+    },
+    "Health": {
+      "additionalProperties": false,
+      "properties": {
+        "vision": {
+          "enum": [
+            "OK",
+            "DEGRADED",
+            "UNAVAILABLE"
+          ],
+          "title": "Vision",
+          "type": "string"
+        },
+        "reasoning": {
+          "enum": [
+            "OK",
+            "DOWN"
+          ],
+          "title": "Reasoning",
+          "type": "string"
+        },
+        "late_rate": {
+          "default": 0.0,
+          "title": "Late Rate",
+          "type": "number"
+        },
+        "rejected_events": {
+          "default": 0,
+          "title": "Rejected Events",
+          "type": "integer"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "last_incident_event_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Incident Event Id"
+        }
+      },
+      "required": [
+        "vision",
+        "reasoning"
+      ],
+      "title": "Health",
+      "type": "object"
+    },
+    "RequiredAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "NEW_GLOVES",
+            "SWAP_TOOL",
+            "SWAP_SURFACE",
+            "USE_SEALED_BACKUP",
+            "SEQUENCE_TICKETS"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "carrier_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Carrier Id"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "done": {
+          "title": "Done",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "action",
+        "carrier_id",
+        "label",
+        "done"
+      ],
+      "title": "RequiredAction",
+      "type": "object"
+    },
+    "Restriction": {
+      "additionalProperties": false,
+      "properties": {
+        "raw_text": {
+          "title": "Raw Text",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "AVOID_ALLERGEN",
+            "AVOID_INGREDIENT",
+            "DIETARY"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "resolution": {
+          "enum": [
+            "RESOLVED",
+            "AMBIGUOUS",
+            "UNRESOLVABLE"
+          ],
+          "title": "Resolution",
+          "type": "string"
+        },
+        "allergen_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allergen Ids",
+          "type": "array"
+        },
+        "severity_declared": {
+          "enum": [
+            "STATED_ALLERGY",
+            "STATED_PREFERENCE",
+            "UNSPECIFIED"
+          ],
+          "title": "Severity Declared",
+          "type": "string"
+        }
+      },
+      "required": [
+        "raw_text",
+        "kind",
+        "resolution",
+        "allergen_ids",
+        "severity_declared"
+      ],
+      "title": "Restriction",
+      "type": "object"
+    },
+    "Taint": {
+      "additionalProperties": false,
+      "properties": {
+        "allergen_id": {
+          "title": "Allergen Id",
+          "type": "string"
+        },
+        "grade": {
+          "enum": [
+            "OBSERVED",
+            "INFERRED",
+            "ASSERTED",
+            "PESSIMISTIC"
+          ],
+          "title": "Grade",
+          "type": "string"
+        },
+        "strength": {
+          "enum": [
+            "PRESENT",
+            "POSSIBLE"
+          ],
+          "title": "Strength",
+          "type": "string"
+        },
+        "hops": {
+          "title": "Hops",
+          "type": "integer"
+        },
+        "acquired_at": {
+          "title": "Acquired At",
+          "type": "integer"
+        },
+        "source_event_id": {
+          "title": "Source Event Id",
+          "type": "string"
+        },
+        "source_carrier_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Carrier Id"
+        }
+      },
+      "required": [
+        "allergen_id",
+        "grade",
+        "strength",
+        "hops",
+        "acquired_at",
+        "source_event_id"
+      ],
+      "title": "Taint",
+      "type": "object"
+    },
+    "Ticket": {
+      "additionalProperties": false,
+      "properties": {
+        "ticket_id": {
+          "title": "Ticket Id",
+          "type": "string"
+        },
+        "lifecycle": {
+          "enum": [
+            "RECEIVED",
+            "BLOCKED",
+            "BOUND",
+            "IN_PREP",
+            "COMPLETE",
+            "HELD",
+            "RELEASED",
+            "VOIDED"
+          ],
+          "title": "Lifecycle",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/TicketItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "restrictions": {
+          "items": {
+            "$ref": "#/$defs/Restriction"
+          },
+          "title": "Restrictions",
+          "type": "array"
+        },
+        "bound_at": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bound At"
+        },
+        "rework_of": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rework Of"
+        },
+        "food_carrier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Food Carrier"
+        }
+      },
+      "required": [
+        "ticket_id",
+        "lifecycle",
+        "items",
+        "restrictions",
+        "bound_at"
+      ],
+      "title": "Ticket",
+      "type": "object"
+    },
+    "TicketItem": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "title": "Item Id",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "item_id",
+        "display_name"
+      ],
+      "title": "TicketItem",
+      "type": "object"
+    },
+    "TimeRef": {
+      "additionalProperties": false,
+      "properties": {
+        "t": {
+          "title": "T",
+          "type": "integer"
+        },
+        "kind": {
+          "enum": [
+            "WALL",
+            "LOG"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "t",
+        "kind"
+      ],
+      "title": "TimeRef",
+      "type": "object"
+    },
+    "TraceStep": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "EVENT",
+            "ABSENCE",
+            "RULE",
+            "ALERT"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "t_occurred": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "T Occurred"
+        },
+        "event_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Event Id"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Type"
+        },
+        "grade": {
+          "anyOf": [
+            {
+              "enum": [
+                "OBSERVED",
+                "INFERRED",
+                "ASSERTED",
+                "PESSIMISTIC"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Grade"
+        },
+        "narrative": {
+          "title": "Narrative",
+          "type": "string"
+        },
+        "state_delta": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "State Delta"
+        }
+      },
+      "required": [
+        "kind",
+        "t_occurred",
+        "event_id",
+        "type",
+        "grade",
+        "narrative",
+        "state_delta"
+      ],
+      "title": "TraceStep",
+      "type": "object"
+    },
+    "Zone": {
+      "additionalProperties": false,
+      "properties": {
+        "zone_id": {
+          "title": "Zone Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "INGREDIENT",
+            "TOOL_RACK",
+            "CLEAN_STOCK",
+            "WORK",
+            "LANDING",
+            "GLOVE_DISPENSER",
+            "WASH"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "contents": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Contents",
+          "type": "array"
+        },
+        "bound_carrier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bound Carrier"
+        },
+        "polygon": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Polygon",
+          "type": "array"
+        },
+        "last_contact_at": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Contact At"
+        }
+      },
+      "required": [
+        "zone_id",
+        "kind",
+        "contents",
+        "bound_carrier",
+        "polygon",
+        "last_contact_at"
+      ],
+      "title": "Zone",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "menu": {
+      "items": {
+        "$ref": "#/$defs/TicketItem"
+      },
+      "title": "Menu",
+      "type": "array"
+    },
+    "station_id": {
+      "title": "Station Id",
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "FULL",
+        "PROTOCOL_ONLY",
+        "REPLAY",
+        "CALIBRATION"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "time": {
+      "$ref": "#/$defs/TimeRef"
+    },
+    "seq": {
+      "title": "Seq",
+      "type": "integer"
+    },
+    "config_version": {
+      "title": "Config Version",
+      "type": "integer"
+    },
+    "knowledge_version": {
+      "title": "Knowledge Version",
+      "type": "integer"
+    },
+    "worker_slots": {
+      "title": "Worker Slots",
+      "type": "integer"
+    },
+    "health": {
+      "$ref": "#/$defs/Health"
+    },
+    "condition": {
+      "$ref": "#/$defs/Condition"
+    },
+    "carriers": {
+      "items": {
+        "$ref": "#/$defs/Carrier"
+      },
+      "title": "Carriers",
+      "type": "array"
+    },
+    "tickets": {
+      "items": {
+        "$ref": "#/$defs/Ticket"
+      },
+      "title": "Tickets",
+      "type": "array"
+    },
+    "alerts": {
+      "items": {
+        "$ref": "#/$defs/Alert"
+      },
+      "title": "Alerts",
+      "type": "array"
+    },
+    "recent_events": {
+      "items": {
+        "$ref": "#/$defs/EventLine"
+      },
+      "title": "Recent Events",
+      "type": "array"
+    },
+    "zones": {
+      "items": {
+        "$ref": "#/$defs/Zone"
+      },
+      "title": "Zones",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "menu",
+    "station_id",
+    "mode",
+    "time",
+    "seq",
+    "config_version",
+    "knowledge_version",
+    "worker_slots",
+    "health",
+    "condition",
+    "carriers",
+    "tickets",
+    "alerts",
+    "recent_events",
+    "zones"
+  ],
+  "title": "Snapshot",
+  "type": "object"
+}

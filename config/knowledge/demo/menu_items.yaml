@@ -6,8 +6,8 @@ menu_items:
   - { item_id: pesto_sandwich,        display_name: Pesto sandwich,               station_id: demo-bagel, ingredient_ids: [bread, pesto],               required_zones: [bin:bread, bin:pesto, work, landing] }
   - { item_id: turkey_sandwich,       display_name: Turkey sandwich,              station_id: demo-bagel, ingredient_ids: [bread, turkey, mayo],        required_zones: [bin:bread, bin:turkey, bin:mayo, work, landing] }
   - { item_id: turkey_pesto_sandwich, display_name: Turkey pesto sandwich,        station_id: demo-bagel, ingredient_ids: [bread, turkey, pesto],       required_zones: [bin:bread, bin:turkey, bin:pesto, work, landing] }
-  - { item_id: turkey_no_mayo,        display_name: Turkey sandwich, no mayo,     station_id: demo-bagel, ingredient_ids: [bread, turkey],             required_zones: [bin:bread, bin:turkey, work, landing] }
-  - { item_id: turkey_club_pesto_mayo, display_name: Turkey club (pesto + mayo),  station_id: demo-bagel, ingredient_ids: [bread, turkey, pesto, mayo], required_zones: [bin:bread, bin:turkey, bin:pesto, bin:mayo, work, landing] }
+  - { item_id: turkey_no_mayo,        display_name: "Turkey sandwich, no mayo",     station_id: demo-bagel, ingredient_ids: [bread, turkey],             required_zones: [bin:bread, bin:turkey, work, landing] }
+  - { item_id: turkey_club_pesto_mayo, display_name: "Turkey club (pesto + mayo)",  station_id: demo-bagel, ingredient_ids: [bread, turkey, pesto, mayo], required_zones: [bin:bread, bin:turkey, bin:pesto, bin:mayo, work, landing] }
   - { item_id: mayo_toast,            display_name: Bread with mayo,              station_id: demo-bagel, ingredient_ids: [bread, mayo],               required_zones: [bin:bread, bin:mayo, work, landing] }
   - { item_id: plain_bread,           display_name: Plain bread,                  station_id: demo-bagel, ingredient_ids: [bread],                     required_zones: [bin:bread, landing] }
   - { item_id: pesto_mayo_sandwich,   display_name: Pesto mayo sandwich,          station_id: demo-bagel, ingredient_ids: [bread, pesto, mayo],        required_zones: [bin:bread, bin:pesto, bin:mayo, work, landing] }

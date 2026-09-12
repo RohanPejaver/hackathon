@@ -1,4 +1,5 @@
 """In-memory append-only committed log with a private draft reorder buffer (Q2)."""
+
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 
@@ -44,7 +45,13 @@ class EventLog:
             self._reject(str(exc), e.station_id, e.t_occurred, e.t_committed, e.event_id)
             raise SchemaError(str(exc)) from exc
         if self._events and accepted.t_committed < self._events[-1].t_committed:
-            self._reject("commit clock regressed", e.station_id, e.t_occurred, self._events[-1].t_committed, e.event_id)
+            self._reject(
+                "commit clock regressed",
+                e.station_id,
+                e.t_occurred,
+                self._events[-1].t_committed,
+                e.event_id,
+            )
             raise ClockError("commit clock regressed")
         self._events.append(accepted.model_copy(deep=True))
         self._max_occurred = max(self._max_occurred, accepted.t_occurred)
@@ -79,23 +86,37 @@ class EventLog:
             if not force and now - arrival < self._window:
                 break
             self._pending.pop(0)
-            event = EVENT_ADAPTER.validate_python({
-                **draft.model_dump(), "seq": len(self._events), "t_committed": now,
-                "late": draft.t_occurred < self._max_occurred,
-            })
+            event = EVENT_ADAPTER.validate_python(
+                {
+                    **draft.model_dump(),
+                    "seq": len(self._events),
+                    "t_committed": now,
+                    "late": draft.t_occurred < self._max_occurred,
+                }
+            )
             self.append(event)
 
-    def _reject(self, reason: str, station: str, occurred: int, committed: int, event_id: str) -> None:
+    def _reject(
+        self, reason: str, station: str, occurred: int, committed: int, event_id: str
+    ) -> None:
         self._quarantine.append(reason)
         draft = DraftHealthDegraded(
             event_id=f"health:{len(self._events)}:{len(self._quarantine)}",
-            station_id=station, t_occurred=occurred, source="SYSTEM",
-            grade=EvidenceGrade.ASSERTED, cause=reason, rejected_event_id=event_id,
+            station_id=station,
+            t_occurred=occurred,
+            source="SYSTEM",
+            grade=EvidenceGrade.ASSERTED,
+            cause=reason,
+            rejected_event_id=event_id,
         )
-        health = EVENT_ADAPTER.validate_python({
-            **draft.model_dump(), "seq": len(self._events), "t_committed": committed,
-            "late": occurred < self._max_occurred,
-        })
+        health = EVENT_ADAPTER.validate_python(
+            {
+                **draft.model_dump(),
+                "seq": len(self._events),
+                "t_committed": committed,
+                "late": occurred < self._max_occurred,
+            }
+        )
         self._events.append(health)
         for subscription in tuple(self._handlers):
             try:
@@ -115,8 +136,12 @@ class EventSink:
         except Exception as exc:
             # P10: no malformed draft or downstream callback escapes into UI/perception.
             try:
-                self._log._reject(str(exc), getattr(e, "station_id", "unknown"),
-                                  getattr(e, "t_occurred", 0), self._clock(),
-                                  getattr(e, "event_id", "malformed"))
+                self._log._reject(
+                    str(exc),
+                    getattr(e, "station_id", "unknown"),
+                    getattr(e, "t_occurred", 0),
+                    self._clock(),
+                    getattr(e, "event_id", "malformed"),
+                )
             except Exception as failure:
                 self._log._quarantine.append(str(failure))

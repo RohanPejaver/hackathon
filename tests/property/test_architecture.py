@@ -1,4 +1,5 @@
 """Mechanical guards required before semantic streams begin."""
+
 import ast
 from pathlib import Path
 
@@ -10,12 +11,25 @@ PACKAGES = ("domain", "events", "state", "risk", "policy", "orders", "knowledge"
 
 def clock_violations(source: str) -> list[int]:
     tree = ast.parse(source)
-    return [node.lineno for node in ast.walk(tree) if (
-        isinstance(node, (ast.Import, ast.ImportFrom))
-        and ((isinstance(node, ast.Import) and any(n.name in {"time", "datetime"} for n in node.names))
-             or (isinstance(node, ast.ImportFrom) and node.module in {"time", "datetime"}))
-    ) or (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-          and node.func.attr in {"now", "utcnow", "time", "monotonic", "perf_counter"})]
+    return [
+        node.lineno
+        for node in ast.walk(tree)
+        if (
+            isinstance(node, (ast.Import, ast.ImportFrom))
+            and (
+                (
+                    isinstance(node, ast.Import)
+                    and any(n.name in {"time", "datetime"} for n in node.names)
+                )
+                or (isinstance(node, ast.ImportFrom) and node.module in {"time", "datetime"})
+            )
+        )
+        or (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr in {"now", "utcnow", "time", "monotonic", "perf_counter"}
+        )
+    ]
 
 
 def test_no_clock_in_core() -> None:
@@ -30,22 +44,46 @@ def test_clock_guard_rejects_violation() -> None:
 
 def event_examples() -> list[dict[str, object]]:
     import src.events.catalog as catalog
+
     result: list[dict[str, object]] = []
     values: dict[str, object] = {
-        "a": "gloves", "b": "board", "carrier": "gloves", "zone": "pesto",
-        "contact_point": {"x": 0, "y": 0}, "depth": 1.0, "duration_ms": 100,
-        "dwell_ms": 100, "worker_slot": 0, "phase": "DON", "retired": "spreader",
-        "introduced": "spreader2", "from_zone": "stock", "claim": "CLEAN",
-        "ticket": "T1", "items": ["sandwich"], "restrictions": [], "reason": "test",
-        "alert_id": "a1", "rework_of": "T0", "mode": "PROTOCOL_ONLY", "cause": "test",
-        "epistemic": "UNKNOWN", "config_version": "1", "knowledge_version": "1",
+        "a": "gloves",
+        "b": "board",
+        "carrier": "gloves",
+        "zone": "pesto",
+        "contact_point": {"x": 0, "y": 0},
+        "depth": 1.0,
+        "duration_ms": 100,
+        "dwell_ms": 100,
+        "worker_slot": 0,
+        "phase": "DON",
+        "retired": "spreader",
+        "introduced": "spreader2",
+        "from_zone": "stock",
+        "claim": "CLEAN",
+        "ticket": "T1",
+        "items": ["sandwich"],
+        "restrictions": [],
+        "reason": "test",
+        "alert_id": "a1",
+        "rework_of": "T0",
+        "mode": "PROTOCOL_ONLY",
+        "cause": "test",
+        "epistemic": "UNKNOWN",
+        "config_version": "1",
+        "knowledge_version": "1",
         "pathway_signature": "sig",
     }
     for index, kind in enumerate(EVENT_TYPES):
         cls = getattr(catalog, "".join(part.title() for part in kind.split("_")))
         data: dict[str, object] = {
-            "type": kind, "event_id": f"e{index}", "seq": index, "t_occurred": index,
-            "t_committed": index, "station_id": "station", "source": "OPERATOR",
+            "type": kind,
+            "event_id": f"e{index}",
+            "seq": index,
+            "t_occurred": index,
+            "t_committed": index,
+            "station_id": "station",
+            "source": "OPERATOR",
             "grade": "ASSERTED" if kind in {"WASH_CYCLE", "OPERATOR_ASSERTION"} else "OBSERVED",
         }
         for field, definition in cls.model_fields.items():
@@ -74,6 +112,7 @@ def test_confidence_projection_invariant() -> None:
 
 def prohibited_copy(text: str) -> bool:
     import re
+
     return bool(re.search(r"\b(safe|contaminated|contamination|allergen-free)\b", text, re.I))
 
 

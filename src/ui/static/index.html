@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Station display</title>
+<link rel="stylesheet" href="/static/vendor/open-props.min.css">
+<link rel="stylesheet" href="/static/vendor/fonts.css">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-page="worker">
+
+<header class="topbar">
+  <div class="station"><svg class="ph"><use href="/static/vendor/icons/phosphor-sprite.svg#ph-hand"/></svg><span id="station">—</span></div>
+  <div class="banner" id="banner" data-mode="CALIBRATION"><span id="banner-text">CONNECTING</span><span class="why" id="banner-why"></span></div>
+  <div class="health micro">vision <span class="num" id="h-vision">—</span> · reasoning <span class="num" id="h-reasoning">—</span> · late <span class="num" id="h-late">—</span> · rejected <span class="num" id="h-rejected">—</span></div>
+  <div class="clock mono" id="clock">—</div>
+</header>
+
+<!-- four panes in dataflow order: orders -> observations -> state -> risk -->
+<main class="panes">
+  <section class="pane" data-pane="tickets">
+    <div class="pane-head"><span class="micro">Tickets</span><span class="count mono" id="tickets-count">0</span></div>
+    <div class="pane-body" id="tickets"><div class="empty">No tickets bound</div></div>
+  </section>
+  <section class="pane" data-pane="log">
+    <div class="pane-head"><span class="micro">Observations</span><span class="count mono" id="log-count">seq —</span></div>
+    <div class="pane-body" id="log"><div class="empty">No observations yet</div></div>
+  </section>
+  <section class="pane" data-pane="carriers">
+    <div class="pane-head"><span class="micro">Carriers · taint / observation</span><span class="count mono" id="carriers-count">0</span></div>
+    <div class="pane-body"><div class="grid" id="grid"></div></div>
+  </section>
+  <section class="pane" data-pane="risk">
+    <div class="pane-head"><span class="micro">Alerts · evidence</span><span class="count mono" id="alerts-count">0</span></div>
+    <div class="pane-body" id="risk"><div class="empty">Quiet</div></div>
+  </section>
+</main>
+
+<!-- the worker surface: one visible alert per station, highest tier wins (16) -->
+<section class="surface" id="surface" data-tier="none">
+  <div class="label micro" id="surface-label">Station quiet</div>
+  <h1 class="headline" id="surface-headline">Nothing to do</h1>
+</section>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

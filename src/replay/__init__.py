@@ -1,1 +1,3 @@
-from .schema import ScenarioFile as ScenarioFile, ReplayResult as ReplayResult, AssertionResult as AssertionResult
+from .schema import AssertionResult as AssertionResult
+from .schema import ReplayResult as ReplayResult
+from .schema import ScenarioFile as ScenarioFile

@@ -8,6 +8,7 @@ mkdir -p "$V/fonts" "$V/icons"
 
 # Open Props — single CSS file, design tokens, no build step.
 curl -fsSL "https://unpkg.com/open-props@1.7.4/open-props.min.css" -o "$V/open-props.min.css"
+[ -s "$V/open-props.min.css" ] || { echo "open-props download is empty" >&2; exit 1; }
 
 # Phosphor Icons — regular weight SVGs, inlined into one local sprite. Deliberately not Lucide.
 ICONS="hand knife square tray jar warning warning-octagon check x eye-slash video-camera-slash
@@ -46,4 +47,9 @@ for subset, body in blocks:
 (out.parent / "fonts.css").write_text("\n".join(lines) + "\n")
 print(f"{len(lines)} font faces written")
 PY
+# Fail loudly if anything vendored is empty — a silent 0-byte asset is a black screen on stage.
+empty=$(find "$V" -type f -empty)
+if [ -n "$empty" ]; then echo "EMPTY VENDORED FILE(S):" >&2; echo "$empty" >&2; exit 1; fi
+[ "$(wc -c < "$V/open-props.min.css")" -gt 10000 ] || { echo "open-props.min.css too small" >&2; exit 1; }
+[ "$(grep -c '<symbol' "$V/icons/phosphor-sprite.svg")" -ge 20 ] || { echo "phosphor sprite incomplete" >&2; exit 1; }
 ls -la "$V" "$V/fonts" "$V/icons"

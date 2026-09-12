@@ -1,4 +1,5 @@
 """Scenario v1 shorthand from 36, retaining typed semantic event validation at expansion."""
+
 from typing import Literal
 
 from pydantic import Field, JsonValue

@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "menu": [
+    { "item_id": "pesto_sandwich", "display_name": "Pesto sandwich" },
+    { "item_id": "turkey_sandwich", "display_name": "Turkey sandwich" },
+    { "item_id": "turkey_pesto_sandwich", "display_name": "Turkey pesto sandwich" },
+    { "item_id": "turkey_no_mayo", "display_name": "Turkey sandwich, no mayo" },
+    { "item_id": "turkey_club_pesto_mayo", "display_name": "Turkey club (pesto + mayo)" },
+    { "item_id": "mayo_toast", "display_name": "Bread with mayo" },
+    { "item_id": "plain_bread", "display_name": "Plain bread" },
+    { "item_id": "pesto_mayo_sandwich", "display_name": "Pesto mayo sandwich" }
+  ],
+  "station_id": "demo-bagel",
+  "mode": "FULL",
+  "time": { "t": 258400, "kind": "LOG" },
+  "seq": 41,
+  "config_version": 1,
+  "knowledge_version": 1,
+  "worker_slots": 1,
+  "health": { "vision": "OK", "reasoning": "OK", "late_rate": 0.02, "rejected_events": 0, "message": null, "last_incident_event_id": null },
+  "condition": { "multi_restriction": false },
+  "carriers": [
+    { "carrier_id": "gloves", "kind": "GLOVES", "epistemic": "TRACKED", "last_observed_at": 258100, "home_zone": null,
+      "taints": [
+        { "allergen_id": "PINE_NUT", "grade": "OBSERVED", "strength": "PRESENT", "hops": 0, "acquired_at": 12000, "source_event_id": "evt-0007", "source_carrier_id": null },
+        { "allergen_id": "MILK", "grade": "OBSERVED", "strength": "PRESENT", "hops": 0, "acquired_at": 12000, "source_event_id": "evt-0007", "source_carrier_id": null }
+      ] },
+    { "carrier_id": "spreader", "kind": "TOOL", "epistemic": "TRACKED", "last_observed_at": 257900, "home_zone": "tool_rack",
+      "taints": [
+        { "allergen_id": "PINE_NUT", "grade": "OBSERVED", "strength": "PRESENT", "hops": 1, "acquired_at": 18000, "source_event_id": "evt-0009", "source_carrier_id": "gloves" },
+        { "allergen_id": "MILK", "grade": "OBSERVED", "strength": "PRESENT", "hops": 1, "acquired_at": 18000, "source_event_id": "evt-0009", "source_carrier_id": "gloves" }
+      ] },
+    { "carrier_id": "board", "kind": "SURFACE", "epistemic": "STALE", "last_observed_at": 201000, "home_zone": "work",
+      "taints": [
+        { "allergen_id": "PINE_NUT", "grade": "OBSERVED", "strength": "PRESENT", "hops": 2, "acquired_at": 21000, "source_event_id": "evt-0011", "source_carrier_id": "spreader" },
+        { "allergen_id": "MILK", "grade": "OBSERVED", "strength": "PRESENT", "hops": 2, "acquired_at": 21000, "source_event_id": "evt-0011", "source_carrier_id": "spreader" }
+      ], "last_wiped_at": 95000 },
+    { "carrier_id": "landing", "kind": "SURFACE", "epistemic": "STALE", "last_observed_at": 201000, "home_zone": "landing",
+      "taints": [
+        { "allergen_id": "PINE_NUT", "grade": "OBSERVED", "strength": "PRESENT", "hops": 2, "acquired_at": 201000, "source_event_id": "evt-0031", "source_carrier_id": "board" },
+        { "allergen_id": "MILK", "grade": "OBSERVED", "strength": "PRESENT", "hops": 2, "acquired_at": 201000, "source_event_id": "evt-0031", "source_carrier_id": "board" }
+      ] },
+    { "carrier_id": "bin:pesto", "kind": "CONTAINER", "epistemic": "TRACKED", "last_observed_at": 258100, "home_zone": "bin:pesto", "taints": [], "source_allergens": ["PINE_NUT", "MILK"], "shared": true },
+    { "carrier_id": "bin:mayo", "kind": "CONTAINER", "epistemic": "TRACKED", "last_observed_at": 258100, "home_zone": "bin:mayo",
+      "taints": [
+        { "allergen_id": "PINE_NUT", "grade": "OBSERVED", "strength": "PRESENT", "hops": 1, "acquired_at": 33000, "source_event_id": "evt-0013", "source_carrier_id": "gloves" },
+        { "allergen_id": "MILK", "grade": "OBSERVED", "strength": "PRESENT", "hops": 1, "acquired_at": 33000, "source_event_id": "evt-0013", "source_carrier_id": "gloves" }
+      ], "source_allergens": ["EGG"], "shared": true },
+    { "carrier_id": "bin:turkey", "kind": "CONTAINER", "epistemic": "UNKNOWN", "last_observed_at": 240000, "home_zone": "bin:turkey",
+      "taints": [
+        { "allergen_id": "PINE_NUT", "grade": "PESSIMISTIC", "strength": "POSSIBLE", "hops": 0, "acquired_at": 244000, "source_event_id": "evt-0036", "source_carrier_id": null }
+      ], "source_allergens": [], "shared": true },
+    { "carrier_id": "bin:bread", "kind": "CONTAINER", "epistemic": "TRACKED", "last_observed_at": 258100, "home_zone": "bin:bread", "taints": [], "source_allergens": ["WHEAT"], "shared": true },
+    { "carrier_id": "food:49", "kind": "FOOD", "epistemic": "TRACKED", "last_observed_at": 256000, "home_zone": "landing",
+      "taints": [
+        { "allergen_id": "PINE_NUT", "grade": "OBSERVED", "strength": "PRESENT", "hops": 2, "acquired_at": 256000, "source_event_id": "evt-0039", "source_carrier_id": "spreader" }
+      ] },
+    { "carrier_id": "food:46", "kind": "FOOD", "epistemic": "TRACKED", "last_observed_at": 190000, "home_zone": "landing",
+      "taints": [
+        { "allergen_id": "PINE_NUT", "grade": "OBSERVED", "strength": "PRESENT", "hops": 2, "acquired_at": 172000, "source_event_id": "evt-0027", "source_carrier_id": "spreader" }
+      ] }
+  ],
+  "tickets": [
+    { "ticket_id": "46", "lifecycle": "HELD", "items": [{ "item_id": "turkey_sandwich", "display_name": "Turkey sandwich" }],
+      "restrictions": [{ "raw_text": "pine nut allergy", "kind": "AVOID_ALLERGEN", "resolution": "RESOLVED", "allergen_ids": ["PINE_NUT"], "severity_declared": "STATED_ALLERGY" }],
+      "bound_at": 150000, "food_carrier": "food:46" },
+    { "ticket_id": "48", "lifecycle": "BOUND", "items": [{ "item_id": "turkey_sandwich", "display_name": "Turkey sandwich" }],
+      "restrictions": [{ "raw_text": "PINE NUT ALLERGY", "kind": "AVOID_ALLERGEN", "resolution": "RESOLVED", "allergen_ids": ["PINE_NUT"], "severity_declared": "STATED_ALLERGY" }],
+      "bound_at": 258000, "food_carrier": null },
+    { "ticket_id": "49", "lifecycle": "IN_PREP", "items": [{ "item_id": "turkey_no_mayo", "display_name": "Turkey sandwich, no mayo" }],
+      "restrictions": [{ "raw_text": "no pine nuts", "kind": "AVOID_ALLERGEN", "resolution": "RESOLVED", "allergen_ids": ["PINE_NUT"], "severity_declared": "UNSPECIFIED" }],
+      "bound_at": 250000, "food_carrier": "food:49" },
+    { "ticket_id": "50", "lifecycle": "BLOCKED", "items": [{ "item_id": "pesto_sandwich", "display_name": "Pesto sandwich" }],
+      "restrictions": [{ "raw_text": "ALLERGY", "kind": "AVOID_ALLERGEN", "resolution": "AMBIGUOUS", "allergen_ids": [], "severity_declared": "STATED_ALLERGY" }],
+      "bound_at": null }
+  ],
+  "alerts": [
+    { "alert_id": "al-0003", "alert_key": "demo-bagel:ps-7c1e", "pathway_signature": "ps-7c1e", "tier": 2, "ticket_id": "46", "allergen_id": "PINE_NUT",
+      "headline": "HOLD — TICKET 46 — DO NOT SEND",
+      "body": "PINE_NUT. Spreader contacted pesto at +0:18. Replacement not observed.",
+      "state": "ESCALATED", "raised_at": 190000, "acknowledged_by_slot": null,
+      "required_actions": [ { "action": "SWAP_TOOL", "carrier_id": "spreader", "label": "Spreader", "done": false } ],
+      "derivation": [
+        { "kind": "EVENT", "t_occurred": 12000, "event_id": "evt-0007", "type": "ZONE_ENTRY", "grade": "OBSERVED", "narrative": "gloves -> bin:pesto", "state_delta": "+taint{PINE_NUT} on gloves" },
+        { "kind": "EVENT", "t_occurred": 18000, "event_id": "evt-0009", "type": "CONTACT_BEGIN", "grade": "OBSERVED", "narrative": "gloves <-> spreader", "state_delta": "+taint{PINE_NUT} on spreader (hop 1)" },
+        { "kind": "ABSENCE", "t_occurred": null, "event_id": null, "type": "TOOL_SWAP", "grade": null, "narrative": "no TOOL_SWAP observed on spreader in window", "state_delta": null },
+        { "kind": "EVENT", "t_occurred": 172000, "event_id": "evt-0027", "type": "CONTACT_BEGIN", "grade": "OBSERVED", "narrative": "spreader <-> food:46", "state_delta": "+taint{PINE_NUT} on food:46 (hop 2)" },
+        { "kind": "EVENT", "t_occurred": 190000, "event_id": "evt-0029", "type": "TICKET_ITEM_COMPLETE", "grade": null, "narrative": "#46 complete", "state_delta": null },
+        { "kind": "RULE", "t_occurred": 190000, "event_id": "evt-0029", "type": "pathway_open", "grade": "OBSERVED", "narrative": "bin:pesto -> gloves -> spreader -> food:46 (2 hops, unbroken)", "state_delta": "level=PATHWAY_OPEN" },
+        { "kind": "ALERT", "t_occurred": 190000, "event_id": "evt-0030", "type": "ALERT_ESCALATED", "grade": null, "narrative": "tier=2 \"HOLD — TICKET 46 — DO NOT SEND\"", "state_delta": null }
+      ] },
+    { "alert_id": "al-0004", "alert_key": "demo-bagel:ps-91aa", "pathway_signature": "ps-91aa", "tier": 1, "ticket_id": "49", "allergen_id": "PINE_NUT",
+      "headline": "STOP — spreader touched pesto",
+      "body": null,
+      "state": "RAISED", "raised_at": 256000, "acknowledged_by_slot": null,
+      "required_actions": [ { "action": "SWAP_TOOL", "carrier_id": "spreader", "label": "Swap tool", "done": false } ],
+      "derivation": [
+        { "kind": "EVENT", "t_occurred": 12000, "event_id": "evt-0007", "type": "ZONE_ENTRY", "grade": "OBSERVED", "narrative": "gloves -> bin:pesto", "state_delta": "+taint{PINE_NUT} on gloves" },
+        { "kind": "EVENT", "t_occurred": 18000, "event_id": "evt-0009", "type": "CONTACT_BEGIN", "grade": "OBSERVED", "narrative": "gloves <-> spreader", "state_delta": "+taint{PINE_NUT} on spreader (hop 1)" },
+        { "kind": "ABSENCE", "t_occurred": null, "event_id": null, "type": "TOOL_SWAP", "grade": null, "narrative": "no TOOL_SWAP observed on spreader in window", "state_delta": null },
+        { "kind": "EVENT", "t_occurred": 256000, "event_id": "evt-0039", "type": "CONTACT_BEGIN", "grade": "OBSERVED", "narrative": "spreader <-> food:49", "state_delta": "+taint{PINE_NUT} on food:49 (hop 2)" },
+        { "kind": "RULE", "t_occurred": 256000, "event_id": "evt-0039", "type": "pathway_open", "grade": "OBSERVED", "narrative": "bin:pesto -> gloves -> spreader -> food:49 (2 hops, unbroken)", "state_delta": "level=PATHWAY_OPEN" },
+        { "kind": "ALERT", "t_occurred": 256000, "event_id": "evt-0040", "type": "ALERT_RAISED", "grade": null, "narrative": "tier=1 \"STOP — spreader touched pesto\"", "state_delta": null }
+      ] },
+    { "alert_id": "al-0005", "alert_key": "demo-bagel:ps-2b40", "pathway_signature": "ps-2b40", "tier": 0, "ticket_id": "48", "allergen_id": "PINE_NUT",
+      "headline": "PINE NUT — station not clean",
+      "body": null,
+      "state": "RAISED", "raised_at": 258000, "acknowledged_by_slot": null,
+      "required_actions": [
+        { "action": "NEW_GLOVES", "carrier_id": "gloves", "label": "New gloves", "done": false },
+        { "action": "SWAP_TOOL", "carrier_id": "spreader", "label": "Clean spreader", "done": false },
+        { "action": "USE_SEALED_BACKUP", "carrier_id": "bin:mayo", "label": "Mayo container flagged — use sealed backup", "done": false },
+        { "action": "SWAP_SURFACE", "carrier_id": "board", "label": "Fresh board", "done": true }
+      ],
+      "derivation": [
+        { "kind": "EVENT", "t_occurred": 12000, "event_id": "evt-0007", "type": "ZONE_ENTRY", "grade": "OBSERVED", "narrative": "gloves -> bin:pesto", "state_delta": "+taint{PINE_NUT} on gloves" },
+        { "kind": "EVENT", "t_occurred": 18000, "event_id": "evt-0009", "type": "CONTACT_BEGIN", "grade": "OBSERVED", "narrative": "gloves <-> spreader", "state_delta": "+taint{PINE_NUT} on spreader (hop 1)" },
+        { "kind": "EVENT", "t_occurred": 33000, "event_id": "evt-0013", "type": "CONTACT_BEGIN", "grade": "OBSERVED", "narrative": "gloves <-> bin:mayo", "state_delta": "+taint{PINE_NUT} on bin:mayo (hop 1)" },
+        { "kind": "ABSENCE", "t_occurred": null, "event_id": null, "type": "GLOVE_CHANGE", "grade": null, "narrative": "no GLOVE_CHANGE observed in window", "state_delta": null },
+        { "kind": "EVENT", "t_occurred": 258000, "event_id": "evt-0041", "type": "TICKET_BOUND", "grade": null, "narrative": "#48 restriction PINE_NUT", "state_delta": null },
+        { "kind": "RULE", "t_occurred": 258000, "event_id": "evt-0041", "type": "precondition_unmet", "grade": "OBSERVED", "narrative": "blocking: [gloves, spreader, bin:mayo]", "state_delta": "level=UNVERIFIED" },
+        { "kind": "ALERT", "t_occurred": 258000, "event_id": "evt-0042", "type": "ALERT_RAISED", "grade": null, "narrative": "tier=0 \"PINE NUT — station not clean\"", "state_delta": null }
+      ] }
+  ],
+  "recent_events": [
+    { "seq": 7,  "event_id": "evt-0007", "t_occurred": 12000,  "type": "ZONE_ENTRY",        "source": "PERCEPTION", "grade": "OBSERVED", "participants": ["gloves", "bin:pesto"],   "mutates_state": true,  "late": false, "summary": "gloves -> bin:pesto" },
+    { "seq": 9,  "event_id": "evt-0009", "t_occurred": 18000,  "type": "CONTACT_BEGIN",     "source": "PERCEPTION", "grade": "OBSERVED", "participants": ["gloves", "spreader"],    "mutates_state": true,  "late": false, "summary": "gloves <-> spreader" },
+    { "seq": 11, "event_id": "evt-0011", "t_occurred": 21000,  "type": "CONTACT_BEGIN",     "source": "PERCEPTION", "grade": "OBSERVED", "participants": ["spreader", "board"],     "mutates_state": true,  "late": false, "summary": "spreader <-> board" },
+    { "seq": 13, "event_id": "evt-0013", "t_occurred": 33000,  "type": "CONTACT_BEGIN",     "source": "PERCEPTION", "grade": "OBSERVED", "participants": ["gloves", "bin:mayo"],    "mutates_state": true,  "late": false, "summary": "gloves <-> bin:mayo" },
+    { "seq": 20, "event_id": "evt-0020", "t_occurred": 95000,  "type": "SURFACE_WIPE",      "source": "PERCEPTION", "grade": "OBSERVED", "participants": ["board"],                 "mutates_state": false, "late": false, "summary": "board wiped — not a reset" },
+    { "seq": 27, "event_id": "evt-0027", "t_occurred": 172000, "type": "CONTACT_BEGIN",     "source": "PERCEPTION", "grade": "OBSERVED", "participants": ["spreader", "food:46"],   "mutates_state": true,  "late": false, "summary": "spreader <-> food:46" },
+    { "seq": 29, "event_id": "evt-0029", "t_occurred": 190000, "type": "TICKET_ITEM_COMPLETE", "source": "OPERATOR", "grade": null,      "participants": ["46"],                    "mutates_state": false, "late": false, "summary": "#46 complete" },
+    { "seq": 30, "event_id": "evt-0030", "t_occurred": 190000, "type": "ALERT_ESCALATED",   "source": "SYSTEM",     "grade": null,       "participants": ["al-0003"],               "mutates_state": false, "late": false, "summary": "al-0003 -> tier 2" },
+    { "seq": 31, "event_id": "evt-0031", "t_occurred": 201000, "type": "TRACK_IDENTITY_SUSPECT", "source": "PERCEPTION", "grade": "INFERRED", "participants": ["board", "landing"], "mutates_state": true, "late": false, "summary": "board ? landing — taints merged, both STALE" },
+    { "seq": 36, "event_id": "evt-0036", "t_occurred": 244000, "type": "CARRIER_OBSERVABILITY_CHANGED", "source": "PERCEPTION", "grade": "OBSERVED", "participants": ["bin:turkey"], "mutates_state": true, "late": false, "summary": "bin:turkey -> UNKNOWN (occluded 3.1s)" },
+    { "seq": 39, "event_id": "evt-0039", "t_occurred": 256000, "type": "CONTACT_BEGIN",     "source": "PERCEPTION", "grade": "OBSERVED", "participants": ["spreader", "food:49"],   "mutates_state": true,  "late": true,  "summary": "spreader <-> food:49" },
+    { "seq": 40, "event_id": "evt-0040", "t_occurred": 256000, "type": "ALERT_RAISED",      "source": "SYSTEM",     "grade": null,       "participants": ["al-0004"],               "mutates_state": false, "late": false, "summary": "al-0004 tier 1" },
+    { "seq": 41, "event_id": "evt-0041", "t_occurred": 258000, "type": "TICKET_BOUND",      "source": "OPERATOR",   "grade": null,       "participants": ["48"],                    "mutates_state": false, "late": false, "summary": "#48 bound (PINE_NUT)" }
+  ],
+  "zones": [
+    { "zone_id": "bin:pesto",  "kind": "INGREDIENT", "contents": ["pesto"],  "bound_carrier": "bin:pesto",  "polygon": [[70,370],[270,370],[270,570],[70,570]],     "last_contact_at": 12000 },
+    { "zone_id": "bin:mayo",   "kind": "INGREDIENT", "contents": ["mayo"],   "bound_carrier": "bin:mayo",   "polygon": [[330,370],[530,370],[530,570],[330,570]],   "last_contact_at": 33000 },
+    { "zone_id": "bin:turkey", "kind": "INGREDIENT", "contents": ["turkey"], "bound_carrier": "bin:turkey", "polygon": [[590,370],[790,370],[790,570],[590,570]],   "last_contact_at": null },
+    { "zone_id": "bin:bread",  "kind": "INGREDIENT", "contents": ["bread"],  "bound_carrier": "bin:bread",  "polygon": [[850,370],[1050,370],[1050,570],[850,570]], "last_contact_at": 160000 },
+    { "zone_id": "work",       "kind": "WORK",       "contents": [],         "bound_carrier": "board",      "polygon": [[300,60],[700,60],[700,320],[300,320]],     "last_contact_at": 172000 },
+    { "zone_id": "landing",    "kind": "LANDING",    "contents": [],         "bound_carrier": "landing",    "polygon": [[740,60],[1000,60],[1000,320],[740,320]],   "last_contact_at": 190000 },
+    { "zone_id": "tool_rack",  "kind": "TOOL_RACK",  "contents": [],         "bound_carrier": null,         "polygon": [[40,200],[260,200],[260,320],[40,320]],     "last_contact_at": null },
+    { "zone_id": "clean_stock","kind": "CLEAN_STOCK","contents": [],         "bound_carrier": null,         "polygon": [[60,80],[240,80],[240,180],[60,180]],       "last_contact_at": null },
+    { "zone_id": "glove_dispenser", "kind": "GLOVE_DISPENSER", "contents": [], "bound_carrier": null,      "polygon": [[1080,380],[1180,380],[1180,560],[1080,560]], "last_contact_at": null },
+    { "zone_id": "wash",       "kind": "WASH",       "contents": [],         "bound_carrier": null,         "polygon": [[1040,60],[1180,60],[1180,320],[1040,320]], "last_contact_at": null }
+  ]
+}

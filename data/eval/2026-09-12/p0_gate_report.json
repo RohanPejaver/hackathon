@@ -1,0 +1,35 @@
+{
+  "phase": "P0",
+  "date": "2026-09-12",
+  "driver": "Device B (sole driver after Device A stopped)",
+  "commands": {
+    "install": "uv pip install -e '.[dev]'  (pydantic==2.13.5, fastapi 0.141.1, uvicorn 0.52.4; opencv absent)",
+    "ruff": "ruff check . && ruff format --check .  -> All checks passed; 48 files formatted",
+    "mypy": "mypy --strict src/domain src/events -> Success: no issues found in 6 source files",
+    "lint_imports": "lint-imports -> Contracts: 8 kept, 0 broken",
+    "pytest": "pytest -q -> 46 passed (before to_domain test)"
+  },
+  "gate_clauses": {
+    "every_event_type_round_trips": {"evidence": "tests/property/test_architecture.py::test_every_event_round_trips_without_binary_fields (33 types) PASS"},
+    "import_lint_rejects_planted_violation": {
+      "plant": "src/state/_plant_a.py: from src.perception import x",
+      "observed": "rule 3: state/risk/policy/orders never import perception, ui or runtime BROKEN; src.state._plant_a -> src.perception (l.1); exit 1; exit 0 after revert",
+      "also": "tests/integration/meta/test_layer_dag.py::test_planted_violation_in_state_is_rejected PASS"
+    },
+    "config_validation_rejects_malformed_bundle": {
+      "plant": "config/defaults.yaml temporal.t_hysteresis_ms: -400",
+      "observed": "REJECTED: defaults.yaml (merged): temporal.t_hysteresis_ms: Input should be greater than 0; loads after revert",
+      "also": "tests/integration/meta/test_config_rejects_malformed.py: 15 planted defects rejected, real bundle loads"
+    },
+    "clock_lint_rejects_planted_now": {
+      "plant": "src/state/_plant_b.py: from datetime import datetime; T = datetime.now()",
+      "observed": "tests/property/test_architecture.py::test_no_clock_in_core FAILED on src/state/_plant_b.py (lines [1, 3]); PASS after revert"
+    },
+    "alert_copy_lint_rejects_claim_word": {
+      "plant": "src/policy/copy.py: HEADLINES = {'tier0': 'Station is safe to use'}",
+      "observed": "tests/property/test_architecture.py::test_alert_copy_guard FAILED: prohibited_copy('Station is safe to use'); PASS after revert",
+      "also": "src/ui/static/app.js 'Station is safe' -> tests/integration/ui/test_copy_lint.py FAILED at app.js:152; PASS after revert"
+    }
+  },
+  "status": "VERIFIED"
+}

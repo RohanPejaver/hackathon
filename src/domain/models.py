@@ -1,4 +1,5 @@
 """Shared semantic types; imports no project package (11–19)."""
+
 from __future__ import annotations
 
 from enum import IntEnum, StrEnum
@@ -310,7 +311,9 @@ class RiskAssessment(Model):
     cause_event_id: str
     cause_event_type: str
     operator_resolution: bool = False
-    resolution_reason: Literal["RESOLVED_BY_RESET", "RESOLVED_BY_ASSERTION", "RESOLVED_BY_REMAKE"] | None = None
+    resolution_reason: (
+        Literal["RESOLVED_BY_RESET", "RESOLVED_BY_ASSERTION", "RESOLVED_BY_REMAKE"] | None
+    ) = None
     condition: str | None = None
 
 
@@ -331,7 +334,16 @@ class AlertLifecycle(StrEnum):
 
 
 class Action(Model):
-    kind: Literal["NEW_GLOVES", "SWAP_TOOL", "SWAP_SURFACE", "USE_SEALED_BACKUP", "VERIFY", "SEQUENCE_TICKETS", "HOLD", "REMAKE"]
+    kind: Literal[
+        "NEW_GLOVES",
+        "SWAP_TOOL",
+        "SWAP_SURFACE",
+        "USE_SEALED_BACKUP",
+        "VERIFY",
+        "SEQUENCE_TICKETS",
+        "HOLD",
+        "REMAKE",
+    ]
     carrier_id: str | None = None
     label: str
 
@@ -386,7 +398,18 @@ class HealthStatus(Model):
 
 class WorkerAction(Model):
     # CONTRACT-GAP: 22/26 omit payload fields; action discriminant and explicit targets.
-    action: Literal["BIND", "ACKNOWLEDGE", "ALREADY_CLEAN", "ALREADY_SWAPPED", "DISMISS", "REMAKE", "RESOLVE_HOLD", "PREP_START", "ITEM_COMPLETE", "RESOLVE_RESTRICTION"]
+    action: Literal[
+        "BIND",
+        "ACKNOWLEDGE",
+        "ALREADY_CLEAN",
+        "ALREADY_SWAPPED",
+        "DISMISS",
+        "REMAKE",
+        "RESOLVE_HOLD",
+        "PREP_START",
+        "ITEM_COMPLETE",
+        "RESOLVE_RESTRICTION",
+    ]
     worker_slot: int
     ticket_id: str | None = None
     carrier_id: str | None = None

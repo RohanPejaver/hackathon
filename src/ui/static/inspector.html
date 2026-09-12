@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inspector</title>
+<link rel="stylesheet" href="/static/vendor/open-props.min.css">
+<link rel="stylesheet" href="/static/vendor/fonts.css">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="inspector" data-page="inspector">
+
+<header class="topbar">
+  <div class="station"><span id="station">—</span> <span class="micro">inspector · read-only</span></div>
+  <div class="banner" id="banner" data-mode="CALIBRATION"><span id="banner-text">CONNECTING</span><span class="why" id="banner-why"></span></div>
+  <div class="health micro">vision <span class="num" id="h-vision">—</span> · reasoning <span class="num" id="h-reasoning">—</span> · late <span class="num" id="h-late">—</span> · rejected <span class="num" id="h-rejected">—</span> · cfg <span class="num" id="h-cfg">—</span> · knowledge <span class="num" id="h-kv">—</span></div>
+  <div class="clock mono" id="clock">—</div>
+</header>
+
+<main class="panes">
+  <section class="pane">
+    <div class="pane-head"><span class="micro">Carriers · both axes</span><span class="count mono" id="carriers-count">0</span></div>
+    <div class="pane-body" id="carriers-table"></div>
+  </section>
+  <section class="pane">
+    <div class="pane-head"><span class="micro">Zones · recent contacts</span><span class="count mono" id="zones-count">0</span></div>
+    <div class="pane-body" id="zones-table"></div>
+  </section>
+  <section class="pane">
+    <div class="pane-head"><span class="micro">Tickets · restrictions</span><span class="count mono" id="tickets-count">0</span></div>
+    <div class="pane-body" id="tickets"></div>
+  </section>
+  <section class="pane">
+    <div class="pane-head"><span class="micro">Alerts · traces</span><span class="count mono" id="alerts-count">0</span></div>
+    <div class="pane-body" id="risk"></div>
+  </section>
+  <section class="pane">
+    <div class="pane-head"><span class="micro">Mode · health</span><span class="count mono" id="mode-now">—</span></div>
+    <div class="pane-body" id="health-table"></div>
+  </section>
+  <section class="pane">
+    <div class="pane-head"><span class="micro">Event timeline</span><span class="count mono" id="log-count">seq —</span></div>
+    <div class="scrub"><span class="micro">to seq</span><input type="range" id="scrub" min="0" max="0" value="0"><span class="mono num" id="scrub-val">—</span></div>
+    <div class="pane-body" id="log"></div>
+  </section>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

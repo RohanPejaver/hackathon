@@ -14,7 +14,7 @@ description = "Allergen cross-contamination safety layer for one food-prep works
 requires-python = ">=3.11"
 dependencies = [
   # core
-  "pydantic~=2.9",
+  "pydantic==2.13.5",   # 39 §2 says ~2.9; pinned exactly per 32 (serialization is on the determinism path)
   "pyyaml~=6.0",
   # runtime
   "fastapi~=0.115",

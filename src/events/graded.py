@@ -1,4 +1,5 @@
-from .catalog import Event, GradedEvent as GradedEvent, GRADEDEVENT_ADAPTER
+from .catalog import GRADEDEVENT_ADAPTER, Event
+from .catalog import GradedEvent as GradedEvent
 
 
 def project(event: Event) -> GradedEvent:

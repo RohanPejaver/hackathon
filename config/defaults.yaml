@@ -51,6 +51,10 @@ capture:
   frame_buffer_seconds: 3      # 24 §Data lifecycle
   persist_frames: false        # only settable in dev/eval profiles; loud warning at startup
 
+# 17 §Restriction normalization: below this the normalizer must return AMBIGUOUS, never RESOLVED.
+orders:
+  normalizer_threshold: 0.80
+
 retention:
   audit_days: 7                # 24 §Data lifecycle
 
